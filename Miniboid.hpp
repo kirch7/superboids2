@@ -1,0 +1,121 @@
+// Copyright (C) 2016-2017 Cássio Kirch.
+// Permission is granted to copy, distribute and/or modify this document
+// under the terms of the GNU Free Documentation License, Version 1.3
+// or any later version published by the Free Software Foundation;
+// with no Invariant Sections, no Front-Cover Texts, and no Back-Cover Texts.
+// A copy of the license is included in the section entitled "GNU
+// Free Documentation License".
+
+#pragma once
+#include <iostream>
+#include <valarray>
+#include <list>
+#include <tuple>
+#include "Neighbor.hpp"
+#include "TwistNeighbor.hpp"
+#include "Distance.hpp"
+#include "CellNeighbors.hpp"
+#include "parameters.hpp"
+
+class Superboid;
+bool operator==   (const Superboid& s1, const Superboid& s2);
+class Box;
+
+class Miniboid
+{
+public:
+  const bool isVirtual;
+  const mini_int ID;
+  Superboid& superboid;
+  std::valarray<real> position;
+  std::valarray<real> velocity;
+  std::valarray<real> newVelocity;
+  Distance radialDistance;
+  real radialAngle;
+
+  real angleCM;
+  box_int boxID() const;   // ID of box where *this is.
+  bool    inEdge() const;  // True if box where *this is is in edge.
+
+  inline Miniboid(const mini_int _id, Superboid& super, const bool);
+  void checkLimits(void);
+  void setNextVelocity(const step_int);
+  void setNextPosition(void);
+  inline void setBox(Box* const b) { _box = b; }
+  inline Box& getBox()  const {return *(this->_box);}
+  void reset(void);
+  real getAreaBetween(const Miniboid&) const;
+  friend void exportPositions(const std::vector<Superboid>&, const step_int);
+  void setNeighbors(void);
+  std::list<TwistNeighbor> _twistNeighbors;
+  //std::list<const Miniboid*> _tangentNeighbors;
+  //const Miniboid* leftN;
+  //const Miniboid* rightN;
+  std::list<std::tuple<step_int, std::vector<const Miniboid*>>> history;
+  bool isInSomeTriangle(const Superboid& super);
+  bool fatInteractions(const step_int, const std::list<Neighbor>&, const bool interact);
+  std::list<std::list<Neighbor> > _neighbors; // From different superboid.
+protected:
+  std::valarray<real> _noiseSum;    // Related to ETA.
+  std::valarray<real> _velocitySum; // Related to ALPHA;
+  std::valarray<real> _forceSum;    // Related to BETA.
+  Box* _box;
+  std::valarray<mini_int> _neighborsPerTypeNos;
+  void noise(void);
+  void checkNeighbor(Miniboid& neighbor);
+  static std::valarray<real> getAngles(const mini_int id);
+  inline Miniboid(void); /* Declared but intentionally not defined. */
+  void setNewVelocity(void);
+  void interInteractions(const step_int);
+};
+
+inline Miniboid::Miniboid(const mini_int _id, Superboid& super, const bool isVirt = false):
+  isVirtual(isVirt),
+  ID(_id),
+  superboid(super),
+  position(DIMENSIONS),
+  velocity(DIMENSIONS),
+  newVelocity(DIMENSIONS),
+  radialDistance(Distance()),
+  ////equilibriumAngles(getAngles(_id)),
+  _noiseSum(DIMENSIONS),
+  _velocitySum(DIMENSIONS),
+  _forceSum(DIMENSIONS),
+  _box(nullptr),
+  _neighborsPerTypeNos(TYPES_NO)
+{
+  if (!this->isVirtual)
+  {
+    this->setNewVelocity();
+    if (_id != 0u)
+    {
+      if (MINIBOIDS_PER_SUPERBOID > 3u || _id != MINIBOIDS_PER_SUPERBOID - 1u)
+	this->_twistNeighbors.push_front(TwistNeighbor(_id, getTangentNeighborID(_id,  1)));
+      if (MINIBOIDS_PER_SUPERBOID > 3u || _id != 1u)
+	this->_twistNeighbors.push_front(TwistNeighbor(_id, getTangentNeighborID(_id, -1)));
+    }
+  }
+  
+  return;
+}
+
+inline std::ostream& operator<<(std::ostream& os,               \
+                                const std::valarray<real>& va)
+{
+  for (auto& component : va)
+    os << std::fixed << component << '\t';
+  
+  return os;
+}
+
+extern std::ostream& operator<<(std::ostream& os, const Miniboid& mini);
+
+inline bool operator==(const Miniboid& m1, const Miniboid& m2)
+{
+  return (m1.ID == m2.ID && m1.isVirtual == m2.isVirtual && m1.superboid  == m2.superboid);
+}
+
+inline bool operator!=(const Miniboid& m1, const Miniboid& m2)
+{
+  return !(m1 == m2);
+}

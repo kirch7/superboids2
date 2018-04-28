@@ -1,3 +1,6 @@
+// Copyright (C) 2016-2018 Cássio Kirch.
+// License specified in LICENSE file.
+
 #pragma once
 #include <list>
 #include "Miniboid.hpp"

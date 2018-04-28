@@ -1,3 +1,6 @@
+// Copyright (C) 2016-2018 Cássio Kirch.
+// License specified in LICENSE file.
+
 #include "CellNeighbors.hpp"
 
 const std::list<super_int>&

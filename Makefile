@@ -10,7 +10,7 @@ CPPFLAGS=-MP -MD
 CXXLIBS=-lpthread
 WARNINGS=-W -Wall -Wextra -Wshadow -Wstrict-overflow -Wmissing-braces -Wextra-tokens -Wambiguous-member-template -Wbind-to-temporary-copy
 CXXFLAGS=-stdlib=libstdc++ -std=c++14 -fno-strict-aliasing -fPIC -flto
-CXXSOURCES:=Argument.cpp Box.cpp CellNeighbors.cpp Date.cpp Distance.cpp export.cpp lines.cpp load.cpp main.cpp Miniboid.cpp nextstep.cpp parameters.cpp Neighbor.cpp Stokes.cpp Superboid.cpp SuperboidContainer.cpp TwistNeighbor.cpp
+CXXSOURCES:=Argument.cpp Box.cpp CellNeighbors.cpp Date.cpp Distance.cpp export.cpp lines.cpp load.cpp main.cpp Miniboid.cpp nextstep.cpp parameters.cpp Neighbor.cpp Stokes.cpp Superboid.cpp TwistNeighbor.cpp
 CXXLINKER+=-fuse-ld=gold
 OBJECTS=$(CXXSOURCES:.cpp=.o)
 DOT_LL=$(CXXSOURCES:.cpp=.ll)

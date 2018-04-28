@@ -19,6 +19,7 @@
 #include "Superboid.hpp"
 #include "export.hpp"
 #include "nextstep.hpp"
+#include "Stokes.hpp"
 
 unsigned long long int
 getSeed(const super_int id)
@@ -228,7 +229,7 @@ Superboid::Superboid(void):
   this->miniboids.reserve(MINIBOIDS_PER_SUPERBOID);
   this->virtualMiniboids.reserve(64u * MINIBOIDS_PER_SUPERBOID);
 
-  if (this->_totalSuperboids > SUPERBOIDS)
+  if (this->_totalSuperboids >= SUPERBOIDS)
   {
     for (mini_int miniCount = 0u; miniCount < MINIBOIDS_PER_SUPERBOID; ++miniCount)
       this->miniboids.emplace_back(miniCount, *this);
@@ -255,10 +256,18 @@ Superboid::Superboid(void):
 	      if (/*std::fabs(HALF_RANGE - std::fabs(comp)) <= INITIAL_DISTANCE / 2 ||*/
 		HALF_RANGE - std::fabs(comp) < INITIAL_DISTANCE / 2.0f - 0.1f)
 		ready = false;
-	      if (BC == BoundaryCondition::RECTANGLE &&			\
-		  RECTANGLE_SIZE[dim] / 2.0f - std::fabs(comp) < INITIAL_DISTANCE / 2.0f - 0.1f)
-		ready = false;
+	      if (BC == BoundaryCondition::RECTANGLE || BC == BoundaryCondition::STOKES)
+		if (RECTANGLE_SIZE[dim] / 2.0f - std::fabs(comp) < INITIAL_DISTANCE / 2.0f - 0.1f)
+		  ready = false;
 	    }
+
+	    if (BC == BoundaryCondition::STOKES)
+	      for (const auto& hole : STOKES_HOLES)
+	      {
+		const Distance d(hole.center, this->miniboids[0u].position);
+		if (d.module < hole.radius + INITIAL_DISTANCE / 2.0f - 0.1f)
+		  ready = false;
+	      }
 	  }
 	}
 	else
@@ -497,21 +506,28 @@ rearrangePeripherals(Superboid& superboid, const real distance)
   return;
 }
 
-void
+bool
 Superboid::divide(const super_int divide_by, Superboid& newSuperboid, std::vector<Box>& boxes, const step_int step)
 {
   if (divide_by < 2u)
   {
     std::cerr << "Cannot divide by n | n < 2" << std::endl;
-    return;
+    return false;
   }
   if (divide_by != 2u)
   {
     std::cerr << "Unimplemented." << std::endl;
-    return;
+    return false;
   }
 
-  
+  this->setShape(step);
+  const real p0 = this->perimeter / std::sqrt(this->area);
+  if (p0 > TOLERABLE_P0)
+  {
+    std::cerr << "p0:\t" << p0 << std::endl;
+    return false;
+  }
+    
   static std::default_random_engine generator;
   std::uniform_int_distribution<int> distribution(0, TYPES_NO - 1);
   const type_int newType = distribution(generator);
@@ -536,9 +552,13 @@ Superboid::divide(const super_int divide_by, Superboid& newSuperboid, std::vecto
   while (true)
   {
     ++atempts;
+    setOriginalPositions(this->miniboids, originalPositions);
+
+    if (atempts > 16)
+      return false;
+    
     bool someInvasion = false;
 
-    setOriginalPositions(this->miniboids, originalPositions);
     //const Distance peripheralDistance = this->getBiggestAxis();
     divisionAngle = this->get0to2piRandom();
     std::valarray<real> peripheralVA({std::cos(divisionAngle), std::sin(divisionAngle)}); //// Arranja um nome melhor!
@@ -583,10 +603,16 @@ Superboid::divide(const super_int divide_by, Superboid& newSuperboid, std::vecto
       for (auto& mini : super->miniboids)
       {
 	if (!someInvasion)
+	  for (const auto& hole : STOKES_HOLES)
+	    if (hole.isInside(mini.position))
+	    {
+	      someInvasion = true;
+	      break;
+	    }
+
+	if (!someInvasion)
 	{
-	  ////std::cout << "setNeighbors super: " << super->ID << std::endl;
 	  mini.setNeighbors();
-	  ////std::cout << "out setNeighrbors" << std::endl;
 	  for (const auto& list : mini._neighbors)
 	    if (mini.fatInteractions(0, list, false))
 	    {
@@ -609,7 +635,7 @@ Superboid::divide(const super_int divide_by, Superboid& newSuperboid, std::vecto
   this->virtualMiniboids.clear();
   newSuperboid.virtualMiniboids.clear();
 
-  return;
+  return true;
 }
 
 Distance
@@ -653,4 +679,48 @@ Superboid::getBiggestAxis() const
   std::sort(distances.begin(), distances.end());
   
   return distances.back();
+}
+
+void
+Superboid::checkWrongNeighbors(const std::vector<Superboid>& superboids)
+{
+  const std::list<super_int> neighbors = this->cellNeighbors(); // Value, not referece.
+  for (const auto cellID1 : neighbors)
+  {
+    for (const auto cellID2 : neighbors)
+    {
+      if (cellID1 == cellID2)
+	continue;
+      if (this->ID == cellID1)
+	continue;
+      if (this->ID == cellID2)
+	continue;
+      
+      const Superboid& super1 = superboids[cellID1];
+      const Superboid& super2 = superboids[cellID2];
+      
+      const Distance dist(this->miniboids[0u], super2.miniboids[0u]);
+      const Distance halfDist = dist * 0.5f;
+
+      //// checar BC periódica depois!!!!!!!!!!!!!!!!!!!!
+      if (isPointInSomeTriangle(this->miniboids[0u].position + (halfDist.getDirectionArray() * halfDist.module), super1))
+      {
+	this->cellNeighbors.remove(cellID2);
+	for (auto& mini : this->miniboids)
+	  for (auto& cell : mini._neighbors)
+	  {
+	    if (!cell.empty())
+	    {
+	      const super_int superID = cell
+		.front()
+		.miniNeighbor
+		.superboid
+		.ID;
+	      if (superID == super2.ID)
+		cell.clear();
+	    }
+	  }
+      }
+    }
+  }
 }

@@ -19,6 +19,7 @@
 #include "parameters.hpp"
 #include "Box.hpp"
 #include "nextstep.hpp"
+#include "Stokes.hpp" ////
 
 static void
 oneSystem()
@@ -26,11 +27,18 @@ oneSystem()
   std::ofstream parametersFile((Date::compactRunTime + ".dat").c_str());
   parametersFile << getParameters() << std::endl;
   parametersFile.close();
-  
+
   std::vector<Superboid> superboids(MAX_SUPERBOIDS);
-  for (super_int index = 0; index < SUPERBOIDS; ++index)
+  for (super_int index = 0u;
+       index < InitialPositions::initialActivatedCellNo();
+       ++index)
     superboids[index].activated = true;
 
+  //// std::vector<Superboid> superboids(1);
+  //// superboids[0].activated = true;
+  //// for (auto& mini : superboids[0].miniboids)
+  ////   mini.position[X] += 5.5f;
+  
   if (InitialPositions::load())
     loadPositions(superboids);
   

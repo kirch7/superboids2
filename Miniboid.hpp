@@ -67,6 +67,11 @@ protected:
   inline Miniboid(void); /* Declared but intentionally not defined. */
   void setNewVelocity(void);
   void interInteractions(const step_int);
+  void checkPeriodicLimits();
+  void checkRectangularLimits();
+  void checkStokesLimits();
+  void checkKillCondition();
+  real getHarrisRadialBeta() const;
 };
 
 inline Miniboid::Miniboid(const mini_int _id, Superboid& super, const bool isVirt = false):
@@ -99,15 +104,6 @@ inline Miniboid::Miniboid(const mini_int _id, Superboid& super, const bool isVir
   return;
 }
 
-inline std::ostream& operator<<(std::ostream& os,               \
-                                const std::valarray<real>& va)
-{
-  for (auto& component : va)
-    os << std::fixed << component << '\t';
-  
-  return os;
-}
-
 extern std::ostream& operator<<(std::ostream& os, const Miniboid& mini);
 
 inline bool operator==(const Miniboid& m1, const Miniboid& m2)
@@ -119,3 +115,6 @@ inline bool operator!=(const Miniboid& m1, const Miniboid& m2)
 {
   return !(m1 == m2);
 }
+
+bool isPointInTriangle(const std::valarray<real>& p_test, const std::valarray<real>& p0, const std::valarray<real>& p1, const std::valarray<real>& p2);
+bool isPointInSomeTriangle(const std::valarray<real>& point, const Superboid& super);

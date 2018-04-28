@@ -18,7 +18,7 @@ public:
   const std::list<super_int>& operator()(void);
   void append(const super_int id);
   inline CellNeighbors(void): _duplicates(true) {return;}
-
+  inline void remove(const super_int id) { this->_list.remove(id); return; }
 protected:
   bool _duplicates;
   std::list<super_int> _list;

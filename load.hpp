@@ -19,12 +19,15 @@ public:
   static inline bool load(void) { return _load; }
   static inline std::ifstream& file(void) { return _file; }
   static inline step_int startStep(void)   { return _startStep; }
+  static inline super_int initialActivatedCellNo(void) { return _initialActivatedCellNo; }
   friend int setInitialPositionsFile(const void* const);
   virtual inline ~InitialPositions() {;}
 private:
+  static super_int _initialActivatedCellNo;
   static bool _load;
   static std::ifstream _file;
   static step_int _startStep;
 };
 
 extern void loadPositions(std::vector<Superboid>&);
+

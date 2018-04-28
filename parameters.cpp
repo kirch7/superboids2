@@ -8,28 +8,40 @@
 
 #include <iostream> ////
 #include <sstream>
+#include "Stokes.hpp"
 #include "Date.hpp"
 #include "parameters.hpp"
 
 const real REAL_TOLERANCE = 1.0e-9;
 
-const super_int SUPERBOIDS = 12u;                   // Cells number.
-const super_int MAX_SUPERBOIDS = 1024u;
-const type_int  TYPES_NO   = 12u;            // Cell types quantity.
+const super_int SUPERBOIDS = 37u;                   // Cells number.
+const super_int MAX_SUPERBOIDS = 4096u;
+const type_int  TYPES_NO   = 2u;            // Cell types quantity.
 const mini_int  MINIBOIDS_PER_SUPERBOID = 12u;      // Particles in a single cell. All cells have the same particles number.
 
-const box_int   BOXES_IN_EDGE = 45u;                // sqrt(total boxes quantity).
+const box_int   BOXES_IN_EDGE = RANGE / NEIGHBOR_DISTANCE;                // sqrt(total boxes quantity).
 const box_int   BOXES = BOXES_IN_EDGE*BOXES_IN_EDGE; // Total boxes quantity.
 const real      RANGE = 50.0f;                      // Domain length.
 
-const BoundaryCondition BC = BoundaryCondition::RECTANGLE;
-//const BoundaryCondition BC = BoundaryCondition::PERIODIC;
-const InitialCondition  INITIAL_CONDITION = InitialCondition::LEFT_EDGE;
-//const InitialCondition  INITIAL_CONDITION = InitialCondition::HEX_CENTER;
-const std::vector<real> RECTANGLE_SIZE = { 0.9f * RANGE, 0.5f * RANGE };
+//const BoundaryCondition BC = BoundaryCondition::STOKES;
+//const BoundaryCondition BC = BoundaryCondition::RECTANGLE;
+const BoundaryCondition BC = BoundaryCondition::PERIODIC;
+//const InitialCondition  INITIAL_CONDITION = InitialCondition::LEFT_EDGE;
+const InitialCondition  INITIAL_CONDITION = InitialCondition::HEX_CENTER;
+//const KillCondition     KILL_CONDITION    = KillCondition::RIGHT_EDGE;
+const KillCondition     KILL_CONDITION    = KillCondition::NONE;
+//const std::vector<real> RECTANGLE_SIZE = { 0.9f * RANGE, 0.5f * RANGE };
+const std::vector<real> RECTANGLE_SIZE = { 0.5f * RANGE, 0.5f * RANGE };
+//const std::vector<real> RECTANGLE_SIZE = { 240.0f, 60.0f };
 
-const step_int DIVISION_INTERVAL = 10000u; // Every DIVISION_INTERVAL a division will occur.
+/*const std::vector<Stokes> STOKES_HOLES(
+  {Stokes(std::valarray<real>(0.0f, DIMENSIONS), 9.0f)}
+  );*/
+const std::vector<Stokes> STOKES_HOLES;
+
+const step_int DIVISION_INTERVAL = 0u; // Every DIVISION_INTERVAL a division will occur.
 const step_int NON_DIVISION_INTERVAL = 50000u; // A cell can not divide if it is product of a division in the last NON_DIVISION_INTERVAL.
+const real TOLERABLE_P0 = 3.9f; // A cell can not divide if its P0 is greater than TOLERABLE_P0.
 
 #ifndef _RADIAL_PLASTIC_END // Plastic starts at 1.2 and ends at elastic_again
   #define _RADIAL_PLASTIC_END 2.0f
@@ -48,13 +60,13 @@ const step_int NON_DIVISION_INTERVAL = 50000u; // A cell can not divide if it is
 #endif
 
 ////const std::vector<real> RADIAL_PLASTIC_END     = {_RADIAL_PLASTIC_END, _RADIAL_PLASTIC_END};
-//const std::vector<real> RADIAL_PLASTIC_END     = {RANGE, RANGE}; //{1.5f, RANGE};
-const std::vector<real> RADIAL_PLASTIC_END     = {RANGE, RANGE, RANGE, RANGE, RANGE, RANGE, RANGE, RANGE, RANGE, RANGE, RANGE, RANGE}; //{1.5f, RANGE};
+//const std::vector<real> RADIAL_PLASTIC_BEGIN   = {RANGE, RANGE}; //{1.2f, RANGE};
+const std::vector<real> RADIAL_PLASTIC_BEGIN(TYPES_NO, RANGE);
+//const std::vector<real> RADIAL_PLASTIC_END = {1.5f, RANGE};
+const std::vector<real> RADIAL_PLASTIC_END(TYPES_NO, RANGE); //{1.5f, RANGE};
 const real      NEIGHBOR_DISTANCE       = _NEIDIST;  // Intercell forces maximum reach distance.
 const real      INTER_ELASTIC_UP_LIMIT  = _INTER_ELASTIC_UP_LIMIT;   /////////////////////////////////////////////
-//const std::vector<real> RADIAL_PLASTIC_BEGIN   = {RANGE, RANGE}; //{1.2f, RANGE};
-const std::vector<real> RADIAL_PLASTIC_BEGIN   = {RANGE, RANGE, RANGE, RANGE, RANGE, RANGE, RANGE, RANGE, RANGE, RANGE, RANGE, RANGE}; //{1.2f, RANGE};
-const real      INITIAL_DISTANCE        = 2.0f; //2.75f;      // Cell-center-to-cell-center distance in STEP=0 (initial condition).
+const real      INITIAL_DISTANCE        = 2.0f; //1.8f; //2.75f;      // Cell-center-to-cell-center distance in STEP=0 (initial condition).
 const real      INITIAL_ANGLE_BETWEEN   = HALF_PI; // rad  // Nowadays it is unused. It was used in twist spring tests.
 const real      INITIAL_ANGLE_ID1       = 0.0f;    // rad  // Nowadays it is unused. It was used in twist spring tests.
 const real      TWIST_EQ_ANGLE          = 2.0f;    // rad  // Nowadays it is unused. It was used in twist spring tests.
@@ -62,8 +74,8 @@ const real      CORE_DIAMETER           = 0.2f;    // "Infinite" force maximum r
 const real      PRINT_CORE              = 0.2f; //0.175f; // Unit to GNUplot use in circles plotting.
 const real      INFINITE_FORCE          = 1000.0f; // Simple "Infinite" magnitude.
 
-const step_int  STEPS         = 2000000llu;        // Last step number.
-const step_int  EXIT_INTERVAL = 100u; //100llu;           // Initial interval between outputs to files. In case EXIT_FACTOR=0, this interval is homogeneous.
+step_int        STEPS         = 500000llu;        // Last step number.
+const step_int  EXIT_INTERVAL = 1000llu;           // Initial interval between outputs to files. In case EXIT_FACTOR=0, this interval is homogeneous.
 const real      EXIT_FACTOR   = 0.0f; //0.8f;
 
 const real      ETA       = 1.0f;                  // Noise weight
@@ -82,7 +94,7 @@ getUniformProportions()
   return vec;
 }
 // Proportions: array with elements having to sum 1. int(SUPERBOIDS*(nth element)) = (type n cells no).
-//const std::vector<real> PROPORTIONS = {0.333333f, 0.666667f};
+//const std::vector<real> PROPORTIONS = {0.25f, 0.75f};
 const std::vector<real> PROPORTIONS = getUniformProportions();
 
 // Equilibrium distance is associated with elastic forces.
@@ -108,16 +120,18 @@ const std::vector<real> PROPORTIONS = getUniformProportions();
 // Beta is elastic and constant forces weight (remember Beta is not associated with twist springs).
 // Radial betas (if it is radial, it is INTRAcellular):
 #ifndef _RBETA
-#define BETA_1R     0.10f  //beta_radial endo
+#define BETA_1R1     0.02f  //beta_radial endo
 #else
-  #define BETA_1R     _RBETA
+  #define BETA_1R1     _RBETA
 #endif
-#define BETA_2R     0.10f  //BETA_1R  //beta_radial ecto
+#define BETA_2R2     0.20f  //BETA_1R  //beta_radial ecto
+#define BETA_1R2     0.40f
+#define BETA_2R1     BETA_1R2
 // Intercell betas (between two cells PERIPHERAL particles (there is a mechanism for intercell fatboid repulsion)):
 #ifdef _IBETA
   #define _BETA_I _IBETA
 #else
-  #define _BETA_I 0.20f
+  #define _BETA_I 0.04f
 #endif
 // #define BETA_1I1    0.1f
 // #define BETA_1I2    0.12247448713915890490f
@@ -136,10 +150,10 @@ const std::vector<real> PROPORTIONS = getUniformProportions();
   #define _INTER_ALPHA    _ALPHA
 #else
   #ifndef _AUTO_ALPHA
-    #define _AUTO_ALPHA     13.0f ////
+  #define _AUTO_ALPHA     13.0f // 13
   #endif
   #ifndef _INTER_ALPHA
-    #define _INTER_ALPHA    13.0f
+  #define _INTER_ALPHA    13.0f // 13
   #endif
 #endif
 
@@ -194,7 +208,7 @@ const std::vector<real> RADIAL_REQ = getNElementsVector(REQ_1R, REQ_2R);
 
 const std::vector<std::vector<real>> INTER_REQ   = getNElementsMatrix(REQ_1I1, REQ_2I2, REQ_1I2, REQ_2I1);
 
-const std::vector<real> RADIAL_BETA              = getNElementsVector(BETA_1R, BETA_2R);
+const std::vector<std::vector<real>> RADIAL_BETA = getNElementsMatrix(BETA_1R1, BETA_2R2, BETA_1R2, BETA_2R1);
 
 const std::vector<std::vector<real>> INTER_BETA   = getNElementsMatrix(BETA_1I1, BETA_2I2, BETA_1I2, BETA_2I1);
 
@@ -224,6 +238,22 @@ const thread_int   THREADS   = SUPERBOIDS > THREADS_MAX_NO ? THREADS_MAX_NO : SU
 
 const std::vector<real> TARGET_AREA = getTargetAreas();
 
+static real
+getMaxValue(const std::vector<std::vector<real>>& matrix)
+{
+  if (matrix.size() == 0)
+    return -0.0f;
+  
+  real max = -1.0e10f;
+  for (const auto& v : matrix)
+    for (const auto elem : v)
+      if (elem > max)
+	max = elem;
+
+  return max;
+}
+
+const real MAX_RADIAL_BETA = getMaxValue(RADIAL_BETA);
 
 template <typename T>
 static void
@@ -292,6 +322,7 @@ getParameters(void)
     stream << "# Compiled at" << '\t' << Date::compiledTime << std::endl;
     stream << "# Runned at"   << '\t' << Date::prettyRunTime << std::endl;
     stream << "# Superboids"  << "\t\t" << SUPERBOIDS << std::endl;
+    stream << "# Superboids Max"  << "\t" <<  MAX_SUPERBOIDS << std::endl;
     stream << "# Miniboids per superboid" << "\t" << MINIBOIDS_PER_SUPERBOID << std::endl;
     stream << "# Boxes in edge"     << "\t\t" << BOXES_IN_EDGE << std::endl;
     stream << "# Boxes"           << "\t\t\t" << BOXES << std::endl;
@@ -323,12 +354,21 @@ getParameters(void)
     stream << "# BC"       << "\t\t\t" << bc << std::endl;
     stream << "# RECTANGLE:" << std::endl;
     printVector(stream, RECTANGLE_SIZE);
+    stream << std::endl << std::endl;
+
+    stream << "# Stokes holes:" << std::endl;
+    for (const auto& hole : STOKES_HOLES)
+      stream << "#radius: " << hole.radius << "\tcenter: " << hole.center << std::endl;
     stream << std::endl;
     
     stream << "# STEPS"       << "\t\t\t" << STEPS << std::endl;
     stream << "# EXIT_INTERVAL" << "\t\t" << EXIT_INTERVAL << std::endl;
     stream << "# EXIT_FACTOR" << "\t\t" << EXIT_FACTOR << std::endl;
 
+    stream << "# DIVISION_INTERVAL" << "\t\t" << DIVISION_INTERVAL << std::endl;
+    stream << "# NON_DIVISION_INTERVAL" << "\t\t" << NON_DIVISION_INTERVAL << std::endl;
+    stream << "# TOLERABLE_P0" << "\t\t" << TOLERABLE_P0 << std::endl;
+    
     stream << "# Types no." << "\t\t" << TYPES_NO << std::endl;
     stream << std::endl << "# Proportions" << std::endl;
     printVector(stream, PROPORTIONS);
@@ -340,7 +380,7 @@ getParameters(void)
     stream << std::endl;
 
     stream << std::endl << "# Radial beta:" << std::endl;
-    printVector(stream, RADIAL_BETA);
+    printMatrix(stream, RADIAL_BETA);
     stream << std::endl;
 
     stream << std::endl << "# Inter R_Eq:" << std::endl;

@@ -11,6 +11,8 @@
 #include <cstdint>
 #include <cmath>
 #include <vector>
+#include <valarray>
+#include <iostream>
 
 #define SEED            (time(NULL))
 typedef uint16_t type_int;
@@ -22,15 +24,22 @@ typedef uint16_t dimension_int;
 typedef uint16_t thread_int;
 typedef float    real;
 
+class Stokes;
+
 enum class BoundaryCondition { PERIODIC, RECTANGLE, STOKES };
 enum class InitialCondition { HEX_CENTER, LEFT_EDGE };
+enum class KillCondition { NONE, RIGHT_EDGE };
 
 extern const BoundaryCondition BC;
 extern const InitialCondition  INITIAL_CONDITION;
+extern const KillCondition     KILL_CONDITION;
 extern const std::vector<real> RECTANGLE_SIZE;
+
+extern const std::vector<Stokes> STOKES_HOLES;
 
 extern const step_int DIVISION_INTERVAL;
 extern const step_int NON_DIVISION_INTERVAL;
+extern const real TOLERABLE_P0;
 
 extern const real    HALF_PI;
 extern const real         PI;
@@ -67,7 +76,8 @@ extern const std::vector<real> TARGET_AREA;
 extern const std::vector<real> RADIAL_REQ;
 extern const std::vector<std::vector<real>> INTER_REQ;
 
-extern const std::vector<real> RADIAL_BETA;
+extern const std::vector<std::vector<real>> RADIAL_BETA;
+extern const real MAX_RADIAL_BETA;
 extern const real RADIAL_SPRING_EXP;
 extern const std::vector<std::vector<real>> INTER_BETA;
 
@@ -84,7 +94,7 @@ extern const uint16_t PLOT_SIZE;
 extern const real ETA;
 extern const real DT;
 
-extern const step_int STEPS;
+extern       step_int STEPS;
 extern const step_int EXIT_INTERVAL;
 extern const real     EXIT_FACTOR;
 
@@ -128,3 +138,11 @@ getModule(const Array& array)
   return std::sqrt(squareSum);
 };
 
+inline std::ostream& operator<<(std::ostream& os,               \
+                                const std::valarray<real>& va)
+{
+  for (auto& component : va)
+    os << std::fixed << component << '\t';
+  
+  return os;
+}

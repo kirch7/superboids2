@@ -7,17 +7,21 @@
 // Free Documentation License".
 
 #include <iostream> ////
+#include "parameters.hpp"
 #include "load.hpp"
 
 bool InitialPositions::_load(false);
 std::ifstream InitialPositions::_file;
 step_int InitialPositions::_startStep(0u);
+super_int InitialPositions::_initialActivatedCellNo(SUPERBOIDS);
 
 void loadPositions(std::vector<Superboid>& superboids)
 {
   std::ifstream& file = InitialPositions::file();
-  for (auto& super : superboids)
+  
+  for (super_int superID = 0; superID < SUPERBOIDS; ++superID)
   {
+    Superboid& super = superboids[superID];
     // Get cell type:
     std::string line;
     getline(file, line);

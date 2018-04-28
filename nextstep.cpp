@@ -37,51 +37,76 @@ divide(std::vector<Box>& boxes,
        const step_int step)
 {
   const step_int nonDivisionInterval = NON_DIVISION_INTERVAL > step ? NON_DIVISION_INTERVAL : step;
-      
-  // super_int cellWithBiggestArea = 0u;
-  // real      biggestArea = -0.0f;
-  // for (const auto& super : superboids)
-  // 	if (super.activated == true)
-  // 	  if (super.area > biggestArea)
-  // 	  {
-  // 	    cellWithBiggestArea = super.ID;
-  // 	    biggestArea = super.area;
-  // 	  }
 
-  //if (INITIAL_CONDITION == InitialCondition::LEFT_EDGE)
+  step_int atempts = 0;
+  std::vector<super_int> alreadyTried;
+
+  while (true)
   {
-    std::vector<super_int> cellsOnTheEdge;
-    for (const auto& super : superboids)
-      if (super.activated == true)
-	if (super.getLastDivisionStep() + NON_DIVISION_INTERVAL <= nonDivisionInterval)
-	  //if (super.miniboids[0u].position[X] < (-RECTANGLE_SIZE[X] / 2.0f + 2.0f * RADIAL_REQ[super.type]))
-	  cellsOnTheEdge.emplace_back(super.ID);
+    ++atempts;
 
-    if (cellsOnTheEdge.size() == 0)
+    if (atempts > 16)
+      break;
+
+    // super_int cellWithBiggestArea = 0u;
+    // real      biggestArea = -0.0f;
+    // for (const auto& super : superboids)
+    // 	if (super.activated == true)
+    // 	  if (super.area > biggestArea)
+    // 	  {
+    // 	    cellWithBiggestArea = super.ID;
+    // 	    biggestArea = super.area;
+    // 	  }
+
+    //if (INITIAL_CONDITION == InitialCondition::LEFT_EDGE)
     {
-      super_int closestCellID = 0u;
-      real closestDistance = RANGE;
+      std::vector<super_int> cellsOnTheEdge;
       for (const auto& super : superboids)
 	if (super.activated == true)
-	  if (super.miniboids[0u].position[X] + RECTANGLE_SIZE[X] / 2 > closestDistance)
+	  if (super.getLastDivisionStep() + NON_DIVISION_INTERVAL <= nonDivisionInterval)
+	    //if (super.miniboids[0u].position[X] < (-RECTANGLE_SIZE[X] / 2.0f + 2.0f * RADIAL_REQ[super.type]))
 	  {
-	    closestCellID = super.ID;
-	    closestDistance = super.miniboids[0u].position[X] + RECTANGLE_SIZE[X] / 2;
+	    bool ok = true;
+	    for (const auto superID : alreadyTried)
+	      if (superID == super.ID)
+	      {
+		ok = false;
+		break;
+	      }
+	    if (ok)
+	      cellsOnTheEdge.emplace_back(super.ID);
 	  }
-      cellsOnTheEdge.emplace_back(closestCellID);
-    }
-	
-    static std::default_random_engine generator;
-    std::uniform_int_distribution<int> distribution(0, cellsOnTheEdge.size() - 1);
-    const super_int chosen = cellsOnTheEdge[distribution(generator)];
-    // const super_int chosen = cellWithBiggestArea;
-	
-    for (auto& super : superboids)
-      if (super.activated == false)
+      
+      if (cellsOnTheEdge.size() == 0)
       {
-	superboids[chosen].divide(2, super, boxes, step);
-	break;
+	return; //////////
+	
+	super_int closestCellID = 0u;
+	real closestDistance = RANGE;
+	for (const auto& super : superboids)
+	  if (super.activated == true)
+	    if (super.miniboids[0u].position[X] + RECTANGLE_SIZE[X] / 2 < closestDistance)
+	    {
+	      closestCellID = super.ID;
+	      closestDistance = super.miniboids[0u].position[X] + RECTANGLE_SIZE[X] / 2;
+	    }
+	cellsOnTheEdge.emplace_back(closestCellID);
       }
+	
+      static std::default_random_engine generator;
+      std::uniform_int_distribution<int> distribution(0, cellsOnTheEdge.size() - 1);
+      const super_int chosen = cellsOnTheEdge[distribution(generator)];
+      // const super_int chosen = cellWithBiggestArea;
+      if (superboids[chosen]
+	  .miniboids[0]
+	  .position[X] < 30.0f) //////// TEM QUE PÔR COMO PARÂMETRO!!!!!
+	for (auto& super : superboids)
+	  if (super.activated == false)
+	  {
+	    if (superboids[chosen].divide(2, super, boxes, step) == true)
+	      return;
+	  }
+    }
   }
   
   return;
@@ -129,6 +154,21 @@ nextNeighbors(const thread_int THREAD_ID, std::vector<Superboid>& superboids)
       continue;
     for (auto& mini : superboid.miniboids)
       mini.setNeighbors(); // Search for neighbors.      
+  }
+  
+  return;
+}
+
+static void
+nextCheckNeighbors(const thread_int THREAD_ID, std::vector<Superboid>& superboids)
+{
+  for (auto& superboid : superboids)
+  {
+    if (superboid.ID % THREADS != THREAD_ID)
+      continue;
+    if (superboid.activated == false)
+      continue;
+    superboid.checkWrongNeighbors(superboids);
   }
   
   return;
@@ -380,6 +420,17 @@ nextStepOK(std::vector<Box>& boxes,
   }
   /////std::cerr << "neighbors" << std::endl;
 
+  {
+    static std::vector<std::thread> checkNeighborsThreads(THREADS);
+    for (thread_int threadCount = 0u; threadCount < THREADS; ++threadCount)
+      checkNeighborsThreads[threadCount] = std::thread(nextCheckNeighbors, \
+						       threadCount,	\
+						       std::ref(superboids));
+    for (auto& thread : checkNeighborsThreads)
+      thread.join();
+  }
+
+  
   /////std::cerr << "velocity" << std::endl;
   {
     static std::vector<std::thread> velocityThreads(THREADS);

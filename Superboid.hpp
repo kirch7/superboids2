@@ -48,11 +48,12 @@ public:
   real get0to2piRandom(void);
   void checkVirtual(const bool export_);
   void setNextPosition(const step_int);
-  void divide(const super_int, Superboid&, std::vector<Box>&, const step_int);
+  bool divide(const super_int, Superboid&, std::vector<Box>&, const step_int);
   Distance getBiggestAxis() const;
   
   CellNeighbors cellNeighbors;
-
+  void checkWrongNeighbors(const std::vector<Superboid>&);
+  
   std::vector<std::valarray<real>> infiniteVectors;
   std::vector<std::valarray<real>> infinite2Vectors;
   std::ostringstream virtualsInfo;

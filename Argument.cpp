@@ -161,7 +161,10 @@ setInitialPositionsFile(const void* const filename)
                                std::ifstream::in | std::ifstream::binary);
   std::string line;
   std::getline(InitialPositions::file(), line);
+  std::string cellsNo;
+  std::getline(InitialPositions::file(), cellsNo);
   InitialPositions::_startStep = std::stoul(line);
+  InitialPositions::_initialActivatedCellNo = std::stoul(cellsNo);
   if (InitialPositions::_startStep >= STEPS)
     throw(std::range_error("Invalid step in binary file or invalid STEPS parameter."));
   
@@ -185,6 +188,16 @@ setInfinite(const void* const)
   Infinite::_virtFile.open(Date::compactRunTime + "_virt.dat", std::ios::out);
   if (!BinPrint::write())
     return setBinPrint(nullptr);
+  return 0;
+}
+
+int
+setLastStep(const void* const stepVoid)
+{
+  const char* const stepCString = static_cast<const char*>(stepVoid);
+  const std::string stepString(stepCString);
+  STEPS = std::stol(stepString);
+
   return 0;
 }
 
@@ -225,6 +238,7 @@ getDoRunList(void)
     list.emplace_back("-phi", "Export velocity alignment.", setPhi);
     list.emplace_back("-initial", "Load initial positions from file.", setInitialPositionsFile, "[file]");
     list.emplace_back("-scs", "Single cell stability.", setSCS);
+    list.emplace_back("-laststep", "Override last step.", setLastStep, "[naturalnumber]");
     ////list.push_back(Argument("-progress", "Show progress bar."));
   }
 

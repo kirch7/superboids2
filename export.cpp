@@ -136,7 +136,7 @@ binPrint(std::ofstream& myFile, std::vector<Superboid>& superboids)
       myFile.write(reinterpret_cast<char*>(&type), sizeof(type));
       uint16_t neiNo = static_cast<uint16_t>(super.cellNeighbors().size());
       myFile.write(reinterpret_cast<char*>(&neiNo), sizeof(neiNo));      
-      float coreSize = static_cast<float>(mini.ID == 0.0 ? (3.0 * PRINT_CORE) : PRINT_CORE);
+      float coreSize = static_cast<float>(mini.ID == 0 ? (3.0 * PRINT_CORE) : PRINT_CORE);
       myFile.write(reinterpret_cast<char*>(&coreSize), sizeof(coreSize));
     }
   }
@@ -159,6 +159,12 @@ exportLastPositionsAndVelocities(const std::vector<Superboid>& superboids, const
   std::ofstream binaryOutFile(fileName.c_str(),
                               std::ofstream::out | std::ofstream::binary);
   binaryOutFile << step << std::endl;
+  super_int activatedCellsNo = 0;
+  for (const auto& super : superboids)
+    if (super.activated)
+      ++activatedCellsNo;
+  
+  binaryOutFile << activatedCellsNo << std::endl;
   for (auto& super : superboids)
   {
     if (super.activated == false)

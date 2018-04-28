@@ -31,9 +31,9 @@ Distance::Distance(const std::valarray<real>& va):
 Distance::Distance(const Miniboid& m1, const Miniboid& m2):
   miniboid1(&m1),
   miniboid2(&m2),
-  module(0.0f),
-  sine(0.0f),
-  cosine(0.0f)
+  module(-0.0f),
+  sine(-0.0f),
+  cosine(-0.0f)
 {
   const Distance d = Distance(m1.position, m2.position);
   this->module = d.module;
@@ -46,14 +46,14 @@ Distance::Distance(const Miniboid& m1, const Miniboid& m2):
 Distance::Distance(const std::valarray<real>& position1, const std::valarray<real>& position2):
   miniboid1(nullptr),
   miniboid2(nullptr),
-  module(0.0f),
-  sine(0.0f),
-  cosine(0.0f)
+  module(-0.0f),
+  sine(-0.0f),
+  cosine(-0.0f)
 {
-  //std::valarray<real> delta(position2 - position1);
-  std::valarray<real> delta(2);
-  delta[X] = position2[X] - position1[X];
-  delta[Y] = position2[Y] - position1[Y];
+  std::valarray<real> delta(position2 - position1);
+  // if (std::fabs(position1[X]) < 1.0e-6f || std::fabs(position2[X]) < 1.0e-6f || std::fabs(position1[Y]) < 1.0e-6f || std::fabs(position2[Y]) < 1.0e-6f)
+  //   std::cerr << "Distance::Distance: delta = " << delta << std::endl;
+  
   const real HALF_RANGE = RANGE / 2.0f;
   real sumOfSquares = -0.0f;
   for (real& component : delta)

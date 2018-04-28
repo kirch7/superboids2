@@ -13,13 +13,13 @@
 bool InitialPositions::_load(false);
 std::ifstream InitialPositions::_file;
 step_int InitialPositions::_startStep(0u);
-super_int InitialPositions::_initialActivatedCellNo(SUPERBOIDS);
+super_int InitialPositions::_initialActivatedCellNo(parameters().SUPERBOIDS);
 
 void loadPositions(std::vector<Superboid>& superboids)
 {
   std::ifstream& file = InitialPositions::file();
   
-  for (super_int superID = 0; superID < SUPERBOIDS; ++superID)
+  for (super_int superID = 0; superID < parameters().SUPERBOIDS; ++superID)
   {
     Superboid& super = superboids[superID];
     // Get cell type:

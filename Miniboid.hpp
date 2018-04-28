@@ -78,25 +78,25 @@ inline Miniboid::Miniboid(const mini_int _id, Superboid& super, const bool isVir
   isVirtual(isVirt),
   ID(_id),
   superboid(super),
-  position(DIMENSIONS),
-  velocity(DIMENSIONS),
-  newVelocity(DIMENSIONS),
+  position(parameters().DIMENSIONS),
+  velocity(parameters().DIMENSIONS),
+  newVelocity(parameters().DIMENSIONS),
   radialDistance(Distance()),
   ////equilibriumAngles(getAngles(_id)),
-  _noiseSum(DIMENSIONS),
-  _velocitySum(DIMENSIONS),
-  _forceSum(DIMENSIONS),
+  _noiseSum(parameters().DIMENSIONS),
+  _velocitySum(parameters().DIMENSIONS),
+  _forceSum(parameters().DIMENSIONS),
   _box(nullptr),
-  _neighborsPerTypeNos(TYPES_NO)
+  _neighborsPerTypeNos(parameters().TYPES_NO)
 {
   if (!this->isVirtual)
   {
     this->setNewVelocity();
     if (_id != 0u)
     {
-      if (MINIBOIDS_PER_SUPERBOID > 3u || _id != MINIBOIDS_PER_SUPERBOID - 1u)
+      if (parameters().MINIBOIDS_PER_SUPERBOID > 3u || _id != parameters().MINIBOIDS_PER_SUPERBOID - 1u)
 	this->_twistNeighbors.push_front(TwistNeighbor(_id, getTangentNeighborID(_id,  1)));
-      if (MINIBOIDS_PER_SUPERBOID > 3u || _id != 1u)
+      if (parameters().MINIBOIDS_PER_SUPERBOID > 3u || _id != 1u)
 	this->_twistNeighbors.push_front(TwistNeighbor(_id, getTangentNeighborID(_id, -1)));
     }
   }

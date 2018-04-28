@@ -24,11 +24,13 @@
 static void
 oneSystem()
 {
+  const Parameters& p = parameters();
+  
   std::ofstream parametersFile((Date::compactRunTime + ".dat").c_str());
   parametersFile << getParameters() << std::endl;
   parametersFile.close();
 
-  std::vector<Superboid> superboids(MAX_SUPERBOIDS);
+  std::vector<Superboid> superboids(p.MAX_SUPERBOIDS);
   for (super_int index = 0u;
        index < InitialPositions::initialActivatedCellNo();
        ++index)
@@ -42,7 +44,7 @@ oneSystem()
   if (InitialPositions::load())
     loadPositions(superboids);
   
-  std::vector<Box>       boxes(BOXES);
+  std::vector<Box>       boxes(p.BOXES);
   for (auto& box: boxes)
     box.setNeighbors(boxes);
 
@@ -59,7 +61,7 @@ oneSystem()
       boxes[Box::getBoxID(mini.position)].append(mini);
   }
 
-  if (BC == BoundaryCondition::PERIODIC)
+  if (p.BC == BoundaryCondition::PERIODIC)
     correctPositionAndRotation(superboids);
 
   for (auto& super : superboids)
@@ -99,7 +101,7 @@ oneSystem()
   }
   
   bool keepStepLoop = true;
-  for (step_int step = InitialPositions::startStep(); step <= STEPS; ++step)
+  for (step_int step = InitialPositions::startStep(); step <= p.STEPS; ++step)
   {
     if (keepStepLoop == false)
       break;
@@ -110,9 +112,9 @@ oneSystem()
     checkVirtuals = true; //// 
     bool exportVirtuals = false;
     if (Infinite::write())
-      if (step + 1 == nextExitStep || step + 1 == STEPS)
+      if (step + 1 == nextExitStep || step + 1 == p.STEPS)
 	exportVirtuals = true;
-    if (step == nextExitStep || step == STEPS || step == 0u)
+    if (step == nextExitStep || step == p.STEPS || step == 0u)
     {
       std::cerr << "Step: " << step << std::endl; ////
       exportLastPositionsAndVelocities(superboids, step);
@@ -121,7 +123,7 @@ oneSystem()
         super_int countNeighbors = 0u;
         for (auto& super : superboids)
           countNeighbors += super.cellNeighbors().size();
-        std::cout << step << '\t' << static_cast<real>(countNeighbors) / static_cast<real>(SUPERBOIDS) << std::endl;
+        std::cout << step << '\t' << static_cast<real>(countNeighbors) / static_cast<real>(p.SUPERBOIDS) << std::endl;
       }
 
       if (MSD::write())
@@ -148,15 +150,15 @@ oneSystem()
       //// checkVirtuals = true;
       ++continuousStep;
 
-      if (EXIT_FACTOR < REAL_TOLERANCE)
+      if (p.EXIT_FACTOR < p.REAL_TOLERANCE)
       {
-	nextExitStep += EXIT_INTERVAL;
+	nextExitStep += p.EXIT_INTERVAL;
       }
       else
       {
 	step_int deltaExit = 1;
 	if (step != 0)
-	  deltaExit = static_cast<step_int>(std::pow(step, EXIT_FACTOR));
+	  deltaExit = static_cast<step_int>(std::pow(step, p.EXIT_FACTOR));
 	nextExitStep = step + deltaExit;
       }
     }
@@ -200,19 +202,19 @@ oneSystem()
       real minRadius     = biggestFloat;
       real radius2Sum    = -0.0f;
 
-      std::vector<real> ratioSumVec(TYPES_NO, -0.0f);
-      std::vector<real> maxRatioVec(TYPES_NO, smallestFloat);
-      std::vector<real> minRatioVec(TYPES_NO, biggestFloat);
-      std::vector<real> perimeterSumVec(TYPES_NO, -0.0f);
-      std::vector<real> maxPerimeterVec(TYPES_NO, smallestFloat);
-      std::vector<real> minPerimeterVec(TYPES_NO, biggestFloat);
-      std::vector<real> areaSumVec(TYPES_NO, -0.0f);
-      std::vector<real> maxAreaVec(TYPES_NO, smallestFloat);
-      std::vector<real> minAreaVec(TYPES_NO, biggestFloat);
-      std::vector<real> radiusSumVec(TYPES_NO, -0.0f);
-      std::vector<real> maxRadiusVec(TYPES_NO, smallestFloat);
-      std::vector<real> minRadiusVec(TYPES_NO, biggestFloat);
-      std::vector<real> radius2SumVec(TYPES_NO, -0.0f);
+      std::vector<real> ratioSumVec(p.TYPES_NO, -0.0f);
+      std::vector<real> maxRatioVec(p.TYPES_NO, smallestFloat);
+      std::vector<real> minRatioVec(p.TYPES_NO, biggestFloat);
+      std::vector<real> perimeterSumVec(p.TYPES_NO, -0.0f);
+      std::vector<real> maxPerimeterVec(p.TYPES_NO, smallestFloat);
+      std::vector<real> minPerimeterVec(p.TYPES_NO, biggestFloat);
+      std::vector<real> areaSumVec(p.TYPES_NO, -0.0f);
+      std::vector<real> maxAreaVec(p.TYPES_NO, smallestFloat);
+      std::vector<real> minAreaVec(p.TYPES_NO, biggestFloat);
+      std::vector<real> radiusSumVec(p.TYPES_NO, -0.0f);
+      std::vector<real> maxRadiusVec(p.TYPES_NO, smallestFloat);
+      std::vector<real> minRadiusVec(p.TYPES_NO, biggestFloat);
+      std::vector<real> radius2SumVec(p.TYPES_NO, -0.0f);
 
       super_int cellsActivatedNo = 0;
       for (const auto& super : superboids)
@@ -261,11 +263,11 @@ oneSystem()
       real msdRatio = -0.0f;
       real msdArea = -0.0f;
       
-      std::vector<real> meanAreaVec(TYPES_NO);
-      std::vector<real> meanPerimeterVec(TYPES_NO);
-      std::vector<real> meanRatioVec(TYPES_NO);
-      std::vector<real> meanRadiusVec(TYPES_NO);
-      for (type_int type = 0u; type < TYPES_NO; ++type)
+      std::vector<real> meanAreaVec(p.TYPES_NO);
+      std::vector<real> meanPerimeterVec(p.TYPES_NO);
+      std::vector<real> meanRatioVec(p.TYPES_NO);
+      std::vector<real> meanRadiusVec(p.TYPES_NO);
+      for (type_int type = 0u; type < p.TYPES_NO; ++type)
       {
 	meanAreaVec[type]      = areaSumVec[type] / cellsActivatedNo;
 	meanPerimeterVec[type] = perimeterSumVec[type] / cellsActivatedNo;
@@ -273,9 +275,9 @@ oneSystem()
 	meanRadiusVec[type]    = radiusSumVec[type] / (cellsActivatedNo /** MINIBOID_PER_SUPERBOID*/);
       }
       
-      std::vector<real> msdPerimeterVec(TYPES_NO, -0.0f);
-      std::vector<real> msdRatioVec(TYPES_NO, -0.0f);
-      std::vector<real> msdAreaVec(TYPES_NO, -0.0f);
+      std::vector<real> msdPerimeterVec(p.TYPES_NO, -0.0f);
+      std::vector<real> msdRatioVec(p.TYPES_NO, -0.0f);
+      std::vector<real> msdAreaVec(p.TYPES_NO, -0.0f);
       
       for (const auto& super : superboids)
       {
@@ -299,8 +301,8 @@ oneSystem()
       msdRatio = std::sqrt(msdRatio);
       real meanMeanRadius2 = radius2Sum / cellsActivatedNo;
 
-      std::vector<real> meanMeanRadius2Vec(TYPES_NO);
-      for (type_int type = 0u; type < TYPES_NO; ++type)
+      std::vector<real> meanMeanRadius2Vec(p.TYPES_NO);
+      for (type_int type = 0u; type < p.TYPES_NO; ++type)
       {
 	msdAreaVec[type] /= cellsActivatedNo;
 	msdAreaVec[type] = std::sqrt(msdAreaVec[type]);
@@ -326,7 +328,7 @@ oneSystem()
 	maxPerimeter << '\t' <<
         meanRadius << '\t' <<
 	meanMeanRadius2 << '\t';
-      for (type_int type = 0u; type < TYPES_NO; ++type)
+      for (type_int type = 0u; type < p.TYPES_NO; ++type)
       {
 	shapeFile << std::fixed << step << '\t' <<
 	  meanRatioVec[type]       << '\t' <<

@@ -7,7 +7,7 @@ getAngularCoefficient(const std::valarray<real> pointA, const std::valarray<real
   const real deltaX = pointB[X] - pointA[X];
   const real deltaY = pointB[Y] - pointA[Y];
 
-  if (std::abs(deltaX) <= REAL_TOLERANCE)
+  if (std::abs(deltaX) <= parameters().REAL_TOLERANCE)
     return sign(deltaX) * sign(deltaY) * INFINITY;
   else
     return deltaY / deltaX;
@@ -21,7 +21,7 @@ getClosestPoint(const real m, const std::valarray<real> pointA, const std::valar
   const real y1 = pointA[Y];
   const real y3 = pointC[Y];
 
-  if (std::abs(m) <= REAL_TOLERANCE)
+  if (std::abs(m) <= parameters().REAL_TOLERANCE)
     return std::valarray<real>({x3, y1});
   else if (!std::isnormal(m))
     return std::valarray<real>({x1, y3});

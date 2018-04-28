@@ -54,12 +54,12 @@ Distance::Distance(const std::valarray<real>& position1, const std::valarray<rea
   // if (std::fabs(position1[X]) < 1.0e-6f || std::fabs(position2[X]) < 1.0e-6f || std::fabs(position1[Y]) < 1.0e-6f || std::fabs(position2[Y]) < 1.0e-6f)
   //   std::cerr << "Distance::Distance: delta = " << delta << std::endl;
   
-  const real HALF_RANGE = RANGE / 2.0f;
+  const real HALF_RANGE = parameters().RANGE / 2.0f;
   real sumOfSquares = -0.0f;
   for (real& component : delta)
   {
     if (std::fabs(component) >= HALF_RANGE)
-      component -= sign(component) * RANGE;
+      component -= sign(component) * parameters().RANGE;
     sumOfSquares += square(component);
   }
 
@@ -76,7 +76,7 @@ Distance::Distance(const std::valarray<real>& position1, const std::valarray<rea
 std::valarray<real>
 Distance::getDirectionArray(void) const
 {
-  std::valarray<real> va(DIMENSIONS);
+  std::valarray<real> va(parameters().DIMENSIONS);
   va[X] = this->cosine;
   va[Y] = this->sine;
   return va;

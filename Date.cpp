@@ -20,8 +20,8 @@ const std::string Date::compactRunTime(Date::getCompactRunTime());
 std::string
 Date::getPrettyRunTime(void)
 {
-  char cString[DATE_SIZE];
-  strftime(cString, DATE_SIZE, "%b %d %Y  %T", gimmeADecentName);
+  char cString[1024u];
+  strftime(cString, 1024u, "%b %d %Y  %T", gimmeADecentName);
 
   std::string banana(cString);
   return banana;
@@ -30,8 +30,8 @@ Date::getPrettyRunTime(void)
 std::string
 Date::getCompactRunTime(void)
 {
-  char cString[DATE_SIZE];
-  strftime(cString, DATE_SIZE, "%Y_%m_%d_%Hh%Mmin_%Ssec", gimmeADecentName);
+  char cString[1024u];
+  strftime(cString, 1024u, "%Y_%m_%d_%Hh%Mmin_%Ssec", gimmeADecentName);
 
   std::string papaya(cString);
   return papaya;

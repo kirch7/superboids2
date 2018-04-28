@@ -17,37 +17,37 @@ namespace boxID
   static box_int
   south (const box_int centralBoxID)
   {
-    if (centralBoxID >= BOXES_IN_EDGE)
-      return (centralBoxID - BOXES_IN_EDGE);
+    if (centralBoxID >= parameters().BOXES_IN_EDGE)
+      return (centralBoxID - parameters().BOXES_IN_EDGE);
     else
-      return (BOXES - BOXES_IN_EDGE + centralBoxID);
+      return (parameters().BOXES - parameters().BOXES_IN_EDGE + centralBoxID);
   }
   
   static box_int
   north (const box_int centralBoxID)
   {
-    if (centralBoxID < BOXES - BOXES_IN_EDGE)
-      return (centralBoxID + BOXES_IN_EDGE);
+    if (centralBoxID < parameters().BOXES - parameters().BOXES_IN_EDGE)
+      return (centralBoxID + parameters().BOXES_IN_EDGE);
     else
-      return (centralBoxID + BOXES_IN_EDGE - BOXES);
+      return (centralBoxID + parameters().BOXES_IN_EDGE - parameters().BOXES);
   }
   
   static box_int
   west (const box_int centralBoxID)
   {
-    if (centralBoxID % BOXES_IN_EDGE != 0)
+    if (centralBoxID % parameters().BOXES_IN_EDGE != 0)
       return (centralBoxID - 1);
     else
-      return (centralBoxID + BOXES_IN_EDGE - 1);
+      return (centralBoxID + parameters().BOXES_IN_EDGE - 1);
   }
   
   static box_int
   east (const box_int centralBoxID)
   {
-    if (centralBoxID % BOXES_IN_EDGE != BOXES_IN_EDGE - 1u)
+    if (centralBoxID % parameters().BOXES_IN_EDGE != parameters().BOXES_IN_EDGE - 1u)
       return (centralBoxID + 1);
     else
-      return (centralBoxID - BOXES_IN_EDGE + 1u);
+      return (centralBoxID - parameters().BOXES_IN_EDGE + 1u);
   }
   
   static box_int
@@ -89,9 +89,9 @@ Box::Box(void):
   miniboids()  /* Construct superboids as a empty list. */
 {
   #ifdef DEBUG
-  if (_totalBoxesCount > BOXES)
+  if (_totalBoxesCount > parameters().BOXES)
   {
-    std::cerr << "There must be only " << BOXES << " boxes." << std::endl;
+    std::cerr << "There must be only " << parameters().BOXES << " boxes." << std::endl;
     exit(30);
   }
   #endif
@@ -102,30 +102,30 @@ Box::Box(void):
 box_int
 Box::getBoxID (std::valarray<real> position) /* Parameter by copy. */
 {
-  static const real BOX_SIZE_INVERSE = static_cast<real>(BOXES_IN_EDGE)/RANGE; /* 1/BOX_SIZE */
+  static const real BOX_SIZE_INVERSE = static_cast<real>(parameters().BOXES_IN_EDGE)/parameters().RANGE; // 1/BOX_SIZE
   
-  position += 0.5f * RANGE;     /* Translate */
+  position += 0.5f * parameters().RANGE;     /* Translate */
   position *= BOX_SIZE_INVERSE; /* Normalize */
 
   std::vector<box_int> truncated;
-  for (dimension_int dimension = 0u; dimension < DIMENSIONS; ++dimension)
+  for (dimension_int dimension = 0u; dimension < parameters().DIMENSIONS; ++dimension)
     truncated.push_back(static_cast<box_int>(position[dimension]));
   
   box_int tmpBoxID(0u);
-  for (dimension_int dim = 0u; dim < DIMENSIONS; ++dim)
+  for (dimension_int dim = 0u; dim < parameters().DIMENSIONS; ++dim)
   {
     box_int sum = truncated[dim];
     for (dimension_int power = 0u; power < dim; ++power)
-      sum *= BOXES_IN_EDGE;
+      sum *= parameters().BOXES_IN_EDGE;
     tmpBoxID += sum;
   }
 
-  for (dimension_int dim = 0u; dim < DIMENSIONS; ++dim)
-    if (position[dim] == BOXES_IN_EDGE)
+  for (dimension_int dim = 0u; dim < parameters().DIMENSIONS; ++dim)
+    if (position[dim] == parameters().BOXES_IN_EDGE)
     {
       box_int sum = 1;
       for (dimension_int power = 0u; power < dim; ++power)
-        sum *= BOXES_IN_EDGE;
+        sum *= parameters().BOXES_IN_EDGE;
       tmpBoxID -= sum;
     }
 
@@ -134,16 +134,16 @@ Box::getBoxID (std::valarray<real> position) /* Parameter by copy. */
 
 bool Box::getIsInEdge(const box_int boxID)
 {
-  if      (boxID < BOXES_IN_EDGE)
+  if      (boxID < parameters().BOXES_IN_EDGE)
     return true;
   
-  else if (boxID >= BOXES - BOXES_IN_EDGE)
+  else if (boxID >= parameters().BOXES - parameters().BOXES_IN_EDGE)
     return true;
   
-  else if (boxID % BOXES_IN_EDGE == 0)
+  else if (boxID % parameters().BOXES_IN_EDGE == 0)
     return true;
   
-  else if (boxID % BOXES_IN_EDGE == BOXES_IN_EDGE - 1)
+  else if (boxID % parameters().BOXES_IN_EDGE == parameters().BOXES_IN_EDGE - 1)
     return true;
   
   else

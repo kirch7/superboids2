@@ -20,15 +20,15 @@
 
 std::ostream& operator<<(std::ostream& os, const Miniboid& mini)
 {
-  const real diameter = (mini.ID == 0u) ? 4.0f * PRINT_CORE : PRINT_CORE;
+  const real diameter = (mini.ID == 0u) ? 4.0f * parameters().PRINT_CORE : parameters().PRINT_CORE;
   os << mini.position << diameter << '\t' << mini.superboid.cellNeighbors().size();
   return os;
 }
 
 std::valarray<real> Miniboid::getAngles(const mini_int id)
 {
-  static const real DELTA_ANGLE = (TWO_PI / (MINIBOIDS_PER_SUPERBOID - 1u));
-  std::valarray<real> angles(DIMENSIONS - 1u);
+  static const real DELTA_ANGLE = (TWO_PI / (parameters().MINIBOIDS_PER_SUPERBOID - 1u));
+  std::valarray<real> angles(parameters().DIMENSIONS - 1u);
   if (id != 0u)
     angles[0u] = DELTA_ANGLE * (id - 1u);
   return angles;
@@ -37,12 +37,12 @@ std::valarray<real> Miniboid::getAngles(const mini_int id)
 void
 Miniboid::checkLimits(void)
 {
-  if (BC == BoundaryCondition::PERIODIC)
+  if (parameters().BC == BoundaryCondition::PERIODIC)
     this->checkPeriodicLimits();
-  else if (BC == BoundaryCondition::RECTANGLE || BC == BoundaryCondition::STOKES)
+  else if (parameters().BC == BoundaryCondition::RECTANGLE || parameters().BC == BoundaryCondition::STOKES)
     this->checkRectangularLimits();
 
-  if (BC == BoundaryCondition::STOKES)
+  if (parameters().BC == BoundaryCondition::STOKES)
   this->checkStokesLimits();
   this->checkKillCondition();
   
@@ -52,14 +52,14 @@ Miniboid::checkLimits(void)
 void
 Miniboid::checkPeriodicLimits()
 {
-  static const real HALF_RANGE(RANGE / 2.0f);
+  static const real HALF_RANGE(parameters().RANGE / 2.0f);
   
   for (auto& component : this -> position)
   {
     while (component <= -HALF_RANGE)
-      component += RANGE;
+      component += parameters().RANGE;
     while (component >   HALF_RANGE)
-      component -= RANGE;
+      component -= parameters().RANGE;
   }
   
   return;
@@ -69,8 +69,8 @@ void
 Miniboid::checkKillCondition()
 {
   
-  if (KILL_CONDITION == KillCondition::RIGHT_EDGE)
-    if (this->position[X] > RECTANGLE_SIZE[X] / 2.0f)
+  if (parameters().KILL_CONDITION == KillCondition::RIGHT_EDGE)
+    if (this->position[X] > parameters().RECTANGLE_SIZE[X] / 2.0f)
       this->superboid.activated = false;
 
   return;
@@ -79,35 +79,35 @@ Miniboid::checkKillCondition()
 void
 Miniboid::checkRectangularLimits()
 {
-  static const real THREE_HALFS_RANGE(1.5f * RANGE);
+  static const real THREE_HALFS_RANGE(1.5f * parameters().RANGE);
 
   for (auto& component : this->position)
   {
     while (component <= -THREE_HALFS_RANGE)
-      component += RANGE;
+      component += parameters().RANGE;
     while (component >   THREE_HALFS_RANGE)
-      component -= RANGE;
+      component -= parameters().RANGE;
   }
-  for (dimension_int dim = 0u; dim < DIMENSIONS; ++dim)
+  for (dimension_int dim = 0u; dim < parameters().DIMENSIONS; ++dim)
   {
-    const real HALF_RECTANGLE_SIZE = 0.5f * RECTANGLE_SIZE[dim];
+    const real HALF_RECTANGLE_SIZE = 0.5f * parameters().RECTANGLE_SIZE[dim];
     if (this->position[dim] < -HALF_RECTANGLE_SIZE)
     {
       real delta = this->position[dim] + HALF_RECTANGLE_SIZE;
-      if (-2.0f * delta < DT * VELOCITY[this->superboid.type])
+      if (-2.0f * delta < parameters().DT * parameters().SPEED[this->superboid.type])
 	this->position[dim] -= 2.0f * delta;
       else
-	this->position[dim] = -HALF_RECTANGLE_SIZE + REAL_TOLERANCE;
+	this->position[dim] = -HALF_RECTANGLE_SIZE + parameters().REAL_TOLERANCE;
       this->velocity[dim]    *= -1.0f;
       this->newVelocity[dim] *= -1.0f;
     }
     else if (this->position[dim] > HALF_RECTANGLE_SIZE)
     {
       real delta = this->position[dim] - HALF_RECTANGLE_SIZE;
-      if (2.0f * delta < DT * VELOCITY[this->superboid.type])
+      if (2.0f * delta < parameters().DT * parameters().SPEED[this->superboid.type])
 	this->position[dim] -= 2.0f * delta;
       else
-	this->position[dim] = HALF_RECTANGLE_SIZE - REAL_TOLERANCE;
+	this->position[dim] = HALF_RECTANGLE_SIZE - parameters().REAL_TOLERANCE;
       this->velocity[dim]    *= -1.0f;
       this->newVelocity[dim] *= -1.0f;
     }
@@ -118,7 +118,7 @@ Miniboid::checkRectangularLimits()
 void
 Miniboid::checkStokesLimits()
 {
-  for (const auto& hole : STOKES_HOLES)
+  for (const auto& hole : parameters().STOKES_HOLES)
   {
     if (this->_box)
     {
@@ -138,7 +138,7 @@ Miniboid::checkStokesLimits()
     }
       
     const real TOLERABLE = (this->ID == 0u && !this->isVirtual)
-      ? (hole.radius + RADIAL_REQ[this->superboid.type] / 4.0f)
+      ? (hole.radius + parameters().RADIAL_REQ[this->superboid.type] / 4.0f)
       : hole.radius;
     const Distance d(hole.center, this->position);
 
@@ -146,7 +146,7 @@ Miniboid::checkStokesLimits()
     {
       std::valarray<real> direction = d.getDirectionArray();
       real delta = d.module - TOLERABLE;
-      if (2.0f * delta < DT * VELOCITY[this->superboid.type])
+      if (2.0f * delta < parameters().DT * parameters().SPEED[this->superboid.type])
 	this->position -= direction * (2.0f * delta);
       else
 	this->position = hole.center + (direction * TOLERABLE);
@@ -165,7 +165,7 @@ Miniboid::noise(void)
 {
   real angle = this->superboid.get0to2piRandom();
   _noiseSum = std::valarray<real>({std::cos(angle), std::sin(angle)});
-  _noiseSum *= ETA;
+  _noiseSum *= parameters().ETA;
   return;
 }
 
@@ -173,9 +173,9 @@ static inline std::valarray<real>
 getFiniteForce(Distance dist, const real beta, const real rEq)
 {
   const real& module = dist.module;
-  std::valarray<real> force(0.0f, DIMENSIONS);
+  std::valarray<real> force(0.0f, parameters().DIMENSIONS);
 
-  if (module <= (INTER_ELASTIC_UP_LIMIT + 1.0e-6)) // Elastic regime or called by recursion.
+  if (module <= (parameters().INTER_ELASTIC_UP_LIMIT + 1.0e-6)) // Elastic regime or called by recursion.
   {
     const real scalar = (1.0f - module / rEq) * beta;
     if (std::isfinite(scalar))
@@ -187,7 +187,7 @@ getFiniteForce(Distance dist, const real beta, const real rEq)
   }
   else // Constant regime; call recursion.
   {
-    dist.module = INTER_ELASTIC_UP_LIMIT;
+    dist.module = parameters().INTER_ELASTIC_UP_LIMIT;
     return getFiniteForce(dist, beta, rEq);
   }
 }
@@ -196,12 +196,12 @@ static std::valarray<real>
 getFiniteRadialForceWithoutBeta(Distance dist, const real rEq, const type_int TYPE)
 {
   const real& module = dist.module;
-  std::valarray<real> force(-0.0f, DIMENSIONS);
+  std::valarray<real> force(-0.0f, parameters().DIMENSIONS);
   
-  if (module <= RADIAL_PLASTIC_BEGIN[TYPE] + 1.0e-6)
+  if (module <= parameters().RADIAL_PLASTIC_BEGIN[TYPE] + 1.0e-6)
   {
     const real dif = 1.0f - dist.module / rEq;
-    ////const real difCubicRoot = std::pow(std::fabs(dif), RADIAL_SPRING_EXP);
+    ////const real difCubicRoot = std::pow(std::fabs(dif), parameters().RADIAL_SPRING_EXP);
     const real scalar = sign(dif) * std::fabs(dif);
     if (std::isfinite(scalar))
     {
@@ -209,14 +209,14 @@ getFiniteRadialForceWithoutBeta(Distance dist, const real rEq, const type_int TY
       force *= scalar;
     }
   }
-  else if (module <= RADIAL_PLASTIC_END[TYPE] + 1.0e06) // Constant regime; call recursion.
+  else if (module <= parameters().RADIAL_PLASTIC_END[TYPE] + 1.0e06) // Constant regime; call recursion.
   {
-    dist.module = RADIAL_PLASTIC_BEGIN[TYPE];
+    dist.module = parameters().RADIAL_PLASTIC_BEGIN[TYPE];
     force = getFiniteRadialForceWithoutBeta(dist, rEq, TYPE);
   }
   else
   {
-    const real d = RADIAL_PLASTIC_END[TYPE] - RADIAL_PLASTIC_BEGIN[TYPE];
+    const real d = parameters().RADIAL_PLASTIC_END[TYPE] - parameters().RADIAL_PLASTIC_BEGIN[TYPE];
     const real dif = 1.0f - (dist.module - d) / rEq;
     if (std::isfinite(dif))
     {
@@ -305,7 +305,7 @@ Miniboid::fatInteractions(const step_int STEP, const std::list<Neighbor>& list, 
     
   if (super.ID != this->superboid.ID)
   {
-    std::valarray<real> tangent(DIMENSIONS);
+    std::valarray<real> tangent(parameters().DIMENSIONS);
       
     const Miniboid* auxMini = &super.miniboids.back();
     for (auto& realMini : super.miniboids)
@@ -346,16 +346,16 @@ Miniboid::fatInteractions(const step_int STEP, const std::list<Neighbor>& list, 
       //const std::valarray<real> tangent = Distance(fatboid.position, r0 - tangent).module > Distance(fatboid.position, r0 + tangent).module ? -tangent : tangent;
       if (Infinite::write())
       {
-	std::valarray<real> infThing(DIMENSIONS * 2u);
-	for (std::size_t i = 0; i < DIMENSIONS; ++i)
+	std::valarray<real> infThing(parameters().DIMENSIONS * 2u);
+	for (std::size_t i = 0; i < parameters().DIMENSIONS; ++i)
 	  infThing[i] = this->position[i];
-	for (std::size_t i = 0; i < DIMENSIONS; ++i)
-	  infThing[i + DIMENSIONS] = tangent[i];
+	for (std::size_t i = 0; i < parameters().DIMENSIONS; ++i)
+	  infThing[i + parameters().DIMENSIONS] = tangent[i];
 	this->superboid.infinite2Vectors.push_back(infThing);
       }
-      const std::valarray<real> force1 = (0.9f * INFINITE_FORCE) * tangent;
+      const std::valarray<real> force1 = (0.9f * parameters().INFINITE_FORCE) * tangent;
       const std::valarray<real> radial = this->radialDistance.getDirectionArray();
-      const std::valarray<real> force2 = radial * (0.9f * INFINITE_FORCE);
+      const std::valarray<real> force2 = radial * (0.9f * parameters().INFINITE_FORCE);
       this->_forceSum += force1;
       this->_forceSum += force2;
     }
@@ -386,22 +386,22 @@ Miniboid::interInteractions(const step_int STEP)
 	const type_int NEIGHBOR_TYPE = miniNeighbor.superboid.type;
 	    
 	// Sum velocity (ALPHA):
-	this->_velocitySum += miniNeighbor.velocity * INTER_ALPHA[MY_TYPE][NEIGHBOR_TYPE];
+	this->_velocitySum += miniNeighbor.velocity * parameters().INTER_ALPHA[MY_TYPE][NEIGHBOR_TYPE];
 	    
 	// Sum force (BETA):
-	const real beta = INTER_BETA[MY_TYPE][NEIGHBOR_TYPE];
-	const real rEq  = INTER_REQ[MY_TYPE][NEIGHBOR_TYPE];
-	if (neighbor.distance.module <= CORE_DIAMETER)
+	const real beta = parameters().INTER_BETA[MY_TYPE][NEIGHBOR_TYPE];
+	const real rEq  = parameters().INTER_REQ[MY_TYPE][NEIGHBOR_TYPE];
+	if (neighbor.distance.module <= parameters().CORE_DIAMETER)
 	{
 	  const std::valarray<real> d = neighbor.distance.getDirectionArray();
-	  this->_forceSum += -INFINITE_FORCE * d;
+	  this->_forceSum += -parameters().INFINITE_FORCE * d;
 	  if (Infinite::write())
 	  {	      
-	    std::valarray<real> infThing(DIMENSIONS * 2u);
-	    for (std::size_t i = 0; i < DIMENSIONS; ++i)
+	    std::valarray<real> infThing(parameters().DIMENSIONS * 2u);
+	    for (std::size_t i = 0; i < parameters().DIMENSIONS; ++i)
 	      infThing[i] = this->position[i];
-	    for (std::size_t i = 0; i < DIMENSIONS; ++i)
-	      infThing[i + DIMENSIONS] = -d[i];
+	    for (std::size_t i = 0; i < parameters().DIMENSIONS; ++i)
+	      infThing[i + parameters().DIMENSIONS] = -d[i];
 	    this->superboid.infiniteVectors.push_back(infThing);
 	  }
 	}
@@ -425,7 +425,7 @@ Miniboid::getHarrisRadialBeta(void) const
 {
   const type_int MY_TYPE = this->superboid.type;
   mini_int total = 0;
-  std::vector<mini_int> counts(TYPES_NO, 0);
+  std::vector<mini_int> counts(parameters().TYPES_NO, 0);
 
   for (const auto& superList : this->_neighbors)
     for (const auto& neighbor : superList)
@@ -441,16 +441,16 @@ Miniboid::getHarrisRadialBeta(void) const
 
   if (total != 0)
   {
-    for (type_int t = 0u; t < TYPES_NO; ++t)
+    for (type_int t = 0u; t < parameters().TYPES_NO; ++t)
     {
-      beta += RADIAL_BETA[MY_TYPE][t] * counts[t];
+      beta += parameters().RADIAL_BETA[MY_TYPE][t] * counts[t];
     }
     
     beta /= total;
   }
   else // total == 0
   {
-    beta = MAX_RADIAL_BETA;
+    beta = parameters().MAX_RADIAL_BETA;
   }
   return beta;
 }
@@ -479,7 +479,7 @@ Miniboid::setNextVelocity(const step_int STEP)
   // Same superboid:
   const auto& miniboidsInThisCell = this->superboid.miniboids;
   for (const auto& mini : miniboidsInThisCell)
-    this->_velocitySum += AUTO_ALPHA[MY_TYPE] * mini.velocity;
+    this->_velocitySum += parameters().AUTO_ALPHA[MY_TYPE] * mini.velocity;
   {
     // Radial:
     if (this->ID == 0u)
@@ -487,12 +487,12 @@ Miniboid::setNextVelocity(const step_int STEP)
       for (auto& mini : miniboidsInThisCell)
 	if (mini.ID != 0u)
 	{
-	  if (mini.radialDistance.module <= CORE_DIAMETER)
-	    this->_forceSum += INFINITE_FORCE * mini.radialDistance.getDirectionArray();
+	  if (mini.radialDistance.module <= parameters().CORE_DIAMETER)
+	    this->_forceSum += parameters().INFINITE_FORCE * mini.radialDistance.getDirectionArray();
 	  else
 	  {
 	    const real beta = mini.getHarrisRadialBeta();
-	    std::valarray<real> force = beta * getFiniteRadialForceWithoutBeta(mini.radialDistance, RADIAL_REQ[MY_TYPE], MY_TYPE);
+	    std::valarray<real> force = beta * getFiniteRadialForceWithoutBeta(mini.radialDistance, parameters().RADIAL_REQ[MY_TYPE], MY_TYPE);
 	    this->_forceSum += force;
 	  }
 	}
@@ -502,13 +502,13 @@ Miniboid::setNextVelocity(const step_int STEP)
       {
 	Distance distance = (this->radialDistance);
 	// lest cost in -real than -Distance.
-	if (distance.module <= CORE_DIAMETER)
-	  this->_forceSum += -INFINITE_FORCE * distance.getDirectionArray();
+	if (distance.module <= parameters().CORE_DIAMETER)
+	  this->_forceSum += -parameters().INFINITE_FORCE * distance.getDirectionArray();
 	else
 	{
 	  // lest cost in -real than -Distance.
 	  const real beta = this->getHarrisRadialBeta();
-	  std::valarray<real> force = -beta * getFiniteRadialForceWithoutBeta(distance, RADIAL_REQ[MY_TYPE], MY_TYPE);
+	  std::valarray<real> force = -beta * getFiniteRadialForceWithoutBeta(distance, parameters().RADIAL_REQ[MY_TYPE], MY_TYPE);
 	  this->_forceSum += force;
 	}
       }
@@ -519,16 +519,16 @@ Miniboid::setNextVelocity(const step_int STEP)
     const Miniboid& miniNeighbor = miniboidsInThisCell[tn.ID];
     const real distanceBetween = tn._distance.module;
     std::valarray<real> tangent = (this->radialDistance.getTangentArray());
-    if (distanceBetween <= CORE_DIAMETER)
+    if (distanceBetween <= parameters().CORE_DIAMETER)
     {
-      const std::valarray<real> f = sign(tn.ANGLES[0u]) * INFINITE_FORCE * tangent;
+      const std::valarray<real> f = sign(tn.ANGLES[0u]) * parameters().INFINITE_FORCE * tangent;
       this->_forceSum += f;
     }
     else
     {
       const real ANGLE_BETWEEN = angleBetween(this->radialAngle, miniNeighbor.radialAngle);
       const real SUBTRACTION = assertAngle(ANGLE_BETWEEN - tn.ANGLES[0u]);
-      const std::valarray<real> f = -KAPA[MY_TYPE] * SUBTRACTION * tangent;
+      const std::valarray<real> f = -parameters().KAPA[MY_TYPE] * SUBTRACTION * tangent;
       this->_forceSum += f;
     }
   }
@@ -537,7 +537,7 @@ Miniboid::setNextVelocity(const step_int STEP)
   const std::valarray<real> sum = this->_noiseSum + this->_velocitySum + this->_forceSum;
   const real module = getModule(sum);
   if (module != 0.0f)
-    this->newVelocity = VELOCITY[MY_TYPE] * (sum / module);
+    this->newVelocity = parameters().SPEED[MY_TYPE] * (sum / module);
 
   return;
 }
@@ -546,9 +546,10 @@ void
 Miniboid::setNextPosition(void)
 {
   this->velocity = this->newVelocity;
-  this->position += DT*this->velocity; // Velocity is already normalized to V0.
+  this->position += parameters().DT * this->velocity; // Velocity is already normalized to V0.
   if (this->ID != 0 && !this->isVirtual)
-    this->position += this->radialDistance.getDirectionArray() * ((this->superboid.area - TARGET_AREA[this->superboid.type]) / (20.0f * TWO_PI * this->superboid.meanRadius));
+    this->position += this->radialDistance.getDirectionArray() *
+      ((this->superboid.area - parameters().TARGET_AREA[this->superboid.type]) / (20.0f * TWO_PI * this->superboid.meanRadius));
   this->checkLimits();
   return;
 }
@@ -573,7 +574,7 @@ Miniboid::setNeighbors(void)
 	{
 	  const Miniboid& mini = *miniPointer;
 	  Distance distance(*this, mini);
-	  if (distance.module <= NEIGHBOR_DISTANCE)
+	  if (distance.module <= parameters().NEIGHBOR_DISTANCE)
 	  {
 	    this->superboid.cellNeighbors.append(mini.superboid.ID); // Potential data race!!!!!!!!
 	    ++(this->_neighborsPerTypeNos[miniPointer->superboid.type]); //// ERRADO?

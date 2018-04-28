@@ -30,80 +30,81 @@ enum class BoundaryCondition { PERIODIC, RECTANGLE, STOKES };
 enum class InitialCondition { HEX_CENTER, LEFT_EDGE };
 enum class KillCondition { NONE, RIGHT_EDGE };
 
-extern const BoundaryCondition BC;
-extern const InitialCondition  INITIAL_CONDITION;
-extern const KillCondition     KILL_CONDITION;
-extern const std::vector<real> RECTANGLE_SIZE;
-
-extern const std::vector<Stokes> STOKES_HOLES;
-
-extern const step_int DIVISION_INTERVAL;
-extern const step_int NON_DIVISION_INTERVAL;
-extern const real TOLERABLE_P0;
-
 extern const real    HALF_PI;
 extern const real         PI;
 extern const real     TWO_PI;
 extern const dimension_int X;
 extern const dimension_int Y;
 extern const dimension_int Z;
-extern const dimension_int DIMENSIONS;
-extern const type_int TYPES_NO;
 
-extern const super_int SUPERBOIDS;
-extern const super_int MAX_SUPERBOIDS;
-extern const mini_int  MINIBOIDS_PER_SUPERBOID;
+class Parameters
+{
+public:
+  Parameters(void);
+  
+  BoundaryCondition BC;
+  InitialCondition  INITIAL_CONDITION;
+  KillCondition     KILL_CONDITION;
+  std::vector<real> RECTANGLE_SIZE;
+  
+  std::vector<Stokes> STOKES_HOLES;
+  
+  step_int DIVISION_INTERVAL;
+  step_int NON_DIVISION_INTERVAL;
+  real TOLERABLE_P0;
 
-extern const box_int BOXES_IN_EDGE;
-extern const box_int BOXES;
-extern const real    RANGE;
+  dimension_int DIMENSIONS;
+  type_int TYPES_NO;
 
-extern const real    NEIGHBOR_DISTANCE;
-extern const real    INTER_ELASTIC_UP_LIMIT;
-extern const std::vector<real> RADIAL_PLASTIC_BEGIN;
-extern const std::vector<real> RADIAL_PLASTIC_END;
-extern const real    INITIAL_DISTANCE;
-extern const real    INITIAL_ANGLE_BETWEEN;
-extern const real    INITIAL_ANGLE_ID1;
-extern const real    TWIST_EQ_ANGLE;
-extern const real    CORE_DIAMETER;
-extern const real    PRINT_CORE;
-extern const real    INFINITE_FORCE;
+  super_int SUPERBOIDS;
+  super_int MAX_SUPERBOIDS;
+  mini_int  MINIBOIDS_PER_SUPERBOID;
 
-extern const std::vector<real> PROPORTIONS;
+  box_int BOXES_IN_EDGE;
+  box_int BOXES;
+  real    RANGE;
 
-extern const std::vector<real> TARGET_AREA;
-extern const std::vector<real> RADIAL_REQ;
-extern const std::vector<std::vector<real>> INTER_REQ;
+  real    NEIGHBOR_DISTANCE;
+  real    INTER_ELASTIC_UP_LIMIT;
+  std::vector<real> RADIAL_PLASTIC_BEGIN;
+  std::vector<real> RADIAL_PLASTIC_END;
+  real    INITIAL_DISTANCE;
+  real    INITIAL_ANGLE_BETWEEN;
+  real    INITIAL_ANGLE_ID1;
+  real    TWIST_EQ_ANGLE;
+  real    CORE_DIAMETER;
+  real    PRINT_CORE;
+  real    INFINITE_FORCE;
 
-extern const std::vector<std::vector<real>> RADIAL_BETA;
-extern const real MAX_RADIAL_BETA;
-extern const real RADIAL_SPRING_EXP;
-extern const std::vector<std::vector<real>> INTER_BETA;
+  std::vector<real> PROPORTIONS;
 
-extern const std::vector<real> KAPA;
+  std::vector<real> TARGET_AREA;
+  std::vector<real> RADIAL_REQ;
+  std::vector<std::vector<real>> INTER_REQ;
 
-extern const std::vector<std::vector<real>> INTER_ALPHA;
-extern const std::vector<real> AUTO_ALPHA;
+  std::vector<std::vector<real>> RADIAL_BETA;
+  real MAX_RADIAL_BETA;
+  real RADIAL_SPRING_EXP;
+  std::vector<std::vector<real>> INTER_BETA;
 
-extern const std::vector<real> VELOCITY;
+  std::vector<real> KAPA;
 
-extern const std::vector<std::string> COLOURS;
-extern const uint16_t PLOT_SIZE;
+  std::vector<std::vector<real>> INTER_ALPHA;
+  std::vector<real> AUTO_ALPHA;
 
-extern const real ETA;
-extern const real DT;
+  std::vector<real> SPEED;
 
-extern       step_int STEPS;
-extern const step_int EXIT_INTERVAL;
-extern const real     EXIT_FACTOR;
+  real ETA;
+  real DT;
 
-extern const unsigned int DATE_SIZE;
-extern const thread_int   THREADS;
+  step_int STEPS;
+  step_int EXIT_INTERVAL;
+  real     EXIT_FACTOR;
 
-extern const real REAL_TOLERANCE;
+  thread_int   THREADS;
 
-extern std::string& getParameters(void);
+  real REAL_TOLERANCE;
+};
 
 template<typename T>
 inline T
@@ -146,3 +147,6 @@ inline std::ostream& operator<<(std::ostream& os,               \
   
   return os;
 }
+
+extern const Parameters& parameters();
+extern std::string& getParameters(void);

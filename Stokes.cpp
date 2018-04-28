@@ -17,7 +17,7 @@ getBoxIDs(const std::valarray<real>& center, const real radius)
   std::vector<box_int> boxes;
 
   real tmpRadius = radius;
-  const real delta = RANGE / BOXES_IN_EDGE;
+  const real delta = parameters().RANGE / parameters().BOXES_IN_EDGE;
   while (tmpRadius > 0.0f)
   {
     for (unsigned i = 0u; i < 3141u; ++i)
@@ -49,7 +49,7 @@ Stokes::Stokes(std::valarray<real> _center, real _radius):
 bool
 Stokes::isInside(const std::valarray<real>& position) const
 {
-  const real TOLERABLE = this->radius + REAL_TOLERANCE;
+  const real TOLERABLE = this->radius + parameters().REAL_TOLERANCE;
   const Distance d(this->center, position);
   return d.module < TOLERABLE;
 }

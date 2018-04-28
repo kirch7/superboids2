@@ -42,7 +42,7 @@ public:
   {
     real raspberry = static_cast<real>(this->miniboids.size());;
     
-    return raspberry / MINIBOIDS_PER_SUPERBOID;
+    return raspberry / parameters().MINIBOIDS_PER_SUPERBOID;
   }
   
   static bool        getIsInEdge(const box_int boxID);

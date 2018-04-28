@@ -91,11 +91,11 @@ printRadius(const void* const)
   {
     return                                                              \
     static_cast<real>(rEq * std::sqrt(2.0 * (1.0 - cos(2.0*PI /         \
-                                                     (MINIBOIDS_PER_SUPERBOID - 1u)))));
+                                                     (parameters().MINIBOIDS_PER_SUPERBOID - 1u)))));
   };
     
-  for (type_int type = 0u; type < TYPES_NO; ++type)
-    std::cout << getTangentRadius(RADIAL_REQ[type]) << std::endl;
+  for (type_int type = 0u; type < parameters().TYPES_NO; ++type)
+    std::cout << getTangentRadius(parameters().RADIAL_REQ[type]) << std::endl;
 
   return 0;
 }
@@ -111,7 +111,7 @@ printParameters(const void* const)
 static int
 printExitSteps(const void* const)
 {
-  std::cout << static_cast<unsigned>(static_cast<real>(STEPS)/static_cast<real>(EXIT_INTERVAL)) << std::endl;
+  std::cout << static_cast<unsigned>(static_cast<real>(parameters().STEPS)/static_cast<real>(parameters().EXIT_INTERVAL)) << std::endl;
   std::cout.flush();
   return 0;
 }
@@ -119,7 +119,7 @@ printExitSteps(const void* const)
 static int
 printThreadsNo(const void* const)
 {
-  std::cout << THREADS << std::endl;
+  std::cout << parameters().THREADS << std::endl;
   std::cout.flush();
   return 0;
 }
@@ -127,7 +127,7 @@ printThreadsNo(const void* const)
 static int
 printHalfRange(const void* const)
 {
-  std::cout << RANGE/2.0f << std::endl;
+  std::cout << parameters().RANGE/2.0f << std::endl;
   std::cout.flush();
   return 0;
 }
@@ -165,7 +165,7 @@ setInitialPositionsFile(const void* const filename)
   std::getline(InitialPositions::file(), cellsNo);
   InitialPositions::_startStep = std::stoul(line);
   InitialPositions::_initialActivatedCellNo = std::stoul(cellsNo);
-  if (InitialPositions::_startStep >= STEPS)
+  if (InitialPositions::_startStep >= parameters().STEPS)
     throw(std::range_error("Invalid step in binary file or invalid STEPS parameter."));
   
   return 0;
@@ -196,7 +196,7 @@ setLastStep(const void* const stepVoid)
 {
   const char* const stepCString = static_cast<const char*>(stepVoid);
   const std::string stepString(stepCString);
-  STEPS = std::stol(stepString);
+  *const_cast<step_int*>(&parameters().STEPS) = std::stol(stepString);
 
   return 0;
 }

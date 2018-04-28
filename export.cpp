@@ -24,10 +24,10 @@
 static void
 writeMSDHead(std::ofstream& myFile)
 {
-  for (const auto i : std::vector<unsigned long int>({/*SUPERBOIDS, */STEPS, EXIT_INTERVAL, DIMENSIONS}))
+  for (const auto i : std::vector<unsigned long int>({parameters().STEPS, parameters().EXIT_INTERVAL, parameters().DIMENSIONS}))
     myFile << i << std::endl;
 
-  for (const auto i : std::vector<real>({DT, RANGE}))
+  for (const auto i : std::vector<real>({parameters().DT, parameters().RANGE}))
     myFile << i << std::endl;
 
   return;
@@ -36,10 +36,10 @@ writeMSDHead(std::ofstream& myFile)
 static void
 writeBinPrintHead(std::ofstream& myFile)
 {
-  for (const auto i : std::vector<unsigned long int>({/*static_cast<unsigned long int>(SUPERBOIDS * MINIBOIDS_PER_SUPERBOID), */STEPS, EXIT_INTERVAL, DIMENSIONS}))
+  for (const auto i : std::vector<unsigned long int>({parameters().STEPS, parameters().EXIT_INTERVAL, parameters().DIMENSIONS}))
     myFile << i << std::endl;
 
-  for (const auto i : std::vector<real>({DT, RANGE}))
+  for (const auto i : std::vector<real>({parameters().DT, parameters().RANGE}))
     myFile << i << std::endl;
 
   return;
@@ -75,7 +75,7 @@ exportMSD(std::ofstream& myFile, std::vector<Superboid>& superboids)
     if (super.activated == false)
       continue;
     const std::valarray<real>& position = super.miniboids[0u].position;
-    for (dimension_int dim = 0u; dim < DIMENSIONS; ++dim)
+    for (dimension_int dim = 0u; dim < parameters().DIMENSIONS; ++dim)
     {
       float dComp = static_cast<float>(position[dim]);
       //// myFile << dComp << std::endl;
@@ -87,7 +87,7 @@ exportMSD(std::ofstream& myFile, std::vector<Superboid>& superboids)
     myFile.write(reinterpret_cast<char*>(&type), sizeof(type));
     uint16_t neiNo = static_cast<uint16_t>(super.cellNeighbors().size());
     myFile.write(reinterpret_cast<char*>(&neiNo), sizeof(neiNo));
-    float coreSize = static_cast<float>(PRINT_CORE);
+    float coreSize = static_cast<float>(parameters().PRINT_CORE);
     myFile.write(reinterpret_cast<char*>(&coreSize), sizeof(coreSize));
   }
   return;
@@ -115,7 +115,7 @@ binPrint(std::ofstream& myFile, std::vector<Superboid>& superboids)
     if (super.activated == true)
       ++activatedNo;
   
-  uint16_t activated = static_cast<uint16_t>(activatedNo * MINIBOIDS_PER_SUPERBOID);
+  uint16_t activated = static_cast<uint16_t>(activatedNo * parameters().MINIBOIDS_PER_SUPERBOID);
   myFile.write(reinterpret_cast<char*>(&activated), sizeof(activated));
   
   for (auto& super : superboids)
@@ -126,7 +126,7 @@ binPrint(std::ofstream& myFile, std::vector<Superboid>& superboids)
     for (const auto& mini : super.miniboids)
     {
       const std::valarray<real>& position = mini.position;
-      for (dimension_int dim = 0u; dim < DIMENSIONS; ++dim)
+      for (dimension_int dim = 0u; dim < parameters().DIMENSIONS; ++dim)
       {
         float dComp = static_cast<float>(position[dim]);
         myFile.write(reinterpret_cast<char*>(&dComp), sizeof(dComp));
@@ -136,7 +136,7 @@ binPrint(std::ofstream& myFile, std::vector<Superboid>& superboids)
       myFile.write(reinterpret_cast<char*>(&type), sizeof(type));
       uint16_t neiNo = static_cast<uint16_t>(super.cellNeighbors().size());
       myFile.write(reinterpret_cast<char*>(&neiNo), sizeof(neiNo));      
-      float coreSize = static_cast<float>(mini.ID == 0 ? (3.0 * PRINT_CORE) : PRINT_CORE);
+      float coreSize = static_cast<float>(mini.ID == 0 ? (3.0 * parameters().PRINT_CORE) : parameters().PRINT_CORE);
       myFile.write(reinterpret_cast<char*>(&coreSize), sizeof(coreSize));
     }
   }
@@ -184,13 +184,13 @@ exportLastPositionsAndVelocities(const std::vector<Superboid>& superboids, const
 
 void exportPhi(std::ofstream& file, const std::vector<Superboid>& superboids)
 {
-  std::valarray<real> meanArray(-0.0, DIMENSIONS);
+  std::valarray<real> meanArray(-0.0, parameters().DIMENSIONS);
   for (const auto& super : superboids)
   {
     if (super.activated == false)
       continue;
     
-    meanArray += super.miniboids[0u].velocity / (SUPERBOIDS * VELOCITY[super.type]);
+    meanArray += super.miniboids[0u].velocity / (parameters().SUPERBOIDS * parameters().SPEED[super.type]);
   }
   
   real arraySum = -0.0;
@@ -210,8 +210,8 @@ SCS::write(const step_int step, const std::vector<Superboid>& superboids)
     if (super.activated == false)
       continue;
     
-    std::valarray<real> peripheralsCM(-0.0, DIMENSIONS);
-    const mini_int PERIPHERAL_NO = MINIBOIDS_PER_SUPERBOID - 1;
+    std::valarray<real> peripheralsCM(-0.0, parameters().DIMENSIONS);
+    const mini_int PERIPHERAL_NO = parameters().MINIBOIDS_PER_SUPERBOID - 1;
     for (auto& mini : super.miniboids)
     {
       if (mini.ID == 0)

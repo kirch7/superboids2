@@ -40,24 +40,24 @@ std::ostream& operator<< (std::ostream& os, const Superboid& super)
 static std::vector<super_int>
 getVectorWithNoOfSuperboidsPerType(void)
 {
-  std::vector<super_int> vec(TYPES_NO);
+  std::vector<super_int> vec(parameters().TYPES_NO);
   super_int total = 0u;
 
-  if (TYPES_NO == SUPERBOIDS)                     //// GAMBIARRA
-    return   std::vector<super_int>(TYPES_NO, 1); //// GAMBIARRA
+  if (parameters().TYPES_NO == parameters().SUPERBOIDS)                     //// GAMBIARRA
+    return   std::vector<super_int>(parameters().TYPES_NO, 1); //// GAMBIARRA
   
   for (type_int type = 0u; type < vec.size(); ++type)
   {
-    if (PROPORTIONS[type] < 1.0e-6f)
+    if (parameters().PROPORTIONS[type] < 1.0e-6f)
       vec[type] = 0u;
     else
     {
-      super_int s = static_cast<super_int>(std::floor(PROPORTIONS[type] * real(SUPERBOIDS)));
+      super_int s = static_cast<super_int>(std::floor(parameters().PROPORTIONS[type] * real(parameters().SUPERBOIDS)));
       vec[type] = s;
       total += s;
     }
   }
-  vec[0u] += SUPERBOIDS - total;
+  vec[0u] += parameters().SUPERBOIDS - total;
   return vec;
 }
 
@@ -75,18 +75,18 @@ getType(void)
 
   static std::mt19937 mtEngine(seed);
   static std::uniform_int_distribution<super_int>
-    uniform(0u, SUPERBOIDS-1u);
-  static std::vector<super_int> already(TYPES_NO);
+    uniform(0u, parameters().SUPERBOIDS-1u);
+  static std::vector<super_int> already(parameters().TYPES_NO);
 
   while (true)
   {
     super_int intRand = uniform(mtEngine);
     super_int typeSum(0);
-    for (type_int type = 0u; type < TYPES_NO; ++type)
+    for (type_int type = 0u; type < parameters().TYPES_NO; ++type)
     {
-      if (PROPORTIONS[type] >= 0.00001f)
+      if (parameters().PROPORTIONS[type] >= 0.00001f)
       {
-        typeSum += std::ceil(PROPORTIONS[type] * real(SUPERBOIDS));
+        typeSum += std::ceil(parameters().PROPORTIONS[type] * real(parameters().SUPERBOIDS));
         if (intRand < typeSum)
           if (already[type] < TOTAL[type])
           {
@@ -103,17 +103,17 @@ getType(const super_int id)
 {
   static std::default_random_engine defaultEngine(std::time(NULL));
   static std::mt19937 mtEngine(defaultEngine());
-  static std::uniform_int_distribution<super_int> uni(0, SUPERBOIDS - 1);
+  static std::uniform_int_distribution<super_int> uni(0, parameters().SUPERBOIDS - 1);
   
   static auto amounts = getVectorWithNoOfSuperboidsPerType();
-  static std::vector<bool> alreadySet(SUPERBOIDS, false);
-  static std::vector<type_int> types(SUPERBOIDS, 123);
+  static std::vector<bool> alreadySet(parameters().SUPERBOIDS, false);
+  static std::vector<type_int> types(parameters().SUPERBOIDS, 123);
   
   static bool firstTime = true;
   if (firstTime)
   {
     firstTime = false;
-    for (type_int t = 0; t < TYPES_NO; ++t)
+    for (type_int t = 0; t < parameters().TYPES_NO; ++t)
     {
       super_int supersWithTypeT = 0;
       while (supersWithTypeT < amounts[t])
@@ -139,8 +139,8 @@ initialNoise(const real radius)
   static std::mt19937 mtEngine(defaultEngine());
   std::uniform_real_distribution<real> uniDistribution2pi(0.0, TWO_PI);
   std::uniform_real_distribution<real> uniDistributionRadius(0.0, radius);
-  std::valarray<real> _noise(DIMENSIONS);
-  if (DIMENSIONS == 2)
+  std::valarray<real> _noise(parameters().DIMENSIONS);
+  if (parameters().DIMENSIONS == 2)
   {
     const real r = std::sqrt(uniDistributionRadius(mtEngine));
     const real a = uniDistribution2pi(mtEngine);
@@ -159,12 +159,12 @@ getCentralMiniboidPosition(void)
   static super_int superboidCount = 0u;
   static super_int superboidsOnLayer = 1u;
   static uint16_t layerCount = 0u;
-  static std::valarray<real> nextPosition (0.0f, DIMENSIONS);
+  static std::valarray<real> nextPosition (0.0f, parameters().DIMENSIONS);
   static real angle = 0.0f;
-  static const real DISTANCE = INITIAL_DISTANCE;
+  static const real DISTANCE = parameters().INITIAL_DISTANCE;
   static const real DELTA_ANGLE = PI / 3.0f;
 
-  const std::valarray<real> position(nextPosition + initialNoise(CORE_DIAMETER / 2.0f));
+  const std::valarray<real> position(nextPosition + initialNoise(parameters().CORE_DIAMETER / 2.0f));
   
   if (superboidCount == (superboidsOnLayer - 1u))
   {
@@ -194,13 +194,13 @@ getCentralMiniboidPosition(void)
 static std::valarray<real>
 getPeripheralMiniboidPosition(const type_int TYPE, const real ANGLE)
 {
-  //// const real distance = INITIAL_DISTANCE * RADIAL_REQ[TYPE] / 3.0f; //////
-  const real distance = RADIAL_REQ[TYPE] * 0.5f;
+  //// const real distance = parameters().INITIAL_DISTANCE * parameters().RADIAL_REQ[TYPE] / 3.0f; //////
+  const real distance = parameters().RADIAL_REQ[TYPE] * 0.5f;
   
-  std::valarray<real> position(DIMENSIONS);
+  std::valarray<real> position(parameters().DIMENSIONS);
   position[X] = distance * std::cos(ANGLE);
   position[Y] = distance * std::sin(ANGLE);
-  position += initialNoise(CORE_DIAMETER / 10.0f);
+  position += initialNoise(parameters().CORE_DIAMETER / 10.0f);
   
   return position;
 }
@@ -208,10 +208,10 @@ getPeripheralMiniboidPosition(const type_int TYPE, const real ANGLE)
 static real
 getDeltaAngle(void)
 {
-  if (MINIBOIDS_PER_SUPERBOID > 3u)
-    return TWO_PI / (MINIBOIDS_PER_SUPERBOID - 1u);
+  if (parameters().MINIBOIDS_PER_SUPERBOID > 3u)
+    return TWO_PI / (parameters().MINIBOIDS_PER_SUPERBOID - 1u);
   else
-    return INITIAL_ANGLE_BETWEEN;
+    return parameters().INITIAL_ANGLE_BETWEEN;
 }
 
 Superboid::Superboid(void):
@@ -226,19 +226,19 @@ Superboid::Superboid(void):
   _randomEngine(/*SuperboidContainer::*/getSeed(ID)),
   lastDivisionStep(0)
 {
-  this->miniboids.reserve(MINIBOIDS_PER_SUPERBOID);
-  this->virtualMiniboids.reserve(64u * MINIBOIDS_PER_SUPERBOID);
+  this->miniboids.reserve(parameters().MINIBOIDS_PER_SUPERBOID);
+  this->virtualMiniboids.reserve(64u * parameters().MINIBOIDS_PER_SUPERBOID);
 
-  if (this->_totalSuperboids >= SUPERBOIDS)
+  if (this->_totalSuperboids >= parameters().SUPERBOIDS)
   {
-    for (mini_int miniCount = 0u; miniCount < MINIBOIDS_PER_SUPERBOID; ++miniCount)
+    for (mini_int miniCount = 0u; miniCount < parameters().MINIBOIDS_PER_SUPERBOID; ++miniCount)
       this->miniboids.emplace_back(miniCount, *this);
   }
   else
   {
-    if (INITIAL_CONDITION == InitialCondition::HEX_CENTER)
+    if (parameters().INITIAL_CONDITION == InitialCondition::HEX_CENTER)
     {
-      for (mini_int miniCount = 0u; miniCount < MINIBOIDS_PER_SUPERBOID; ++miniCount)
+      for (mini_int miniCount = 0u; miniCount < parameters().MINIBOIDS_PER_SUPERBOID; ++miniCount)
       {
 	static const real DELTA_ANGLE = getDeltaAngle();
 	this->miniboids.emplace_back(miniCount, *this);
@@ -249,51 +249,51 @@ Superboid::Superboid(void):
 	  {
 	    this->miniboids[0u].position = getCentralMiniboidPosition();
 	    ready = true;
-	    for (dimension_int dim = 0u; ready && dim < DIMENSIONS; ++dim)
+	    for (dimension_int dim = 0u; ready && dim < parameters().DIMENSIONS; ++dim)
 	    {
 	      const real comp = this->miniboids[0u].position[dim];
-	      const real HALF_RANGE = RANGE / 2;
-	      if (/*std::fabs(HALF_RANGE - std::fabs(comp)) <= INITIAL_DISTANCE / 2 ||*/
-		HALF_RANGE - std::fabs(comp) < INITIAL_DISTANCE / 2.0f - 0.1f)
+	      const real HALF_RANGE = parameters().RANGE / 2.0f;
+	      if (/*std::fabs(HALF_RANGE - std::fabs(comp)) <= parameters().INITIAL_DISTANCE / 2 ||*/
+		HALF_RANGE - std::fabs(comp) < parameters().INITIAL_DISTANCE / 2.0f - 0.1f)
 		ready = false;
-	      if (BC == BoundaryCondition::RECTANGLE || BC == BoundaryCondition::STOKES)
-		if (RECTANGLE_SIZE[dim] / 2.0f - std::fabs(comp) < INITIAL_DISTANCE / 2.0f - 0.1f)
+	      if (parameters().BC == BoundaryCondition::RECTANGLE || parameters().BC == BoundaryCondition::STOKES)
+		if (parameters().RECTANGLE_SIZE[dim] / 2.0f - std::fabs(comp) < parameters().INITIAL_DISTANCE / 2.0f - 0.1f)
 		  ready = false;
 	    }
 
-	    if (BC == BoundaryCondition::STOKES)
-	      for (const auto& hole : STOKES_HOLES)
+	    if (parameters().BC == BoundaryCondition::STOKES)
+	      for (const auto& hole : parameters().STOKES_HOLES)
 	      {
 		const Distance d(hole.center, this->miniboids[0u].position);
-		if (d.module < hole.radius + INITIAL_DISTANCE / 2.0f - 0.1f)
+		if (d.module < hole.radius + parameters().INITIAL_DISTANCE / 2.0f - 0.1f)
 		  ready = false;
 	      }
 	  }
 	}
 	else
 	  this->miniboids[miniCount].position = this->miniboids[0u].position + \
-	    getPeripheralMiniboidPosition(this->type, DELTA_ANGLE * (miniCount - 1u) + INITIAL_ANGLE_ID1);
+	    getPeripheralMiniboidPosition(this->type, DELTA_ANGLE * (miniCount - 1u) + parameters().INITIAL_ANGLE_ID1);
     
       }
     }
-    else if (INITIAL_CONDITION == InitialCondition::LEFT_EDGE)
+    else if (parameters().INITIAL_CONDITION == InitialCondition::LEFT_EDGE)
     {
-      static const super_int AMOUNT_IN_A_COLUMN = RECTANGLE_SIZE[Y] / INITIAL_DISTANCE;
+      static const super_int AMOUNT_IN_A_COLUMN = parameters().RECTANGLE_SIZE[Y] / parameters().INITIAL_DISTANCE;
 
       this->miniboids.emplace_back(0u, *this);
       std::valarray<real>& centralPosition = this->miniboids[0u].position;
       const super_int COLUMN = static_cast<super_int>(this->ID / AMOUNT_IN_A_COLUMN);
       const super_int ROW    = static_cast<super_int>(this->ID % AMOUNT_IN_A_COLUMN);
-      centralPosition[X] = (COLUMN + 0.5f) * INITIAL_DISTANCE - RECTANGLE_SIZE[X] / 2.0f;
-      centralPosition[Y] = (ROW    + 0.5f) * INITIAL_DISTANCE - RECTANGLE_SIZE[Y] / 2.0f;
-      if (DIMENSIONS != 2u)
+      centralPosition[X] = (COLUMN + 0.5f) * parameters().INITIAL_DISTANCE - parameters().RECTANGLE_SIZE[X] / 2.0f;
+      centralPosition[Y] = (ROW    + 0.5f) * parameters().INITIAL_DISTANCE - parameters().RECTANGLE_SIZE[Y] / 2.0f;
+      if (parameters().DIMENSIONS != 2u)
 	std::cerr << "Unimplemented!" << std::endl;
       
-      for (mini_int miniCount = 1u; miniCount < MINIBOIDS_PER_SUPERBOID; ++miniCount)
+      for (mini_int miniCount = 1u; miniCount < parameters().MINIBOIDS_PER_SUPERBOID; ++miniCount)
       {
 	this->miniboids.emplace_back(miniCount, *this);
 	this->miniboids[miniCount].position = this->miniboids[0u].position + \
-	  getPeripheralMiniboidPosition(this->type, getDeltaAngle() * (miniCount - 1u) + INITIAL_ANGLE_ID1);
+	  getPeripheralMiniboidPosition(this->type, getDeltaAngle() * (miniCount - 1u) + parameters().INITIAL_ANGLE_ID1);
       }
     }
     else
@@ -367,7 +367,7 @@ Superboid::setShape(const step_int STEP)
     if (mini1.ID == 0u)
       // If central miniboid, then continue loop in the next miniboid.
       continue;
-    else if (mini1.ID == MINIBOIDS_PER_SUPERBOID - 1u) // Last miniboid.
+    else if (mini1.ID == parameters().MINIBOIDS_PER_SUPERBOID - 1u) // Last miniboid.
     {
       this->perimeter += Distance(mini1, this->miniboids[1u]).module;
       this->area += mini1.getAreaBetween(this->miniboids[1u]);
@@ -390,8 +390,8 @@ void
 Superboid::checkVirtual(const bool export_)
 {
   //this->virtualMiniboids.clear();
-  const real _maxDistance = 2.0f * RADIAL_REQ[this->type] *			\
-    std::sqrt(2.0f * (1.0f - std::cos(2.0*PI / (MINIBOIDS_PER_SUPERBOID - 1u))));
+  const real _maxDistance = 2.0f * parameters().RADIAL_REQ[this->type] *			\
+    std::sqrt(2.0f * (1.0f - std::cos(2.0*PI / (parameters().MINIBOIDS_PER_SUPERBOID - 1u))));
   //Miniboid* thisMini = nullptr;
   if (export_)
     this->virtualsInfo.str(std::string(""));
@@ -401,7 +401,7 @@ Superboid::checkVirtual(const bool export_)
       continue;
     std::vector<real> vec;
     for (auto& tn : mini1._twistNeighbors)
-      if (tn._distance.module > CORE_DIAMETER)
+      if (tn._distance.module > parameters().CORE_DIAMETER)
 	vec.emplace_back(tn._distance.module);
     vec.emplace_back(_maxDistance);
     std::sort(vec.begin(), vec.end());
@@ -484,19 +484,19 @@ rearrangePeripherals(Superboid& superboid, const real distance)
       }*/
 
   // Fild smallest distance.
-  real smallest = RANGE;
-  /*for (mini_int miniID = 1u; miniID < MINIBOIDS_PER_SUPERBOID; ++miniID)
+  real smallest = parameters().RANGE;
+  /*for (mini_int miniID = 1u; miniID < parameters().MINIBOIDS_PER_SUPERBOID; ++miniID)
     if (distances[miniID].module < smallest)
       smallest = distances[miniID].module;
 
   smallest /= 2.0f; ////
   */
 
-  smallest = distance + REAL_TOLERANCE;
-  for (mini_int miniID = 1u; miniID < MINIBOIDS_PER_SUPERBOID; ++miniID)
+  smallest = distance + parameters().REAL_TOLERANCE;
+  for (mini_int miniID = 1u; miniID < parameters().MINIBOIDS_PER_SUPERBOID; ++miniID)
   {
     //std::valarray<real> dist = distances[miniID].getDirectionArray();
-    const real angle = miniID * TWO_PI / (MINIBOIDS_PER_SUPERBOID - 1);
+    const real angle = miniID * TWO_PI / (parameters().MINIBOIDS_PER_SUPERBOID - 1);
     std::valarray<real> dist({std::cos(angle), std::sin(angle)});
     dist *= smallest;
     superboid.miniboids[miniID].position = superboid.miniboids[0u].position + dist;
@@ -522,14 +522,14 @@ Superboid::divide(const super_int divide_by, Superboid& newSuperboid, std::vecto
 
   this->setShape(step);
   const real p0 = this->perimeter / std::sqrt(this->area);
-  if (p0 > TOLERABLE_P0)
+  if (p0 > parameters().TOLERABLE_P0)
   {
     std::cerr << "p0:\t" << p0 << std::endl;
     return false;
   }
     
   static std::default_random_engine generator;
-  std::uniform_int_distribution<int> distribution(0, TYPES_NO - 1);
+  std::uniform_int_distribution<int> distribution(0, parameters().TYPES_NO - 1);
   const type_int newType = distribution(generator);
   
   *const_cast<type_int*>(&(newSuperboid.type)) = newType;
@@ -538,7 +538,7 @@ Superboid::divide(const super_int divide_by, Superboid& newSuperboid, std::vecto
 
   const std::vector<std::valarray<real>> originalPositions = getOriginalPositions(this->miniboids);
   newSuperboid.activated = true;
-  for (mini_int miniID = 0u; miniID < MINIBOIDS_PER_SUPERBOID; ++miniID)
+  for (mini_int miniID = 0u; miniID < parameters().MINIBOIDS_PER_SUPERBOID; ++miniID)
   {
     newSuperboid.miniboids[miniID].position = this->miniboids[miniID].position;
     newSuperboid.miniboids[miniID].velocity = this->miniboids[miniID].velocity;
@@ -562,7 +562,7 @@ Superboid::divide(const super_int divide_by, Superboid& newSuperboid, std::vecto
     //const Distance peripheralDistance = this->getBiggestAxis();
     divisionAngle = this->get0to2piRandom();
     std::valarray<real> peripheralVA({std::cos(divisionAngle), std::sin(divisionAngle)}); //// Arranja um nome melhor!
-    peripheralVA *= static_cast<real>(10.0f / std::sqrt(atempts)) * CORE_DIAMETER;
+    peripheralVA *= static_cast<real>(10.0f / std::sqrt(atempts)) * parameters().CORE_DIAMETER;
     //const Distance peripheralDistance = Distance(peripheralVA);
     //const Miniboid& peripheral1 = *peripheralDistance.miniboid1;
     //const Miniboid& peripheral2 = *peripheralDistance.miniboid2;
@@ -576,7 +576,7 @@ Superboid::divide(const super_int divide_by, Superboid& newSuperboid, std::vecto
     // this->miniboids[0u].position = peripheral1.position + differenceArray;
     // newSuperboid.miniboids[0u].position = peripheral2.position - differenceArray;
 
-    const real radius = 3.0f * CORE_DIAMETER / std::sqrt(atempts);
+    const real radius = 3.0f * parameters().CORE_DIAMETER / std::sqrt(atempts);
     rearrangePeripherals(*this, radius);
     rearrangePeripherals(newSuperboid, radius);
 
@@ -586,9 +586,9 @@ Superboid::divide(const super_int divide_by, Superboid& newSuperboid, std::vecto
       if (insideBox)
 	for (const auto& mini : superPtr->miniboids)
 	  if (insideBox)
-	    for (dimension_int dim = 0u; dim < DIMENSIONS; ++dim)
+	    for (dimension_int dim = 0u; dim < parameters().DIMENSIONS; ++dim)
 	    {
-	      const real HALF_RECTANGLE_SIZE = 0.5f * RECTANGLE_SIZE[dim];
+	      const real HALF_RECTANGLE_SIZE = 0.5f * parameters().RECTANGLE_SIZE[dim];
 	      if (mini.position[dim] < -HALF_RECTANGLE_SIZE)
 		insideBox = false;
 	    }
@@ -603,7 +603,7 @@ Superboid::divide(const super_int divide_by, Superboid& newSuperboid, std::vecto
       for (auto& mini : super->miniboids)
       {
 	if (!someInvasion)
-	  for (const auto& hole : STOKES_HOLES)
+	  for (const auto& hole : parameters().STOKES_HOLES)
 	    if (hole.isInside(mini.position))
 	    {
 	      someInvasion = true;
@@ -642,15 +642,15 @@ Distance
 Superboid::getBiggestAxis() const
 {
   std::vector<Distance> distances;
-  const mini_int peripheralNo = MINIBOIDS_PER_SUPERBOID - 1;
+  const mini_int peripheralNo = parameters().MINIBOIDS_PER_SUPERBOID - 1;
   for (mini_int miniID1 = 1u;
-       miniID1 < MINIBOIDS_PER_SUPERBOID;
+       miniID1 < parameters().MINIBOIDS_PER_SUPERBOID;
        ++miniID1)
   {
     std::vector<mini_int> miniIDs2;
     mini_int opposite1 = miniID1;
     opposite1 += peripheralNo / 2;
-    if (MINIBOIDS_PER_SUPERBOID % 2 == 0)
+    if (parameters().MINIBOIDS_PER_SUPERBOID % 2 == 0)
     {
       miniIDs2.emplace_back(opposite1 - 1);
       miniIDs2.emplace_back(opposite1);
@@ -666,7 +666,7 @@ Superboid::getBiggestAxis() const
     
     for (auto& miniID2 : miniIDs2) // Reference.
     {
-      if (miniID2 >= MINIBOIDS_PER_SUPERBOID)
+      if (miniID2 >= parameters().MINIBOIDS_PER_SUPERBOID)
 	miniID2 -= peripheralNo;
     }
     for (auto miniID2 : miniIDs2)  // Copy.

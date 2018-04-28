@@ -15,9 +15,9 @@ getAngles(const mini_int myID, const mini_int neighborID)
 {
   std::vector<real> angles;
   
-  static const mini_int M = static_cast<mini_int>(std::ceil((MINIBOIDS_PER_SUPERBOID - 1u)/2u));
+  static const mini_int M = static_cast<mini_int>(std::ceil((parameters().MINIBOIDS_PER_SUPERBOID - 1u)/2u));
 
-  if (MINIBOIDS_PER_SUPERBOID > 3u)
+  if (parameters().MINIBOIDS_PER_SUPERBOID > 3u)
   {
     if (myID != 0u)
     {
@@ -45,7 +45,7 @@ getAngles(const mini_int myID, const mini_int neighborID)
           if (neighborID == ms[line[0u]])
           {
             ////angles.push_back(real(m * TWO_PI / (MINIBOIDS_PER_SUPERBOID - 1u)));
-            angles.push_back(line[1] * m * TWIST_EQ_ANGLE);
+            angles.push_back(line[1] * m * parameters().TWIST_EQ_ANGLE);
             keep = false;
             break;
           }
@@ -56,9 +56,9 @@ getAngles(const mini_int myID, const mini_int neighborID)
   else
   {
     if (myID == 1u && neighborID == 2u)
-      angles.push_back(TWIST_EQ_ANGLE);
+      angles.push_back(parameters().TWIST_EQ_ANGLE);
     else if (myID == 2u && neighborID == 1u)
-      angles.push_back(-TWIST_EQ_ANGLE);
+      angles.push_back(-parameters().TWIST_EQ_ANGLE);
   }
   
   //std::cout << angles[0u] << std::endl;
@@ -82,7 +82,7 @@ getTangentNeighborID(const mini_int MY_ID, const int SIDE)
     return 0u;
   else if (SIDE > 0)
   {
-    if (MY_ID < MINIBOIDS_PER_SUPERBOID - 1u)
+    if (MY_ID < parameters().MINIBOIDS_PER_SUPERBOID - 1u)
       return (MY_ID + 1u);
     else
       return 1u;
@@ -92,7 +92,7 @@ getTangentNeighborID(const mini_int MY_ID, const int SIDE)
     if (MY_ID > 1u)
       return (MY_ID - 1u);
     else
-      return (MINIBOIDS_PER_SUPERBOID - 1u);
+      return (parameters().MINIBOIDS_PER_SUPERBOID - 1u);
   }
 }
 

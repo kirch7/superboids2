@@ -18,6 +18,177 @@
 #include "Parameter.hpp"
 
 static void
+shapeIt(const std::vector<Superboid>& superboids, std::ofstream& shapeFile, const step_int step)
+{
+  const Parameters& p = parameters();
+
+  const real smallestFloat = std::numeric_limits<float>().min();
+  const real biggestFloat  = std::numeric_limits<float>().max();
+  real ratioSum      = -0.0f;
+  real maxRatio      = smallestFloat;
+  real minRatio      = biggestFloat;
+  real perimeterSum  = -0.0f;
+  real maxPerimeter  = smallestFloat;
+  real minPerimeter  = biggestFloat;
+  real areaSum       = -0.0f;
+  real maxArea       = smallestFloat;
+  real minArea       = biggestFloat;
+  real radiusSum     = -0.0f;
+  real maxRadius     = smallestFloat;
+  real minRadius     = biggestFloat;
+  real radius2Sum    = -0.0f;
+
+  std::vector<real> ratioSumVec(p.TYPES_NO, -0.0f);
+  std::vector<real> maxRatioVec(p.TYPES_NO, smallestFloat);
+  std::vector<real> minRatioVec(p.TYPES_NO, biggestFloat);
+  std::vector<real> perimeterSumVec(p.TYPES_NO, -0.0f);
+  std::vector<real> maxPerimeterVec(p.TYPES_NO, smallestFloat);
+  std::vector<real> minPerimeterVec(p.TYPES_NO, biggestFloat);
+  std::vector<real> areaSumVec(p.TYPES_NO, -0.0f);
+  std::vector<real> maxAreaVec(p.TYPES_NO, smallestFloat);
+  std::vector<real> minAreaVec(p.TYPES_NO, biggestFloat);
+  std::vector<real> radiusSumVec(p.TYPES_NO, -0.0f);
+  std::vector<real> maxRadiusVec(p.TYPES_NO, smallestFloat);
+  std::vector<real> minRadiusVec(p.TYPES_NO, biggestFloat);
+  std::vector<real> radius2SumVec(p.TYPES_NO, -0.0f);
+
+  super_int cellsActivatedNo = 0;
+  std::vector<super_int> activatedPerType(p.TYPES_NO, 0);
+  for (const auto& super : superboids)
+  {
+    if (super.activated == false)
+      continue;
+    ++activatedPerType[super.type];
+    ++cellsActivatedNo;
+    
+    areaSum                     += super.area;
+    perimeterSum                += super.perimeter;
+    const real ratio             = super.perimeter / std::sqrt(super.area);
+    ratioSum                    += ratio;
+    radiusSum                   += super.meanRadius;
+    radius2Sum                  += super.meanRadius2;
+
+    areaSumVec[super.type]      += super.area;
+    perimeterSumVec[super.type] += super.perimeter;
+    ratioSumVec[super.type]     += ratio;
+    radiusSumVec[super.type]    += super.meanRadius;
+    radius2SumVec[super.type]   += super.meanRadius2;
+
+    if (ratio < minRatio)                              minRatio     = ratio;
+    if (ratio > maxRatio)                              maxRatio     = ratio;
+    if (super.area < minArea)                          minArea      = super.area;
+    if (super.area > maxArea)                          maxArea      = super.area;
+    if (super.perimeter < minPerimeter)                minPerimeter = super.perimeter;
+    if (super.perimeter > maxPerimeter)                maxPerimeter = super.perimeter;
+    if (super.meanRadius < minRadius)                  minRadius    = super.meanRadius;
+    if (super.meanRadius > maxRadius)                  maxRadius    = super.meanRadius;
+
+    if (ratio < minRatioVec[super.type])               minRatioVec[super.type]     = ratio;
+    if (ratio > maxRatioVec[super.type])               maxRatioVec[super.type]     = ratio;
+    if (super.area < minAreaVec[super.type])           minAreaVec[super.type]      = super.area;
+    if (super.area > maxAreaVec[super.type])           maxAreaVec[super.type]      = super.area;
+    if (super.perimeter < minPerimeterVec[super.type]) minPerimeterVec[super.type] = super.perimeter;
+    if (super.perimeter > maxPerimeterVec[super.type]) maxPerimeterVec[super.type] = super.perimeter;
+    if (super.meanRadius < minRadiusVec[super.type])   minRadiusVec[super.type]    = super.meanRadius;
+    if (super.meanRadius > maxRadiusVec[super.type])   maxRadiusVec[super.type]    = super.meanRadius;
+  }
+  const real meanArea = areaSum / cellsActivatedNo;
+  const real meanPerimeter = perimeterSum / cellsActivatedNo;
+  const real meanRatio = ratioSum / cellsActivatedNo;
+  const real meanRadius = radiusSum / cellsActivatedNo;
+
+  real msdPerimeter = -0.0f;
+  real msdRatio = -0.0f;
+  real msdArea = -0.0f;
+      
+  std::vector<real> meanAreaVec(p.TYPES_NO);
+  std::vector<real> meanPerimeterVec(p.TYPES_NO);
+  std::vector<real> meanRatioVec(p.TYPES_NO);
+  std::vector<real> meanRadiusVec(p.TYPES_NO);
+  for (type_int type = 0u; type < p.TYPES_NO; ++type)
+  {
+    meanAreaVec[type]      = areaSumVec[type] / activatedPerType[type];
+    meanPerimeterVec[type] = perimeterSumVec[type] / activatedPerType[type];
+    meanRatioVec[type]     = ratioSumVec[type] / activatedPerType[type];
+    meanRadiusVec[type]    = radiusSumVec[type] / activatedPerType[type];
+  }
+      
+  std::vector<real> msdPerimeterVec(p.TYPES_NO, -0.0f);
+  std::vector<real> msdRatioVec(p.TYPES_NO, -0.0f);
+  std::vector<real> msdAreaVec(p.TYPES_NO, -0.0f);
+      
+  for (const auto& super : superboids)
+  {
+    if (super.activated == false)
+      continue;
+	
+    msdPerimeter += square(super.perimeter - meanPerimeter);
+    msdArea += square(super.area - meanArea);
+    msdRatio += square(super.perimeter / std::sqrt(super.area) - meanRatio);
+
+    msdPerimeterVec[super.type] += square(super.perimeter - meanPerimeterVec[super.type]);
+    msdAreaVec[super.type]      += square(super.area - meanAreaVec[super.type]);
+    msdRatioVec[super.type]     += square(super.perimeter / std::sqrt(super.area) - meanRatioVec[super.type]);
+  }
+
+  msdArea /= cellsActivatedNo;
+  msdArea = std::sqrt(msdArea);
+  msdPerimeter /= cellsActivatedNo;
+  msdPerimeter = std::sqrt(msdPerimeter);
+  msdRatio /= cellsActivatedNo;
+  msdRatio = std::sqrt(msdRatio);
+  real meanMeanRadius2 = radius2Sum / cellsActivatedNo;
+
+  std::vector<real> meanMeanRadius2Vec(p.TYPES_NO);
+  for (type_int type = 0u; type < p.TYPES_NO; ++type)
+  {
+    msdAreaVec[type] /= activatedPerType[type];
+    msdAreaVec[type] = std::sqrt(msdAreaVec[type]);
+    msdPerimeterVec[type] /= activatedPerType[type];
+    msdPerimeterVec[type] = std::sqrt(msdPerimeterVec[type]);
+    msdRatioVec[type] /= activatedPerType[type];
+    msdRatioVec[type] = std::sqrt(msdRatioVec[type]);
+    meanMeanRadius2Vec[type] = radius2SumVec[type] / activatedPerType[type];
+  }
+      
+  shapeFile << std::fixed << step << '\t' <<
+    meanRatio << '\t' <<
+    msdRatio << '\t' <<
+    minRatio << '\t' <<
+    maxRatio << '\t' <<
+    meanArea << '\t' <<
+    msdArea << '\t' <<
+    minArea << '\t' <<
+    maxArea << '\t' <<
+    meanPerimeter << '\t' <<
+    msdPerimeter << '\t' <<
+    minPerimeter << '\t' <<
+    maxPerimeter << '\t' <<
+    meanRadius << '\t' <<
+    meanMeanRadius2 << '\t';
+  for (type_int type = 0u; type < p.TYPES_NO; ++type)
+  {
+    shapeFile << std::fixed << step << '\t' <<
+      meanRatioVec[type]       << '\t' <<
+      msdRatioVec[type]        << '\t' <<
+      minRatioVec[type]        << '\t' <<
+      maxRatioVec[type]        << '\t' <<
+      meanAreaVec[type]        << '\t' <<
+      msdAreaVec[type]         << '\t' <<
+      minAreaVec[type]         << '\t' <<
+      maxAreaVec[type]         << '\t' <<
+      meanPerimeterVec[type]   << '\t' <<
+      msdPerimeterVec[type]    << '\t' <<
+      minPerimeterVec[type]    << '\t' <<
+      maxPerimeterVec[type]    << '\t' <<
+      meanRadiusVec[type]      << '\t' <<
+      meanMeanRadius2Vec[type] << '\t';
+  }	
+  shapeFile << std::endl;
+  return;
+}
+
+static void
 oneSystem()
 {
   const Parameters& p = parameters();
@@ -181,169 +352,7 @@ oneSystem()
 
     // Shape measures.
     if (shape == true)
-    {
-      const real smallestFloat = static_cast<real>(std::numeric_limits<float>().min());
-      const real biggestFloat  = static_cast<real>(std::numeric_limits<float>().max());
-      real ratioSum      = -0.0f;
-      real maxRatio      = smallestFloat;
-      real minRatio      = biggestFloat;
-      real perimeterSum  = -0.0f;
-      real maxPerimeter  = smallestFloat;
-      real minPerimeter  = biggestFloat;
-      real areaSum       = -0.0f;
-      real maxArea       = smallestFloat;
-      real minArea       = biggestFloat;
-      real radiusSum     = -0.0f;
-      real maxRadius     = smallestFloat;
-      real minRadius     = biggestFloat;
-      real radius2Sum    = -0.0f;
-
-      std::vector<real> ratioSumVec(p.TYPES_NO, -0.0f);
-      std::vector<real> maxRatioVec(p.TYPES_NO, smallestFloat);
-      std::vector<real> minRatioVec(p.TYPES_NO, biggestFloat);
-      std::vector<real> perimeterSumVec(p.TYPES_NO, -0.0f);
-      std::vector<real> maxPerimeterVec(p.TYPES_NO, smallestFloat);
-      std::vector<real> minPerimeterVec(p.TYPES_NO, biggestFloat);
-      std::vector<real> areaSumVec(p.TYPES_NO, -0.0f);
-      std::vector<real> maxAreaVec(p.TYPES_NO, smallestFloat);
-      std::vector<real> minAreaVec(p.TYPES_NO, biggestFloat);
-      std::vector<real> radiusSumVec(p.TYPES_NO, -0.0f);
-      std::vector<real> maxRadiusVec(p.TYPES_NO, smallestFloat);
-      std::vector<real> minRadiusVec(p.TYPES_NO, biggestFloat);
-      std::vector<real> radius2SumVec(p.TYPES_NO, -0.0f);
-
-      super_int cellsActivatedNo = 0;
-      for (const auto& super : superboids)
-      {
-	if (super.activated == false)
-	  continue;
-
-	++cellsActivatedNo;
-	areaSum                     += super.area;
-	perimeterSum                += super.perimeter;
-	const real ratio             = super.perimeter / std::sqrt(super.area);
-        ratioSum                    += ratio;
-        radiusSum                   += super.meanRadius;
-        radius2Sum                  += super.meanRadius2;
-
-	areaSumVec[super.type]      += super.area;
-        perimeterSumVec[super.type] += super.perimeter;
-        ratioSumVec[super.type]     += ratio;
-        radiusSumVec[super.type]    += super.meanRadius;
-        radius2SumVec[super.type]   += super.meanRadius2;
-
-        if (ratio < minRatio)                              minRatio     = ratio;
-        if (ratio > maxRatio)                              maxRatio     = ratio;
-        if (super.area < minArea)                          minArea      = super.area;
-        if (super.area > maxArea)                          maxArea      = super.area;
-        if (super.perimeter < minPerimeter)                minPerimeter = super.perimeter;
-        if (super.perimeter > maxPerimeter)                maxPerimeter = super.perimeter;
-        if (super.meanRadius < minRadius)                  minRadius    = super.meanRadius;
-        if (super.meanRadius > maxRadius)                  maxRadius    = super.meanRadius;
-
-	if (ratio < minRatioVec[super.type])               minRatio     = ratio;
-        if (ratio > maxRatioVec[super.type])               maxRatio     = ratio;
-        if (super.area < minAreaVec[super.type])           minArea      = super.area;
-        if (super.area > maxAreaVec[super.type])           maxArea      = super.area;
-        if (super.perimeter < minPerimeterVec[super.type]) minPerimeter = super.perimeter;
-        if (super.perimeter > maxPerimeterVec[super.type]) maxPerimeter = super.perimeter;
-        if (super.meanRadius < minRadiusVec[super.type])   minRadius    = super.meanRadius;
-        if (super.meanRadius > maxRadiusVec[super.type])   maxRadius    = super.meanRadius;
-      }
-      const real meanArea = areaSum / cellsActivatedNo;
-      const real meanPerimeter = perimeterSum / cellsActivatedNo;
-      const real meanRatio = ratioSum / cellsActivatedNo;
-      const real meanRadius = radiusSum / (cellsActivatedNo /** MINIBOID_PER_SUPERBOID*/);
-
-      real msdPerimeter = -0.0f;
-      real msdRatio = -0.0f;
-      real msdArea = -0.0f;
-      
-      std::vector<real> meanAreaVec(p.TYPES_NO);
-      std::vector<real> meanPerimeterVec(p.TYPES_NO);
-      std::vector<real> meanRatioVec(p.TYPES_NO);
-      std::vector<real> meanRadiusVec(p.TYPES_NO);
-      for (type_int type = 0u; type < p.TYPES_NO; ++type)
-      {
-	meanAreaVec[type]      = areaSumVec[type] / cellsActivatedNo;
-	meanPerimeterVec[type] = perimeterSumVec[type] / cellsActivatedNo;
-	meanRatioVec[type]     = ratioSumVec[type] / cellsActivatedNo;
-	meanRadiusVec[type]    = radiusSumVec[type] / (cellsActivatedNo /** MINIBOID_PER_SUPERBOID*/);
-      }
-      
-      std::vector<real> msdPerimeterVec(p.TYPES_NO, -0.0f);
-      std::vector<real> msdRatioVec(p.TYPES_NO, -0.0f);
-      std::vector<real> msdAreaVec(p.TYPES_NO, -0.0f);
-      
-      for (const auto& super : superboids)
-      {
-	if (super.activated == false)
-	  continue;
-	
-        msdPerimeter += square(super.perimeter - meanPerimeter);
-        msdArea += square(super.area - meanArea);
-        msdRatio += square(super.perimeter / std::sqrt(super.area) - meanRatio);
-
-        msdPerimeterVec[super.type] += square(super.perimeter - meanPerimeterVec[super.type]);
-        msdAreaVec[super.type]      += square(super.area - meanAreaVec[super.type]);
-        msdRatioVec[super.type]     += square(super.perimeter / std::sqrt(super.area) - meanRatioVec[super.type]);
-      }
-
-      msdArea /= cellsActivatedNo;
-      msdArea = std::sqrt(msdArea);
-      msdPerimeter /= cellsActivatedNo;
-      msdPerimeter = std::sqrt(msdPerimeter);
-      msdRatio /= cellsActivatedNo;
-      msdRatio = std::sqrt(msdRatio);
-      real meanMeanRadius2 = radius2Sum / cellsActivatedNo;
-
-      std::vector<real> meanMeanRadius2Vec(p.TYPES_NO);
-      for (type_int type = 0u; type < p.TYPES_NO; ++type)
-      {
-	msdAreaVec[type] /= cellsActivatedNo;
-	msdAreaVec[type] = std::sqrt(msdAreaVec[type]);
-	msdPerimeterVec[type] /= cellsActivatedNo;
-	msdPerimeterVec[type] = std::sqrt(msdPerimeterVec[type]);
-	msdRatioVec[type] /= cellsActivatedNo;
-	msdRatioVec[type] = std::sqrt(msdRatioVec[type]);
-	meanMeanRadius2Vec[type] = radius2SumVec[type] / cellsActivatedNo;
-      }
-      
-      shapeFile << std::fixed << step << '\t' <<
-        meanRatio << '\t' <<
-	msdRatio << '\t' <<
-	minRatio << '\t' <<
-	maxRatio << '\t' <<
-        meanArea << '\t' <<
-	msdArea << '\t' <<
-	minArea << '\t' <<
-	maxArea << '\t' <<
-        meanPerimeter << '\t' <<
-	msdPerimeter << '\t' <<
-	minPerimeter << '\t' <<
-	maxPerimeter << '\t' <<
-        meanRadius << '\t' <<
-	meanMeanRadius2 << '\t';
-      for (type_int type = 0u; type < p.TYPES_NO; ++type)
-      {
-	shapeFile << std::fixed << step << '\t' <<
-	  meanRatioVec[type]       << '\t' <<
-	  msdRatioVec[type]        << '\t' <<
-	  minRatioVec[type]        << '\t' <<
-	  maxRatioVec[type]        << '\t' <<
-	  meanAreaVec[type]        << '\t' <<
-	  msdAreaVec[type]         << '\t' <<
-	  minAreaVec[type]         << '\t' <<
-	  maxAreaVec[type]         << '\t' <<
-	  meanPerimeterVec[type]   << '\t' <<
-	  msdPerimeterVec[type]    << '\t' <<
-	  minPerimeterVec[type]    << '\t' <<
-	  maxPerimeterVec[type]    << '\t' <<
-	  meanRadiusVec[type]      << '\t' <<
-	  meanMeanRadius2Vec[type] << '\t';
-      }	
-      shapeFile << std::endl;
-    }
+      shapeIt(superboids, shapeFile, step);
   }
   
   gammaFile.close();
@@ -365,101 +374,6 @@ oneSystem()
   
   return;
 }
-
-// int
-// main(int argc, char** argv)
-// {
-//   setParameters();
-//   int problem(0);
-
-//   if (argc > 1)
-//   {
-//     std::list<std::vector<Argument> > listOfLists;
-//     listOfLists.push_back(getDontRunList());
-//     listOfLists.push_back(getDoRunList());
-//     listOfLists.push_back(getMandatoryList());
-    
-//     const uint16_t possibleArgumentsNo(getDoRunList().size() + getDontRunList().size() + getMandatoryList().size());
-
-//     // Check if there is any invalid argument.
-//     // If there is any, the program ends.
-//     for (int argvCount = 1; argvCount < argc; ++argvCount)
-//     {
-//       uint16_t wrongArgumentsNo(0u);
-//       for (const auto& list : listOfLists)
-//         for (const auto& arg : list)
-//         {
-//           if (argv[argvCount] != arg.argument)
-//             //if (std::string("-initial") != argv[argvCount-1] && std::string("-param") != argv[argvCount-1])
-//             if (argv[argvCount-1] != std::string("-initial") && argv[argvCount-1] != std::string("-param"))
-//               ++wrongArgumentsNo;
-//         }
-      
-//       if (wrongArgumentsNo == possibleArgumentsNo)
-//       {
-//         std::cerr << "Invalid argument: " << argv[argvCount] << std::endl;
-//         return 1;
-//       }
-//     }
-
-//     // Check if there is some parameter getter argument.
-//     for (int argvCount = 1; argvCount < argc; ++argvCount)
-//       for (const auto& arg : getDontRunList())
-//         if (arg.argument == argv[argvCount])
-//         {
-//           arg.function(nullptr);
-//           return 0;
-//         }
-//   }
-
-//   {
-//     const auto mandatory = getMandatoryList();
-//     const std::vector<unsigned> OK(mandatory.size(), 1);
-//     std::vector<unsigned> ok(mandatory.size(), 0);
-//     for (int argvCount = 1; argvCount < argc; ++argvCount)
-//       for (std::size_t mandCount = 0; mandCount < mandatory.size(); ++mandCount)
-// 	if (mandatory[mandCount].argument == argv[argvCount])
-// 	  ++ok[mandCount];
-//     if (ok != OK)
-//     {
-//       std::cerr << "mandatory argment not present or duplicated." << std::endl;
-//       return 1;
-//     }
-//     //// Must be generalized.
-//     for (int argvCount = 1; argvCount < argc; ++argvCount)
-//       for (const auto& arg : getMandatoryList())
-// 	if (argv[argvCount] == arg.argument)
-// 	  arg.function(argv[argvCount + 1]);
-//   }
-  
-//   if (argc > 1)
-//   {
-//     // Check if there is some 'execute about' argument.
-//     for (int argvCount = 1; argvCount < argc; ++ argvCount)
-//       for (const auto& arg : getDoRunList())
-//         if (arg.argument == argv[argvCount])
-//         {
-//           //if (argvCount >= (argc - 1) &&
-// 	  // (argv[argvCount] == std::string("-initial") || argv[argvCount-1] == std::string("-param")))
-//           if (argvCount >= (argc - 1) && (argv[argvCount] == std::string("-initial")))
-//           {
-//             std::cerr << "Please, enter with a valid path." << std::endl;
-//             return (2);
-//           }
-//           else
-//             problem += arg.function(argv[argvCount + 1]);
-//         }
-//   }
-  
-//   if (argc != 1 && problem)
-//     return problem;
-//   else
-//   {
-//     ////distances();
-//     oneSystem();
-//     return (0);
-//   }
-// }
 
 int
 main(int argc, char** argv)

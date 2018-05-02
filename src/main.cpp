@@ -15,6 +15,7 @@
 #include "Box.hpp"
 #include "nextstep.hpp"
 #include "Stokes.hpp" ////
+#include "Parameter.hpp"
 
 static void
 oneSystem()
@@ -368,15 +369,17 @@ oneSystem()
 int
 main(int argc, char** argv)
 {
+  setParameters();
   int problem(0);
-  
+
   if (argc > 1)
   {
-    std::list<std::list<Argument> > listOfLists;
+    std::list<std::vector<Argument> > listOfLists;
     listOfLists.push_back(getDontRunList());
     listOfLists.push_back(getDoRunList());
-
-    const uint16_t possibleArgumentsNo(getDoRunList().size() + getDontRunList().size());
+    listOfLists.push_back(getMandatoryList());
+    
+    const uint16_t possibleArgumentsNo(getDoRunList().size() + getDontRunList().size() + getMandatoryList().size());
 
     // Check if there is any invalid argument.
     // If there is any, the program ends.
@@ -387,9 +390,11 @@ main(int argc, char** argv)
         for (const auto& arg : list)
         {
           if (argv[argvCount] != arg.argument)
-            if (argv[argvCount-1] != std::string("-initial"))
+            //if (std::string("-initial") != argv[argvCount-1] && std::string("-param") != argv[argvCount-1])
+            if (argv[argvCount-1] != std::string("-initial") && argv[argvCount-1] != std::string("-param"))
               ++wrongArgumentsNo;
         }
+      
       if (wrongArgumentsNo == possibleArgumentsNo)
       {
         std::cerr << "Invalid argument: " << argv[argvCount] << std::endl;
@@ -405,12 +410,37 @@ main(int argc, char** argv)
           arg.function(nullptr);
           return 0;
         }
+  }
 
+  {
+    const auto mandatory = getMandatoryList();
+    const std::vector<unsigned> OK(mandatory.size(), 1);
+    std::vector<unsigned> ok(mandatory.size(), 0);
+    for (int argvCount = 1; argvCount < argc; ++argvCount)
+      for (std::size_t mandCount = 0; mandCount < mandatory.size(); ++mandCount)
+	if (mandatory[mandCount].argument == argv[argvCount])
+	  ++ok[mandCount];
+    if (ok != OK)
+    {
+      std::cerr << "mandatory argment not present or duplicated." << std::endl;
+      return 1;
+    }
+    //// Must be generalized.
+    for (int argvCount = 1; argvCount < argc; ++argvCount)
+      for (const auto& arg : getMandatoryList())
+	if (argv[argvCount] == arg.argument)
+	  arg.function(argv[argvCount + 1]);
+  }
+  
+  if (argc > 1)
+  {
     // Check if there is some 'execute about' argument.
     for (int argvCount = 1; argvCount < argc; ++ argvCount)
       for (const auto& arg : getDoRunList())
         if (arg.argument == argv[argvCount])
         {
+          //if (argvCount >= (argc - 1) &&
+	  // (argv[argvCount] == std::string("-initial") || argv[argvCount-1] == std::string("-param")))
           if (argvCount >= (argc - 1) && (argv[argvCount] == std::string("-initial")))
           {
             std::cerr << "Please, enter with a valid path." << std::endl;

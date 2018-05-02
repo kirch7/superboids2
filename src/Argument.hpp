@@ -4,7 +4,7 @@
 #pragma once
 #include <iostream>
 #include <string>
-#include <list>
+#include <vector>
 
 typedef int (*ArgFunction)(const void* const);
 
@@ -27,6 +27,7 @@ protected:
   static std::size_t _biggestSize;
 };
 
-extern std::list<Argument>& getDontRunList(void);
-extern std::list<Argument>& getDoRunList(void);
+extern std::vector<Argument>& getDontRunList(void);
+extern std::vector<Argument>& getDoRunList(void);
+extern std::vector<Argument>& getMandatoryList(void);
 extern std::ostream& operator<< (std::ostream& os, const Argument& arg);

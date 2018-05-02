@@ -11,6 +11,7 @@
 #include "export.hpp"
 #include "load.hpp"
 #include "Argument.hpp"
+#include "Parameter.hpp"
 
 std::size_t Argument::_biggestSize(0u);
 
@@ -30,7 +31,7 @@ size_t Argument::getBiggestSize(void)
 {
   if (Argument::_biggestSize == 0u)
   {
-    auto lambdaExp =[&](std::list<Argument>& argList)
+    auto lambdaExp =[&](std::vector<Argument>& argList)
       {
         for (const auto& arg : argList)
         {
@@ -50,12 +51,12 @@ static int
 printHelp(const void* const)
 {
   {
-    const std::list<Argument>& list(getDontRunList());
+    const std::vector<Argument>& list(getDontRunList());
     for (auto& arg : list)
       std::cout << arg << std::endl;
   }
   {
-    const std::list<Argument>& list(getDoRunList());
+    const std::vector<Argument>& list(getDoRunList());
     for (auto& arg : list)
       std::cout << arg << std::endl;
   }
@@ -99,6 +100,14 @@ static int
 printParameters(const void* const)
 {
   std::cout << getParameters() << std::endl;
+  std::cout.flush();
+  return 0;
+}
+
+static int
+printParametersSample(const void* const)
+{
+  std::cout << getParametersSample() << std::endl;
   std::cout.flush();
   return 0;
 }
@@ -196,16 +205,46 @@ setLastStep(const void* const stepVoid)
   return 0;
 }
 
-std::list<Argument>&
+int
+setParameters(const void* const filename)
+{
+  const char* const filenameChar = static_cast<const char*>(filename);
+  std::ifstream file(filenameChar);
+  std::string content( (std::istreambuf_iterator<char>(file) ),
+                       (std::istreambuf_iterator<char>()    ) );
+
+  loadParametersFromString(content);
+
+  const_cast<Parameters* const>(&parameters())->set();
+  
+  return 0;
+}
+
+std::vector<Argument>&
+getMandatoryList(void)
+{
+  static std::vector<Argument> list;
+  static bool firstTime = true;
+  if (firstTime)
+  {
+    firstTime = false;
+    list.push_back(Argument("-param", "Specify file with parameters", setParameters, "[file]"));
+  }
+
+  return list;
+}
+
+std::vector<Argument>&
 getDontRunList(void)
 {
-  static std::list<Argument> list;
+  static std::vector<Argument> list;
   static bool firstTime = true;
   if (firstTime)
   {
     firstTime = false;
     list.push_back(Argument("-h", "Show this help message.", printHelp));
     list.push_back(Argument("-p", "Show parameters.", printParameters));
+    list.push_back(Argument("-sample", "Show parameters sample.", printParametersSample));
     ////list.push_back(Argument("-check", "Only check parameters."));
     list.push_back(Argument("-r", "Show ideal tangent radius.", printRadius));
     list.push_back(Argument("-v", "Show number of exit times.", printExitSteps));
@@ -216,10 +255,10 @@ getDontRunList(void)
   return list;
 }
 
-std::list<Argument>&
+std::vector<Argument>&
 getDoRunList(void)
 {
-  static std::list<Argument> list;
+  static std::vector<Argument> list;
   static bool firstTime = true;
   if (firstTime)
   {

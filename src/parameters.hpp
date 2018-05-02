@@ -35,7 +35,7 @@ extern const dimension_int Z;
 class Parameters
 {
 public:
-  Parameters(void);
+  void set(void);
   
   BoundaryCondition BC;
   InitialCondition  INITIAL_CONDITION;
@@ -99,6 +99,13 @@ public:
   thread_int   THREADS;
 
   real REAL_TOLERANCE;
+protected:
+  void set1(void);
+  void setCells(void);
+  void setDomain(void);
+  void setDivision(void);
+  void setRadial(void);
+  void setInter(void);
 };
 
 template<typename T>

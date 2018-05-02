@@ -223,6 +223,8 @@ getBoxesInEdge()
     return b;
 }
 
+static void panic(const std::string& m) __attribute__((noreturn));
+
 static void
 panic(const std::string& m)
 {
@@ -230,9 +232,10 @@ panic(const std::string& m)
   std::exit(2);
 }
 
+static void panic(const std::string& m, const real value) __attribute__((noreturn));
+
 static void
-panic(const std::string& m, const real value)
-{
+panic(const std::string& m, const real value) {
   std::cerr << m << std::endl;
   std::cerr << value << " was found" << std::endl;
   std::exit(2);

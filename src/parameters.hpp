@@ -107,6 +107,7 @@ protected:
   void setDivision(void);
   void setRadial(void);
   void setInter(void);
+  void setStokes(void);
 };
 
 template<typename T>

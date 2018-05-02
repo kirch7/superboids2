@@ -113,7 +113,7 @@ setParameters(void)
   vector_set.emplace_back("rectangle", true);
   vector_set.back().pushDependency("dimensions");
   vector_set.emplace_back("stokes", true);
-  vector_set.back().pushDependency("rectangle");
+  vector_set.back().pushDependency("dimensions");
   vector_set.emplace_back("radial_plastic_begin", true);
   vector_set.back().pushDependency("types");
   vector_set.emplace_back("radial_plastic_end", true);
@@ -566,69 +566,103 @@ loadParametersFromString(const std::string& raw)
       }
 
     // Vector parameters:
-    for (auto& parameter : Parameter<std::vector<real>>::map)
-      if (parameter.name == keys[0])
+    if (keys[0] == "stokes")
+    {
+      if (values.size() == 1 && keys.size() == 1 && values[0] == "none")
       {
-	if (!parameter.areDependenciesSet())
-	  panic("dependencies unset", t);
-	++matchesNo;
-	const std::size_t elementsNo = parameter.getElementsNo();
-	
-	if (keys.size() == 1)
+	for (auto& parameter : Parameter<std::vector<real>>::map)
 	{
-	  if (values.size() == 1)
-	  {
-	    if (isNumeric(values[0]))
-	      parameter = std::vector<real>(elementsNo, std::stof(values[0]));
-	    else
-	    {
-	      if (Parameter<real>::has(values[0]) && Parameter<real>::get(values[0]).isSet())
-		parameter = std::vector<real>(elementsNo, Parameter<real>::get(values[0])());
-	      else
-		panic("invalid value", t);
-	    }
-	  }
-	  else if (values.size() == elementsNo)
-	  {
-	    auto newVec = std::vector<real>();
-	    for (const auto& valueStr : values)
-	    {
-	      if (!isNumeric(valueStr))
-		panic("non numeric", t);
-	      newVec.push_back(std::stof(valueStr));
-	      parameter = newVec;
-	    }
-	  }
-	  else
-	    panic("wrong number of elements", t);
+	  if (parameter.name != "stokes")
+	    continue;
+	  parameter = std::vector<real>();
 	}
-	else if (keys.size() == 2)
-	{
-	  if (!isNumeric(keys[1]))
-	    panic("invalid key", t);
+      }
+      else if (!Parameter<unsigned long int>::get("dimensions").isSet())
+	panic("dependencies unset", t);
+      else if (keys.size() != 1)
+	panic("invalid key", t);
+      else if (values.size() != Parameter<unsigned long int>::get("dimensions")() + 1)
+	panic("invalid number of values", t);
+      else
+	for (const auto& str : values)
+	  if (!isNumeric(str))
+	    panic("non numeric", t);
 	  else
 	  {
-	    if (values.size() != 1)
-	      panic("invalid value", t);
-	    else if (isNumeric(values[0]))
+	    for (auto& parameter : Parameter<std::vector<real>>::map)
 	    {
+	      if (parameter.name != "stokes")
+		continue;
 	      auto oldVec = parameter();
-	      oldVec[std::stoul(keys[1])] = std::stof(values[0]);
+	      oldVec.emplace_back(std::stof(str));
 	      parameter = oldVec;
 	    }
+	  }
+    }
+    else
+      for (auto& parameter : Parameter<std::vector<real>>::map)
+	if (parameter.name == keys[0])
+	{
+	  if (!parameter.areDependenciesSet())
+	    panic("dependencies unset", t);
+	  ++matchesNo;
+	  const std::size_t elementsNo = parameter.getElementsNo();
+	
+	  if (keys.size() == 1)
+	  {
+	    if (values.size() == 1)
+	    {
+	      if (isNumeric(values[0]))
+		parameter = std::vector<real>(elementsNo, std::stof(values[0]));
+	      else
+	      {
+		if (Parameter<real>::has(values[0]) && Parameter<real>::get(values[0]).isSet())
+		  parameter = std::vector<real>(elementsNo, Parameter<real>::get(values[0])());
+		else
+		  panic("invalid value", t);
+	      }
+	    }
+	    else if (values.size() == elementsNo)
+	    {
+	      auto newVec = std::vector<real>();
+	      for (const auto& valueStr : values)
+	      {
+		if (!isNumeric(valueStr))
+		  panic("non numeric", t);
+		newVec.push_back(std::stof(valueStr));
+		parameter = newVec;
+	      }
+	    }
+	    else
+	      panic("wrong number of elements", t);
+	  }
+	  else if (keys.size() == 2)
+	  {
+	    if (!isNumeric(keys[1]))
+	      panic("invalid key", t);
 	    else
 	    {
-	      if (Parameter<real>::has(values[0]) && Parameter<real>::get(values[0]).isSet())
-		parameter = std::vector<real>(elementsNo, Parameter<real>::get(values[0])());
-	      else
+	      if (values.size() != 1)
 		panic("invalid value", t);
+	      else if (isNumeric(values[0]))
+	      {
+		auto oldVec = parameter();
+		oldVec[std::stoul(keys[1])] = std::stof(values[0]);
+		parameter = oldVec;
+	      }
+	      else
+	      {
+		if (Parameter<real>::has(values[0]) && Parameter<real>::get(values[0]).isSet())
+		  parameter = std::vector<real>(elementsNo, Parameter<real>::get(values[0])());
+		else
+		  panic("invalid value", t);
 	      
+	      }
 	    }
 	  }
+	  else
+	    panic("invalid key", t);
 	}
-	else
-	  panic("invalid key", t);
-      }
     
     // Matrix parameters:
     for (auto& parameter : Parameter<std::vector<std::vector<real>>>::map)
@@ -699,13 +733,16 @@ loadParametersFromString(const std::string& raw)
 	  panic("invalid key", t);
       }
 
-    if (matchesNo == 0)
+    if (keys[0] != "stokes")
     {
-      std::cerr << keys.size() << std::endl;
-      panic("key not found", t);
+      if (matchesNo == 0)
+      {
+	std::cerr << keys.size() << std::endl;
+	panic("key not found", t);
+      }
+      else if (matchesNo > 1)
+	panic("algorithm problem", t);
     }
-    else if (matchesNo > 1)
-      panic("algorithm problem", t);
   }
 
   checkAllSet();

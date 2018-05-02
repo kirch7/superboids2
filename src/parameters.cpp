@@ -367,9 +367,9 @@ Parameters::setDomain(void)
   for (const auto& comp : this->RECTANGLE_SIZE)
   {
     if (comp <= 0.0)
-      panic("rectangle lenght supposed to be positive", comp);
+      panic("rectangle length supposed to be positive", comp);
     else if (comp > this->RANGE)
-      panic("rectangle lenght supposed to smaller than domain", comp);
+      panic("rectangle length supposed to smaller than domain", comp);
   }
   
   // Intercell forces maximum reach distance:
@@ -461,6 +461,25 @@ Parameters::setRadial(void)
 }
 
 void
+Parameters::setStokes(void)
+{
+  this->STOKES_HOLES = std::vector<Stokes>();
+  const auto& vec = getParameter<std::vector<real>>("stokes");
+  if (vec.size() % (this->DIMENSIONS + 1) != 0)
+    panic("algorithm problem");
+  const std::size_t stokesNo = vec.size() / (this->DIMENSIONS + 1);
+  for (std::size_t stokesID = 0; stokesID < stokesNo; ++stokesID)
+  {
+    std::valarray<real> position(this->DIMENSIONS);
+    for (dimension_int dim = 0; dim < this->DIMENSIONS; ++dim)
+      position[dim] = vec[stokesID * (this->DIMENSIONS + 1) + 1 + dim];
+    this->STOKES_HOLES.emplace_back(position, vec[stokesID * (this->DIMENSIONS + 1)]);
+  }
+
+  return;
+}
+
+void
 Parameters::set(void)
 {
   setParameters();
@@ -471,14 +490,8 @@ Parameters::set(void)
   this->setDivision();
   this->setRadial();
   this->setInter();
+  this->setStokes();
   
-
-//this->STOKES_HOLES = std::vector<Stokes>(
-  //{Stokes(std::valarray<real>(0.0f, DIMENSIONS), 9.0f)}
-  //);
-  this->STOKES_HOLES = std::vector<Stokes>();
-
-
   // Proportions: array with elements having to sum 1. int(SUPERBOIDS*(nth element)) = (type n cells no).
   this->PROPORTIONS = getParameter<std::vector<real>>("proportions");
   for (const auto& comp : this->PROPORTIONS)

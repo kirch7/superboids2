@@ -170,6 +170,10 @@ getParameters(void)
     printMatrix(stream, p.RADIAL_BETA);
     stream << std::endl;
 
+    stream << std::endl << "# Radial beta medium:" << std::endl;
+    printVector(stream, p.RADIAL_BETA_MEDIUM);
+    stream << std::endl;
+
     stream << std::endl << "# Inter R_Eq:" << std::endl;
     printMatrix(stream, p.INTER_REQ);
     stream << std::endl;
@@ -188,6 +192,10 @@ getParameters(void)
 
     stream << std::endl << "# Kapa:" << std::endl;
     printMatrix(stream, p.KAPA);
+    stream << std::endl;
+
+    stream << std::endl << "# Kapa medium:" << std::endl;
+    printVector(stream, p.KAPA_MEDIUM);
     stream << std::endl;
 
     stream << std::endl << "# Velocity:" << std::endl;

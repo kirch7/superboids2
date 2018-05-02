@@ -268,8 +268,8 @@ template<> std::vector<real> getParameter(const std::string& name)
     if (comp.name == name)
       return comp();
 
-    std::cerr << "parameter " << name << " not found" << std::endl;
-    std::exit(2);
+  std::cerr << "parameter " << name << " not found" << std::endl;
+  std::exit(2);
 }
 
 template<> std::vector<std::vector<real>> getParameter(const std::string& name)

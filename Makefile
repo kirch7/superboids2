@@ -13,6 +13,7 @@ TARGET = superboids
 CPPFLAGS = -MP -MD
 CXXLIBS = -lpthread
 WARNINGS = -W -Wall -Wextra -Wshadow -Wstrict-overflow -Wmissing-braces -Wextra-tokens -Wambiguous-member-template -Wbind-to-temporary-copy
+GCCWARNINGS = -Wall -Wextra -Wshadow -Wstrict-overflow -Wmissing-braces
 CXXFLAGS = -stdlib=libstdc++ -std=c++14 -fno-strict-aliasing -fPIC -flto
 CXXLINKER += -fuse-ld=gold
 
@@ -24,7 +25,7 @@ all: CXXFLAGS+=-O3 $(WARNINGS)
 all: $(TARGET)
 
 ada: CXX=g++
-ada: CXXFLAGS=-std=c++14 -fno-strict-aliasing -flto -fPIC -O3
+ada: CXXFLAGS=-std=c++14 -fno-strict-aliasing -flto -fPIC -O3 $(GCCWARNINGS)
 ada: $(TARGET)
 
 $(TARGET): $(OBJECTS)

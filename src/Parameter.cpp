@@ -111,7 +111,7 @@ setParameters(void)
   
   auto& vector_set = Parameter<std::vector<real>>::map;
   vector_set.emplace_back("rectangle", true);
-  vector_set.back().pushDependency("domain");
+  vector_set.back().pushDependency("dimensions");
   vector_set.emplace_back("stokes", true);
   vector_set.back().pushDependency("rectangle");
   vector_set.emplace_back("radial_plastic_begin", true);
@@ -514,7 +514,24 @@ loadParametersFromString(const std::string& raw)
 	if (values.size() != 1)
 	  panic("invalid value", t);
 	else if (!isNumeric(values[0]))
-	  panic("non numeric", t);
+	{
+	  if (Parameter<unsigned long int>::has(values[0]))
+	  {
+	    if (Parameter<unsigned long int>::get(values[0]).isSet())
+	      parameter = Parameter<unsigned long int>::get(values[0])();
+	    else
+	      panic("undefined value", t);
+	  }
+	  else if (Parameter<real>::has(values[0]))
+	  {
+	    if (Parameter<real>::get(values[0]).isSet())
+	      parameter = Parameter<real>::get(values[0])();
+	    else
+	      panic("undefined value", t);
+	  }
+	  else
+	    panic("non numeric", t);
+	}
 	else
 	  parameter = std::stoul(values[0]);
       }
@@ -664,7 +681,20 @@ loadParametersFromString(const std::string& raw)
 	else if (keys.size() == 2)
 	  panic("unimplemented", t);
 	else if (keys.size() == 3)
-	  panic("unimplemented", t);
+	{
+	  if (isNumeric(keys[1]) && isNumeric(keys[2]))
+	  {
+	    if (values.size() != 1)
+	      panic("invalid value", t);
+	    if (!isNumeric(values[0]))
+	      panic("non numeric", t);
+	    auto oldMatrix = parameter();
+	    oldMatrix[std::stoul(keys[1])][std::stoul(keys[2])] = std::stof(values[0]);
+	    parameter = oldMatrix;
+	  }
+	  else
+	    panic("invalid key", t);
+	}
 	else
 	  panic("invalid key", t);
       }

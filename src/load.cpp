@@ -8,7 +8,6 @@
 bool InitialPositions::_load(false);
 std::ifstream InitialPositions::_file;
 step_int InitialPositions::_startStep(0u);
-super_int InitialPositions::_initialActivatedCellNo(parameters().SUPERBOIDS);
 
 void loadPositions(std::vector<Superboid>& superboids)
 {

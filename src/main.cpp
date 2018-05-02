@@ -28,7 +28,7 @@ oneSystem()
 
   std::vector<Superboid> superboids(p.MAX_SUPERBOIDS);
   for (super_int index = 0u;
-       index < InitialPositions::initialActivatedCellNo();
+       index < p.SUPERBOIDS;
        ++index)
     superboids[index].activated = true;
 
@@ -366,97 +366,172 @@ oneSystem()
   return;
 }
 
+// int
+// main(int argc, char** argv)
+// {
+//   setParameters();
+//   int problem(0);
+
+//   if (argc > 1)
+//   {
+//     std::list<std::vector<Argument> > listOfLists;
+//     listOfLists.push_back(getDontRunList());
+//     listOfLists.push_back(getDoRunList());
+//     listOfLists.push_back(getMandatoryList());
+    
+//     const uint16_t possibleArgumentsNo(getDoRunList().size() + getDontRunList().size() + getMandatoryList().size());
+
+//     // Check if there is any invalid argument.
+//     // If there is any, the program ends.
+//     for (int argvCount = 1; argvCount < argc; ++argvCount)
+//     {
+//       uint16_t wrongArgumentsNo(0u);
+//       for (const auto& list : listOfLists)
+//         for (const auto& arg : list)
+//         {
+//           if (argv[argvCount] != arg.argument)
+//             //if (std::string("-initial") != argv[argvCount-1] && std::string("-param") != argv[argvCount-1])
+//             if (argv[argvCount-1] != std::string("-initial") && argv[argvCount-1] != std::string("-param"))
+//               ++wrongArgumentsNo;
+//         }
+      
+//       if (wrongArgumentsNo == possibleArgumentsNo)
+//       {
+//         std::cerr << "Invalid argument: " << argv[argvCount] << std::endl;
+//         return 1;
+//       }
+//     }
+
+//     // Check if there is some parameter getter argument.
+//     for (int argvCount = 1; argvCount < argc; ++argvCount)
+//       for (const auto& arg : getDontRunList())
+//         if (arg.argument == argv[argvCount])
+//         {
+//           arg.function(nullptr);
+//           return 0;
+//         }
+//   }
+
+//   {
+//     const auto mandatory = getMandatoryList();
+//     const std::vector<unsigned> OK(mandatory.size(), 1);
+//     std::vector<unsigned> ok(mandatory.size(), 0);
+//     for (int argvCount = 1; argvCount < argc; ++argvCount)
+//       for (std::size_t mandCount = 0; mandCount < mandatory.size(); ++mandCount)
+// 	if (mandatory[mandCount].argument == argv[argvCount])
+// 	  ++ok[mandCount];
+//     if (ok != OK)
+//     {
+//       std::cerr << "mandatory argment not present or duplicated." << std::endl;
+//       return 1;
+//     }
+//     //// Must be generalized.
+//     for (int argvCount = 1; argvCount < argc; ++argvCount)
+//       for (const auto& arg : getMandatoryList())
+// 	if (argv[argvCount] == arg.argument)
+// 	  arg.function(argv[argvCount + 1]);
+//   }
+  
+//   if (argc > 1)
+//   {
+//     // Check if there is some 'execute about' argument.
+//     for (int argvCount = 1; argvCount < argc; ++ argvCount)
+//       for (const auto& arg : getDoRunList())
+//         if (arg.argument == argv[argvCount])
+//         {
+//           //if (argvCount >= (argc - 1) &&
+// 	  // (argv[argvCount] == std::string("-initial") || argv[argvCount-1] == std::string("-param")))
+//           if (argvCount >= (argc - 1) && (argv[argvCount] == std::string("-initial")))
+//           {
+//             std::cerr << "Please, enter with a valid path." << std::endl;
+//             return (2);
+//           }
+//           else
+//             problem += arg.function(argv[argvCount + 1]);
+//         }
+//   }
+  
+//   if (argc != 1 && problem)
+//     return problem;
+//   else
+//   {
+//     ////distances();
+//     oneSystem();
+//     return (0);
+//   }
+// }
+
 int
 main(int argc, char** argv)
 {
   setParameters();
-  int problem(0);
 
-  if (argc > 1)
+  for (int aCount = 1; aCount < argc; ++aCount)
   {
-    std::list<std::vector<Argument> > listOfLists;
-    listOfLists.push_back(getDontRunList());
-    listOfLists.push_back(getDoRunList());
-    listOfLists.push_back(getMandatoryList());
-    
-    const uint16_t possibleArgumentsNo(getDoRunList().size() + getDontRunList().size() + getMandatoryList().size());
-
-    // Check if there is any invalid argument.
-    // If there is any, the program ends.
-    for (int argvCount = 1; argvCount < argc; ++argvCount)
+    if (Argument::has(argv[aCount]))
     {
-      uint16_t wrongArgumentsNo(0u);
-      for (const auto& list : listOfLists)
-        for (const auto& arg : list)
-        {
-          if (argv[argvCount] != arg.argument)
-            //if (std::string("-initial") != argv[argvCount-1] && std::string("-param") != argv[argvCount-1])
-            if (argv[argvCount-1] != std::string("-initial") && argv[argvCount-1] != std::string("-param"))
-              ++wrongArgumentsNo;
-        }
-      
-      if (wrongArgumentsNo == possibleArgumentsNo)
+      auto& arg = Argument::get(argv[aCount]);
+      arg.isSet = true;
+      if (arg.secondArgument != "")
       {
-        std::cerr << "Invalid argument: " << argv[argvCount] << std::endl;
-        return 1;
+	++aCount;
+	if (aCount == argc)
+	{
+	  std::cerr << "expects one value for " << arg.argument << std::endl;
+	  return 5;
+	}
+	arg.valueSet = argv[aCount];
       }
     }
-
-    // Check if there is some parameter getter argument.
-    for (int argvCount = 1; argvCount < argc; ++argvCount)
-      for (const auto& arg : getDontRunList())
-        if (arg.argument == argv[argvCount])
-        {
-          arg.function(nullptr);
-          return 0;
-        }
-  }
-
-  {
-    const auto mandatory = getMandatoryList();
-    const std::vector<unsigned> OK(mandatory.size(), 1);
-    std::vector<unsigned> ok(mandatory.size(), 0);
-    for (int argvCount = 1; argvCount < argc; ++argvCount)
-      for (std::size_t mandCount = 0; mandCount < mandatory.size(); ++mandCount)
-	if (mandatory[mandCount].argument == argv[argvCount])
-	  ++ok[mandCount];
-    if (ok != OK)
+    else
     {
-      std::cerr << "mandatory argment not present or duplicated." << std::endl;
-      return 1;
+      std::cerr << argv[aCount] << " not recognized" << std::endl;
+      return 6;
     }
-    //// Must be generalized.
-    for (int argvCount = 1; argvCount < argc; ++argvCount)
-      for (const auto& arg : getMandatoryList())
-	if (argv[argvCount] == arg.argument)
-	  arg.function(argv[argvCount + 1]);
   }
+
+  for (const auto& arg : Argument::args())
+    if (arg.skipMandatory)
+      if (arg.isSet)
+	return arg.function(arg.valueSet);
   
-  if (argc > 1)
+  if (!Argument::areAllMandatorySet())
   {
-    // Check if there is some 'execute about' argument.
-    for (int argvCount = 1; argvCount < argc; ++ argvCount)
-      for (const auto& arg : getDoRunList())
-        if (arg.argument == argv[argvCount])
-        {
-          //if (argvCount >= (argc - 1) &&
-	  // (argv[argvCount] == std::string("-initial") || argv[argvCount-1] == std::string("-param")))
-          if (argvCount >= (argc - 1) && (argv[argvCount] == std::string("-initial")))
-          {
-            std::cerr << "Please, enter with a valid path." << std::endl;
-            return (2);
-          }
-          else
-            problem += arg.function(argv[argvCount + 1]);
-        }
+    std::cerr << "not all mandatory arguments set." << std::endl;
+    return 10;
   }
+  for (const auto& arg : Argument::args())
+    if (!arg.skipMandatory)
+      if (arg.mandatory)
+	if (arg.preventRunning)
+	  if (arg.isSet)
+	  {
+	    std::cerr << "impossible" << std::endl;
+	    return arg.function(arg.valueSet);
+	  }
   
-  if (argc != 1 && problem)
-    return problem;
-  else
-  {
-    ////distances();
-    oneSystem();
-    return (0);
-  }
+  for (const auto& arg : Argument::args())
+    if (!arg.skipMandatory)
+      if (arg.mandatory)
+	if (!arg.preventRunning)
+	  if (arg.isSet)
+	    arg.function(arg.valueSet);
+  
+  for (const auto& arg : Argument::args())
+    if (!arg.skipMandatory)
+      if (!arg.mandatory)
+	if (arg.preventRunning)
+	  if (arg.isSet)
+	    return arg.function(arg.valueSet);
+  
+  for (const auto& arg : Argument::args())
+    if (!arg.skipMandatory)
+      if (!arg.mandatory)
+	if (!arg.preventRunning)
+	  if (arg.isSet)
+	    arg.function(arg.valueSet);
+
+  oneSystem();
+  
+  return 0;
 }

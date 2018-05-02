@@ -13,9 +13,43 @@
 #include "Argument.hpp"
 #include "Parameter.hpp"
 
-std::size_t Argument::_biggestSize(0u);
+std::vector<Argument> getArguments(void);
 
-std::ostream& operator<< (std::ostream& os, const Argument& arg)
+std::size_t Argument::_biggestSize(0u);
+std::vector<Argument> Argument::arguments = getArguments();
+
+bool
+Argument::has(const std::string& s)
+{
+  for (const auto& arg : Argument::args())
+    if (arg.argument == s)
+      return true;
+  return false;
+}
+
+Argument&
+Argument::get(const std::string& s)
+{
+  for (auto& arg : Argument::args())
+    if (arg.argument == s)
+      return arg;
+  
+  throw "Cacaca";
+}
+
+bool
+Argument::areAllMandatorySet(void)
+{
+  for (const auto& arg : Argument::args())
+    if (arg.mandatory)
+      if (!arg.isSet)
+	return false;
+  
+  return true;
+}
+
+std::ostream&
+operator<< (std::ostream& os, const Argument& arg)
 {
   size_t tabsNo = Argument::getBiggestSize() + 1u -    \
     (arg.argument.size() + arg.secondArgument.size());
@@ -27,11 +61,12 @@ std::ostream& operator<< (std::ostream& os, const Argument& arg)
   return os;
 }
 
-size_t Argument::getBiggestSize(void)
+size_t
+Argument::getBiggestSize(void)
 {
   if (Argument::_biggestSize == 0u)
   {
-    auto lambdaExp =[&](std::vector<Argument>& argList)
+    auto lambdaExp =[&](const std::vector<Argument>& argList)
       {
         for (const auto& arg : argList)
         {
@@ -41,31 +76,26 @@ size_t Argument::getBiggestSize(void)
         }
         return;
       };
-    lambdaExp(getDontRunList());
-    lambdaExp(getDoRunList());
+    lambdaExp(Argument::args());
   }
   return Argument::_biggestSize;
 }
 
 static int
-printHelp(const void* const)
+printHelp(const std::string&)
 {
   {
-    const std::vector<Argument>& list(getDontRunList());
+    const std::vector<Argument>& list(getArguments());
     for (auto& arg : list)
       std::cout << arg << std::endl;
   }
-  {
-    const std::vector<Argument>& list(getDoRunList());
-    for (auto& arg : list)
-      std::cout << arg << std::endl;
-  }
+
   std::cout.flush();
   return 0;
 }
 
 int
-setMSD(const void* const)
+setMSD(const std::string&)
 {
   MSD::_export = true;
   MSD::_file.open((Date::compactRunTime + "_msd_v4.bin").c_str());
@@ -73,7 +103,7 @@ setMSD(const void* const)
 }
 
 int
-setBinPrint(const void* const)
+setBinPrint(const std::string&)
 {
   BinPrint::_export = true;
   BinPrint::_file.open((Date::compactRunTime + "_binprint_v4.bin").c_str());
@@ -81,7 +111,7 @@ setBinPrint(const void* const)
 }
 
 static int
-printRadius(const void* const)
+printRadius(const std::string&)
 {
   auto getTangentRadius =[](real rEq)
   {
@@ -97,7 +127,7 @@ printRadius(const void* const)
 }
 
 static int
-printParameters(const void* const)
+printParameters(const std::string&)
 {
   std::cout << getParameters() << std::endl;
   std::cout.flush();
@@ -105,7 +135,7 @@ printParameters(const void* const)
 }
 
 static int
-printParametersSample(const void* const)
+printParametersSample(const std::string&)
 {
   std::cout << getParametersSample() << std::endl;
   std::cout.flush();
@@ -113,7 +143,7 @@ printParametersSample(const void* const)
 }
 
 static int
-printExitSteps(const void* const)
+printExitSteps(const std::string&)
 {
   std::cout << static_cast<unsigned>(static_cast<real>(parameters().STEPS)/static_cast<real>(parameters().EXIT_INTERVAL)) << std::endl;
   std::cout.flush();
@@ -121,7 +151,7 @@ printExitSteps(const void* const)
 }
 
 static int
-printThreadsNo(const void* const)
+printThreadsNo(const std::string&)
 {
   std::cout << parameters().THREADS << std::endl;
   std::cout.flush();
@@ -129,7 +159,7 @@ printThreadsNo(const void* const)
 }
 
 static int
-printHalfRange(const void* const)
+printHalfRange(const std::string&)
 {
   std::cout << parameters().RANGE/2.0f << std::endl;
   std::cout.flush();
@@ -137,38 +167,39 @@ printHalfRange(const void* const)
 }
 
 int
-setShapeExportation(const void* const)
+setShapeExportation(const std::string&)
 {
   Shape::_export = true;
   return 0;
 }
 
 int
-setGammaExportation(const void* const)
+setGammaExportation(const std::string&)
 {
   Gamma::_export = true;
   return 0;
 }
 
 int
-setPhi(const void* const)
+setPhi(const std::string&)
 {
   Phi::_export = true;
   return 0;
 }
 
 int
-setInitialPositionsFile(const void* const filename)
+setInitialPositionsFile(const std::string& filename)
 {
   InitialPositions::_load = true;
-  InitialPositions::_file.open(static_cast<const char* const>(filename),
-                               std::ifstream::in | std::ifstream::binary);
+  InitialPositions::_file.open(filename, std::ifstream::in | std::ifstream::binary);
   std::string line;
   std::getline(InitialPositions::file(), line);
   std::string cellsNo;
   std::getline(InitialPositions::file(), cellsNo);
   InitialPositions::_startStep = std::stoul(line);
-  InitialPositions::_initialActivatedCellNo = std::stoul(cellsNo);
+  *const_cast<super_int* const>(&parameters().SUPERBOIDS) = std::stoul(cellsNo);
+  if (parameters().MAX_SUPERBOIDS < parameters().SUPERBOIDS)
+    *const_cast<super_int* const>(&parameters().MAX_SUPERBOIDS) = std::stoul(cellsNo);
   if (InitialPositions::_startStep >= parameters().STEPS)
     throw(std::range_error("Invalid step in binary file or invalid STEPS parameter."));
   
@@ -176,7 +207,7 @@ setInitialPositionsFile(const void* const filename)
 }
 
 int
-setSCS(const void* const)
+setSCS(const std::string&)
 {
   SCS::_export = true;
   SCS::_file.open((Date::compactRunTime + "_scs.dat").c_str(), std::ios::out);
@@ -184,7 +215,7 @@ setSCS(const void* const)
 }
 
 int
-setInfinite(const void* const)
+setInfinite(const std::string&)
 {
   Infinite::_export = true;
   Infinite::_infFile.open(Date::compactRunTime + "_inf.dat", std::ios::out);
@@ -196,20 +227,22 @@ setInfinite(const void* const)
 }
 
 int
-setLastStep(const void* const stepVoid)
+setLastStep(const std::string& stepString)
 {
-  const char* const stepCString = static_cast<const char*>(stepVoid);
-  const std::string stepString(stepCString);
   *const_cast<step_int*>(&parameters().STEPS) = std::stol(stepString);
 
   return 0;
 }
 
 int
-setParameters(const void* const filename)
+setParameters(const std::string& filename)
 {
-  const char* const filenameChar = static_cast<const char*>(filename);
-  std::ifstream file(filenameChar);
+  std::ifstream file(filename);
+  if (!file.is_open())
+  {
+    std::cerr << "could not open " << filename << std::endl;
+    std::exit(11);
+  }
   std::string content( (std::istreambuf_iterator<char>(file) ),
                        (std::istreambuf_iterator<char>()    ) );
 
@@ -228,53 +261,35 @@ getMandatoryList(void)
   if (firstTime)
   {
     firstTime = false;
-    list.push_back(Argument("-param", "Specify file with parameters", setParameters, "[file]"));
   }
 
   return list;
 }
 
-std::vector<Argument>&
-getDontRunList(void)
+std::vector<Argument>
+getArguments(void)
 {
-  static std::vector<Argument> list;
-  static bool firstTime = true;
-  if (firstTime)
-  {
-    firstTime = false;
-    list.push_back(Argument("-h", "Show this help message.", printHelp));
-    list.push_back(Argument("-p", "Show parameters.", printParameters));
-    list.push_back(Argument("-sample", "Show parameters sample.", printParametersSample));
-    ////list.push_back(Argument("-check", "Only check parameters."));
-    list.push_back(Argument("-r", "Show ideal tangent radius.", printRadius));
-    list.push_back(Argument("-v", "Show number of exit times.", printExitSteps));
-    list.push_back(Argument("-range", "Show HALF of range value.", printHalfRange));
-    list.push_back(Argument("-t", "Show number of worker threads.", printThreadsNo));
-  }
-
-  return list;
-}
-
-std::vector<Argument>&
-getDoRunList(void)
-{
-  static std::vector<Argument> list;
-  static bool firstTime = true;
-  if (firstTime)
-  {
-    firstTime = false;
-    ////list.push_back(Argument("-flex", "Run anyway."));
-    list.push_back(Argument("-shape", "Export area and perimeter information.", setShapeExportation));
-    list.push_back(Argument("-gamma", "Export segregation information.", setGammaExportation));
-    list.push_back(Argument("-msd", "Export position of central particle.", setMSD));
-    list.push_back(Argument("-binprint", "Export position of particles.", setBinPrint));
-    list.push_back(Argument("-virtual", "Export position of virtual particles and infinite forces.", setInfinite));
-    list.emplace_back("-phi", "Export velocity alignment.", setPhi);
-    list.emplace_back("-initial", "Load initial positions from file.", setInitialPositionsFile, "[file]");
-    list.emplace_back("-scs", "Single cell stability.", setSCS);
-    list.emplace_back("-laststep", "Override last step.", setLastStep, "[naturalnumber]");
-    ////list.push_back(Argument("-progress", "Show progress bar."));
-  }
-
+  std::vector<Argument> list;
+  list.push_back(Argument("-h", "Show this help message.", false, true, true, printHelp));
+  list.push_back(Argument("-p", "Show parameters.", false, true, false, printParameters));
+  list.push_back(Argument("-sample", "Show parameters sample.", false, true, true, printParametersSample));
+  ////list.push_back(Argument("-check", "Only check parameters."));
+  list.push_back(Argument("-r", "Show ideal tangent radius.", false, true, false, printRadius));
+  list.push_back(Argument("-v", "Show number of exit times.", false, true, false, printExitSteps));
+  list.push_back(Argument("-range", "Show HALF of range value.", false, true, false, printHalfRange));
+  list.push_back(Argument("-t", "Show number of worker threads.", false, true, false, printThreadsNo));
+  ////list.push_back(Argument("-flex", "Run anyway."));
+  list.push_back(Argument("-shape", "Export area and perimeter information.", false, false, false, setShapeExportation));
+  list.push_back(Argument("-gamma", "Export segregation information.", false, false, false, setGammaExportation));
+  list.push_back(Argument("-msd", "Export position of central particle.", false, false, false, setMSD));
+  list.push_back(Argument("-binprint", "Export position of particles.", false, false, false, setBinPrint));
+  list.push_back(Argument("-virtual", "Export position of virtual particles and infinite forces.", false, false, false, setInfinite));
+  list.emplace_back("-phi", "Export velocity alignment.", false, false, false, setPhi);
+  list.emplace_back("-initial", "Load initial positions from file.", false, false, false, setInitialPositionsFile, "[file]");
+  list.emplace_back("-scs", "Single cell stability.", false, false, false, setSCS);
+  list.emplace_back("-laststep", "Override last step.", false, false, false, setLastStep, "[naturalnumber]");
+  ////list.push_back(Argument("-progress", "Show progress bar."));
+  list.push_back(Argument("-param", "Specify file with parameters", true, false, false, setParameters, "[file]"));
+  
   return list;
 }

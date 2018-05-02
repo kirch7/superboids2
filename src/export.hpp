@@ -14,7 +14,7 @@ public:
   static inline bool write(void) { return _export; }
   static inline std::ofstream& file(void) { return _file; }
   virtual inline ~MSD() {;}
-  friend int setMSD(const void* const);
+  friend int setMSD(const std::string&);
 private:
   static std::ofstream _file;
   static bool _export;
@@ -27,7 +27,7 @@ public:
   static inline bool write(void) { return _export; }
   static inline std::ofstream& file(void) { return _file; }
   virtual inline ~BinPrint() {;}
-  friend int setBinPrint(const void* const);
+  friend int setBinPrint(const std::string&);
 private:
   static std::ofstream _file;
   static bool _export;
@@ -38,7 +38,7 @@ class Shape
 public:
   virtual void youCannotMakeAInstanceOfMe(void) = 0;
   static inline bool write(void) { return _export; }
-  friend int setShapeExportation(const void* const);
+  friend int setShapeExportation(const std::string&);
 private:
   static bool _export;
 };
@@ -48,7 +48,7 @@ class Gamma
 public:
   virtual void youCannotMakeAInstanceOfMe(void) = 0;
   static inline bool write(void) { return _export; }
-  friend int setGammaExportation(const void* const);
+  friend int setGammaExportation(const std::string&);
 private:
   static bool _export;
 };
@@ -58,7 +58,7 @@ class SCS
 public:
   virtual void youCannotMakeAInstanceOfMe(void) = 0;
   static inline bool write(void) { return _export; }
-  friend int setSCS(const void* const);
+  friend int setSCS(const std::string&);
   static void write(const step_int step, const std::vector<Superboid>& superboids);
   static inline std::ofstream& file(void) { return _file; }
 private:
@@ -71,7 +71,7 @@ class Infinite
 public:
   virtual void youCannotMakeAInstanceOfMe(void) = 0;
   static inline bool write(void) { return _export; }
-  friend int setInfinite(const void* const);
+  friend int setInfinite(const std::string&);
   static void write(std::vector<Superboid>& superboids);
   static inline std::ofstream& infFile(void) { return _infFile; }
   static inline std::ofstream& inf2File(void) { return _inf2File; }
@@ -89,7 +89,7 @@ class Phi
 public:
   virtual void youCannotMakeAInstanceOfMe(void) = 0;
   static inline bool write(void) { return _export; }
-  friend int setPhi(const void* const);
+  friend int setPhi(const std::string&);
 private:
   static bool _export;
 };

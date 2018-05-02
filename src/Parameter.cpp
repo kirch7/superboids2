@@ -11,12 +11,13 @@
 class SuperParameter
 {
 public:
-  SuperParameter(const std::string&, const bool);
+  SuperParameter(const std::string&, const bool, const std::string&);
   bool isSet(void) const { return this->_modifiedCount > 0; }
   void pushDependency(const std::string&);
   std::size_t getElementsNo(void);
   
   const std::string name;
+  const std::string defaultValue;
   bool areDependenciesSet(void);
 protected:
   std::size_t _modifiedCount;
@@ -31,7 +32,7 @@ public:
   static bool has(const std::string&);
   static Parameter<P> get(const std::string&);
   
-  Parameter(const std::string&, const bool);
+  Parameter(const std::string&, const bool, const std::string&);
   const P& operator()(void) const;
   void operator=(const P&);
   void set(const P&);
@@ -79,81 +80,82 @@ setParameters(void)
     return;
   
   auto& string_set = Parameter<std::string>::map;
-  string_set.emplace_back("boundary", false);
-  string_set.emplace_back("initial", false);
-  string_set.emplace_back("kill", false);
+  string_set.emplace_back("boundary", false, "periodic");
+  string_set.emplace_back("initial", false, "hex_center");
+  string_set.emplace_back("kill", false, "none");
     
   auto& uint_set = Parameter<unsigned long int>::map;
-  uint_set.emplace_back("dimensions", false);
-  uint_set.emplace_back("types", false);
-  uint_set.emplace_back("cells", false);
-  uint_set.emplace_back("max_cells", false);
-  uint_set.emplace_back("particles_per_cell", false);
-  uint_set.emplace_back("division", true);
-  uint_set.emplace_back("non_division", true);
-  uint_set.emplace_back("steps", true);
-  uint_set.emplace_back("exit_interval", true);
-  uint_set.emplace_back("threads", true);
+  uint_set.emplace_back("dimensions", false, "2");
+  uint_set.emplace_back("types", false, "cells");
+  uint_set.emplace_back("cells", false, "7");
+  uint_set.emplace_back("max_cells", false, "cells");
+  uint_set.emplace_back("particles_per_cell", false, "12");
+  uint_set.emplace_back("division", true, "0");
+  uint_set.emplace_back("non_division", true, "0");
+  uint_set.emplace_back("steps", true, "10000");
+  uint_set.emplace_back("exit_interval", true, "1000");
+  uint_set.emplace_back("threads", true, "8");
   
   auto& real_set = Parameter<real>::map;
-  real_set.emplace_back("tolerable_p0", true);
-  real_set.emplace_back("domain", false);
+  real_set.emplace_back("tolerable_p0", true, "4");
+  real_set.emplace_back("domain", false, "100");
   real_set.back().pushDependency("dimensions");
-  real_set.emplace_back("neighbor_distance", false);
-  real_set.emplace_back("initial_distance", true);
-  real_set.emplace_back("core_diameter", true);
-  real_set.emplace_back("core_intensity", true);
-  real_set.emplace_back("print_core", true);
-  real_set.emplace_back("eta", true);
-  real_set.emplace_back("dt", true);
-  real_set.emplace_back("exit_factor", true);
-  real_set.emplace_back("real_tolerance", true);
+  real_set.emplace_back("neighbor_distance", false, "1.1");
+  real_set.emplace_back("initial_distance", true, "2");
+  real_set.emplace_back("core_diameter", true, "0.2");
+  real_set.emplace_back("core_intensity", true, "1000");
+  real_set.emplace_back("print_core", true, "0.2");
+  real_set.emplace_back("eta", true, "1");
+  real_set.emplace_back("dt", true, "1");
+  real_set.emplace_back("exit_factor", true, "0");
+  real_set.emplace_back("real_tolerance", true, "0.000001");
   
   auto& vector_set = Parameter<std::vector<real>>::map;
-  vector_set.emplace_back("rectangle", true);
+  vector_set.emplace_back("rectangle", true, "domain");
   vector_set.back().pushDependency("dimensions");
-  vector_set.emplace_back("stokes", true);
+  vector_set.emplace_back("stokes", true, "none");
   vector_set.back().pushDependency("dimensions");
-  vector_set.emplace_back("radial_plastic_begin", true);
+  vector_set.emplace_back("radial_plastic_begin", true, "domain");
   vector_set.back().pushDependency("types");
-  vector_set.emplace_back("radial_plastic_end", true);
+  vector_set.emplace_back("radial_plastic_end", true, "domain");
   vector_set.back().pushDependency("types");
-  vector_set.emplace_back("proportions", true);
+  vector_set.emplace_back("proportions", true, "1");
   vector_set.back().pushDependency("types");
-  vector_set.emplace_back("radial_beta_medium", true);
+  vector_set.emplace_back("radial_beta_medium", true, "0.1");
   vector_set.back().pushDependency("types");
-  vector_set.emplace_back("target_area", true);
+  vector_set.emplace_back("target_area", true, "3.141592");
   vector_set.back().pushDependency("types");
-  vector_set.emplace_back("radial_eq", true);
+  vector_set.emplace_back("radial_eq", true, "1");
   vector_set.back().pushDependency("types");
-  vector_set.emplace_back("kapa_medium", true);
+  vector_set.emplace_back("kapa_medium", true, "2");
   vector_set.back().pushDependency("types");
-  vector_set.emplace_back("auto_alpha", true);
+  vector_set.emplace_back("auto_alpha", true, "13");
   vector_set.back().pushDependency("types");
-  vector_set.emplace_back("speed", true);
+  vector_set.emplace_back("speed", true, "0.007");
   vector_set.back().pushDependency("types");
 
   auto& matrix_set = Parameter<std::vector<std::vector<real>>>::map;
-  matrix_set.emplace_back("kapa", true);
+  matrix_set.emplace_back("kapa", true, "2");
   matrix_set.back().pushDependency("types");
-  matrix_set.emplace_back("inter_eq", true);
+  matrix_set.emplace_back("inter_eq", true, "0.75");
   matrix_set.back().pushDependency("types");
-  matrix_set.emplace_back("inter_beta", true);
+  matrix_set.emplace_back("inter_beta", true, "0.1");
   matrix_set.back().pushDependency("types");
-  matrix_set.emplace_back("radial_beta", true);
+  matrix_set.emplace_back("radial_beta", true, "0.1");
   matrix_set.back().pushDependency("types");
-  matrix_set.emplace_back("inter_alpha", true);
+  matrix_set.emplace_back("inter_alpha", true, "13");
   matrix_set.back().pushDependency("types");
 }
 
-SuperParameter::SuperParameter(const std::string& n, const bool a):
+SuperParameter::SuperParameter(const std::string& n, const bool a, const std::string& def):
   name(n),
+  defaultValue(def),
   _modifiedCount(0),
   _canChange(a) { }
 
 template <typename P>
-Parameter<P>::Parameter(const std::string& n, const bool a):
-  SuperParameter(n, a) {}
+Parameter<P>::Parameter(const std::string& n, const bool a, const std::string& def):
+  SuperParameter(n, a, def) {}
 
 template <typename P>
 const P&
@@ -748,25 +750,35 @@ loadParametersFromString(const std::string& raw)
   checkAllSet();
 }
 
+static std::string
+getSpaces(const std::size_t n)
+{
+  std::string s = "";
+  for (std::size_t i = 0; i < n; ++i)
+    s += " ";
+
+  return s;
+}
+
 std::string
 getParametersSample()
 {
   std::stringstream stream;
 
   for (const auto& param : Parameter<std::string>::map)
-    stream << param.name << '\t' << '=' << '\t' << "sometext" << std::endl;
+    stream << param.name << getSpaces(24 - param.name.size()) << '=' << ' ' << param.defaultValue << std::endl;
 
   for (const auto& param : Parameter<unsigned long int>::map)
-    stream << param.name << '\t' << '=' << '\t' << "7" << std::endl;
+    stream << param.name << getSpaces(24 - param.name.size()) << '=' << ' ' << param.defaultValue << std::endl;
   
   for (const auto& param : Parameter<real>::map)
-    stream << param.name << '\t' << '=' << '\t' << "-0.0" << std::endl;
+    stream << param.name << getSpaces(24 - param.name.size()) << '=' << ' ' << param.defaultValue << std::endl;
   
   for (const auto& param : Parameter<std::vector<real>>::map)
-    stream << param.name << '\t' << '=' << '\t' << "-0.0" << std::endl;
+    stream << param.name << getSpaces(24 - param.name.size()) << '=' << ' ' << param.defaultValue << std::endl;
 
   for (const auto& param : Parameter<std::vector<std::vector<real>>>::map)
-    stream << param.name << '\t' << '=' << '\t' << "-0.0" << std::endl;
-
+    stream << param.name << getSpaces(24 - param.name.size()) << '=' << ' ' << param.defaultValue << std::endl;
+  
   return stream.str();
 }

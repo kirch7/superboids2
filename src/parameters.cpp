@@ -23,20 +23,20 @@ const real    HALF_PI = 1.57079633f;
 const real         PI = 3.14159265359f;
 const real     TWO_PI = 6.283185307179586f;
 
-static real
-getMaxValue(const std::vector<std::vector<real>>& matrix)
-{
-  if (matrix.size() == 0)
-    return -0.0f;
+// static real
+// getMaxValue(const std::vector<std::vector<real>>& matrix)
+// {
+//   if (matrix.size() == 0)
+//     return -0.0f;
   
-  real max = -1.0e10f;
-  for (const auto& v : matrix)
-    for (const auto elem : v)
-      if (elem > max)
-	max = elem;
+//   real max = -1.0e10f;
+//   for (const auto& v : matrix)
+//     for (const auto elem : v)
+//       if (elem > max)
+// 	max = elem;
 
-  return max;
-}
+//   return max;
+// }
 
 
 template <typename T>
@@ -187,7 +187,7 @@ getParameters(void)
     stream << std::endl;
 
     stream << std::endl << "# Kapa:" << std::endl;
-    printVector(stream, p.KAPA);
+    printMatrix(stream, p.KAPA);
     stream << std::endl;
 
     stream << std::endl << "# Velocity:" << std::endl;
@@ -443,6 +443,11 @@ Parameters::setRadial(void)
     for (const auto& comp : vec)
       if (comp < 0.0f)
 	panic("radial_eq must be bigger positive or nule", comp);
+
+  this->RADIAL_BETA_MEDIUM = getParameter<std::vector<real>>("radial_beta_medium");
+  for (const auto& comp : this->RADIAL_BETA_MEDIUM)
+    if (comp < this->REAL_TOLERANCE)
+      panic("radial_beta_medium must be bigger than real_tolerance", comp);
   
   return;
 }
@@ -473,7 +478,8 @@ Parameters::set(void)
       panic("proportion component must be positive or nule", comp);
   this->PROPORTIONS = normalize(this->PROPORTIONS);
 
-  this->KAPA = getParameter<std::vector<real>>("kapa");
+  this->KAPA = getParameter<std::vector<std::vector<real>>>("kapa");
+  this->KAPA_MEDIUM = getParameter<std::vector<real>>("kapa_medium");
 
   this->INTER_ALPHA = getParameter<std::vector<std::vector<real>>>("inter_alpha");
   this->AUTO_ALPHA = getParameter<std::vector<real>>("auto_alpha");
@@ -484,5 +490,4 @@ Parameters::set(void)
   this->THREADS    = getParameter<unsigned long int>("threads"); // Threads quantity.
 
   this->TARGET_AREA = getTargetAreas(this->RADIAL_REQ);
-  this->MAX_RADIAL_BETA = getMaxValue(RADIAL_BETA);
 };

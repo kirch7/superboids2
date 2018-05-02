@@ -78,11 +78,12 @@ public:
   std::vector<std::vector<real>> INTER_REQ;
 
   std::vector<std::vector<real>> RADIAL_BETA;
-  real MAX_RADIAL_BETA;
+  std::vector<real> RADIAL_BETA_MEDIUM;
   real RADIAL_SPRING_EXP;
   std::vector<std::vector<real>> INTER_BETA;
 
-  std::vector<real> KAPA;
+  std::vector<std::vector<real>> KAPA;
+  std::vector<real> KAPA_MEDIUM;
 
   std::vector<std::vector<real>> INTER_ALPHA;
   std::vector<real> AUTO_ALPHA;

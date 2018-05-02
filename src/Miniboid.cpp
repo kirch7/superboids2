@@ -416,7 +416,7 @@ Miniboid::interInteractions(const step_int STEP)
 }
 
 real
-Miniboid::getHarrisRadialBeta(void) const
+Miniboid::getHarrisParameter(const std::vector<std::vector<real>>& matrix, const std::vector<real>& medium) const
 {
   const type_int MY_TYPE = this->superboid.type;
   mini_int total = 0;
@@ -434,18 +434,16 @@ Miniboid::getHarrisRadialBeta(void) const
 
   real beta = -0.0f;
 
-  if (total != 0)
+  for (type_int t = 0u; t < parameters().TYPES_NO; ++t)
   {
-    for (type_int t = 0u; t < parameters().TYPES_NO; ++t)
-    {
-      beta += parameters().RADIAL_BETA[MY_TYPE][t] * counts[t];
-    }
-    
-    beta /= total;
+    beta += matrix[MY_TYPE][t] * counts[t];
   }
-  else // total == 0
+
+  if (total >= parameters().MINIBOIDS_PER_SUPERBOID / 2)
+    beta /= total;
+  else
   {
-    beta = parameters().MAX_RADIAL_BETA;
+    beta = (parameters().MINIBOIDS_PER_SUPERBOID / 2 - total) * medium[MY_TYPE];
   }
   return beta;
 }
@@ -486,7 +484,7 @@ Miniboid::setNextVelocity(const step_int STEP)
 	    this->_forceSum += parameters().INFINITE_FORCE * mini.radialDistance.getDirectionArray();
 	  else
 	  {
-	    const real beta = mini.getHarrisRadialBeta();
+	    const real beta = mini.getHarrisParameter(parameters().RADIAL_BETA, parameters().RADIAL_BETA_MEDIUM);
 	    std::valarray<real> force = beta * getFiniteRadialForceWithoutBeta(mini.radialDistance, parameters().RADIAL_REQ[MY_TYPE], MY_TYPE);
 	    this->_forceSum += force;
 	  }
@@ -502,7 +500,7 @@ Miniboid::setNextVelocity(const step_int STEP)
 	else
 	{
 	  // lest cost in -real than -Distance.
-	  const real beta = this->getHarrisRadialBeta();
+	  const real beta = this->getHarrisParameter(parameters().RADIAL_BETA, parameters().RADIAL_BETA_MEDIUM);
 	  std::valarray<real> force = -beta * getFiniteRadialForceWithoutBeta(distance, parameters().RADIAL_REQ[MY_TYPE], MY_TYPE);
 	  this->_forceSum += force;
 	}
@@ -523,7 +521,10 @@ Miniboid::setNextVelocity(const step_int STEP)
     {
       const real ANGLE_BETWEEN = angleBetween(this->radialAngle, miniNeighbor.radialAngle);
       const real SUBTRACTION = assertAngle(ANGLE_BETWEEN - tn.ANGLES[0u]);
-      const std::valarray<real> f = -parameters().KAPA[MY_TYPE] * SUBTRACTION * tangent;
+      const real kapa1 = this->getHarrisParameter(parameters().KAPA, parameters().KAPA_MEDIUM);
+      const real kapa2 = miniNeighbor.getHarrisParameter(parameters().KAPA, parameters().KAPA_MEDIUM);
+      const real kapa = (kapa1 + kapa2) / 2.0f;
+      const std::valarray<real> f = -kapa * SUBTRACTION * tangent;
       this->_forceSum += f;
     }
   }

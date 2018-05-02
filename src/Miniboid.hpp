@@ -66,7 +66,7 @@ protected:
   void checkRectangularLimits();
   void checkStokesLimits();
   void checkKillCondition();
-  real getHarrisRadialBeta() const;
+  real getHarrisParameter(const std::vector<std::vector<real>>&, const std::vector<real>& medium) const;
 };
 
 inline Miniboid::Miniboid(const mini_int _id, Superboid& super, const bool isVirt = false):

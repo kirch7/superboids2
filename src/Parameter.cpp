@@ -120,11 +120,13 @@ setParameters(void)
   vector_set.back().pushDependency("types");
   vector_set.emplace_back("proportions", true);
   vector_set.back().pushDependency("types");
+  vector_set.emplace_back("radial_beta_medium", true);
+  vector_set.back().pushDependency("types");
   vector_set.emplace_back("target_area", true);
   vector_set.back().pushDependency("types");
   vector_set.emplace_back("radial_eq", true);
   vector_set.back().pushDependency("types");
-  vector_set.emplace_back("kapa", true);
+  vector_set.emplace_back("kapa_medium", true);
   vector_set.back().pushDependency("types");
   vector_set.emplace_back("auto_alpha", true);
   vector_set.back().pushDependency("types");
@@ -132,6 +134,8 @@ setParameters(void)
   vector_set.back().pushDependency("types");
 
   auto& matrix_set = Parameter<std::vector<std::vector<real>>>::map;
+  matrix_set.emplace_back("kapa", true);
+  matrix_set.back().pushDependency("types");
   matrix_set.emplace_back("inter_eq", true);
   matrix_set.back().pushDependency("types");
   matrix_set.emplace_back("inter_beta", true);
@@ -427,16 +431,50 @@ isNumeric(const std::string& s)
   return true;
 }
 
+static void
+checkAllSet(void)
+{
+  for (const auto& parameter : Parameter<std::string>::map)
+    if (!parameter.isSet())
+    {
+      std::cerr << "please, set " << parameter.name << std::endl;
+      exit(1);
+    }
+  
+  for (const auto& parameter : Parameter<unsigned long int>::map)
+    if (!parameter.isSet())
+    {
+      std::cerr << "please, set " << parameter.name << std::endl;
+      exit(1);
+    }
+  
+  for (const auto& parameter : Parameter<real>::map)
+    if (!parameter.isSet())
+    {
+      std::cerr << "please, set " << parameter.name << std::endl;
+      exit(1);
+    }
+
+  for (const auto& parameter : Parameter<std::vector<real>>::map)
+    if (!parameter.isSet())
+    {
+      std::cerr << "please, set " << parameter.name << std::endl;
+      exit(1);
+    }
+
+  for (const auto& parameter : Parameter<std::vector<std::vector<real>>>::map)
+    if (!parameter.isSet())
+    {
+      std::cerr << "please, set " << parameter.name << std::endl;
+      exit(1);
+    }
+}
+
 void
 loadParametersFromString(const std::string& raw)
 {
   setParameters();
-  /*std::cerr << Parameter<std::string>::map.size() << std::endl;
-  std::cerr << Parameter<unsigned long int>::map.size() << std::endl;
-  std::cerr << Parameter<real>::map.size() << std::endl;
-  std::cerr << Parameter<std::vector<real>>::map.size() << std::endl;
-  std::cerr << Parameter<std::vector<std::vector<real>>>::map.size() << std::endl;*/
-
+  
   auto vec = splitLines(raw);
 
   for (const auto& t : vec)
@@ -639,6 +677,8 @@ loadParametersFromString(const std::string& raw)
     else if (matchesNo > 1)
       panic("algorithm problem", t);
   }
+
+  checkAllSet();
 }
 
 std::string

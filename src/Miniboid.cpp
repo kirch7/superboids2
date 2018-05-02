@@ -419,6 +419,7 @@ real
 Miniboid::getHarrisParameter(const std::vector<std::vector<real>>& matrix, const std::vector<real>& medium) const
 {
   const type_int MY_TYPE = this->superboid.type;
+  const mini_int TOTAL = parameters().MINIBOIDS_PER_SUPERBOID / 3;
   mini_int total = 0;
   std::vector<mini_int> counts(parameters().TYPES_NO, 0);
 
@@ -432,20 +433,22 @@ Miniboid::getHarrisParameter(const std::vector<std::vector<real>>& matrix, const
       ++total;
     }
 
-  real beta = -0.0f;
+  real harris = -0.0f;
 
   for (type_int t = 0u; t < parameters().TYPES_NO; ++t)
   {
-    beta += matrix[MY_TYPE][t] * counts[t];
+    harris += matrix[MY_TYPE][t] * counts[t];
   }
 
-  if (total >= parameters().MINIBOIDS_PER_SUPERBOID / 2)
-    beta /= total;
+  if (total >= TOTAL)
+    harris /= total;
   else
   {
-    beta = (parameters().MINIBOIDS_PER_SUPERBOID / 2 - total) * medium[MY_TYPE];
+    harris += (TOTAL - total) * medium[MY_TYPE];
+    harris /= TOTAL;
   }
-  return beta;
+  
+  return harris;
 }
 
 void

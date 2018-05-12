@@ -1,8 +1,3 @@
-# ifneq ("$(wildcard $(HOME)/.clang/usr/bin/clang++)", "")
-# CXX=$(HOME)/.clang/usr/bin/clang++
-# export LD_LIBRARY_PATH=$(HOME)/.clang/lib/x86_64-linux-gnu/:$(HOME)/.clang/lib/:$(HOME)/.clang/usr/lib/:$(HOME)/.clang/usr/lib/x86_64-linux-gnu
-# endif
-
 BUILDDIR := build
 SRCDIR   := src
 
@@ -15,7 +10,12 @@ CXXLIBS = -lpthread
 WARNINGS = -W -Wall -Wextra -Wshadow -Wstrict-overflow -Wmissing-braces -Wextra-tokens -Wambiguous-member-template -Wbind-to-temporary-copy
 GCCWARNINGS = -Wall -Wextra -Wshadow -Wstrict-overflow -Wmissing-braces
 CXXFLAGS = -stdlib=libstdc++ -std=c++14 -fno-strict-aliasing -fPIC -flto
-CXXLINKER += -fuse-ld=gold
+
+ifneq ("$(wildcard /usr/bin/ld.lld)", "")
+LDFLAGS += -fuse-ld=lld
+else
+LDFLAGS += -fuse-ld=gold
+endif
 
 CXXSOURCES := $(wildcard $(SRCDIR)/*.cpp)
 OBJECTS    := $(CXXSOURCES:$(SRCDIR)/%.cpp=$(BUILDDIR)/%.o)
@@ -29,7 +29,7 @@ ada: CXXFLAGS=-std=c++14 -fno-strict-aliasing -flto -fPIC -O3 $(GCCWARNINGS)
 ada: $(TARGET)
 
 $(TARGET): $(OBJECTS)
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $(CXXLINKER) $(CXXLIBS) $(OBJECTS) -o $(TARGET)
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $(LDFLAGS) $(CXXLIBS) $(OBJECTS) -o $(TARGET)
 
 at_once: 
 	$(CXX) $(CXXFLAGS) $(CXXLIBS) $(CXXSOURCES) -o $(TARGET)

@@ -695,26 +695,31 @@ Superboid::checkWrongNeighbors(const std::vector<Superboid>& superboids)
       const Superboid& super2 = superboids[cellID2];
       
       const Distance dist(this->miniboids[0u], super2.miniboids[0u]);
-      const Distance halfDist = dist * 0.5f;
-
-      //// checar BC periódica depois!!!!!!!!!!!!!!!!!!!!
-      if (isPointInSomeTriangle(this->miniboids[0u].position + (halfDist.getDirectionArray() * halfDist.module), super1))
+      const std::vector<real> portions = {0.5, 0.53, 0.47, 0.56, 0.44, 0.6, 0.4};
+      for (const auto portion : portions)
       {
-	this->cellNeighbors.remove(cellID2);
-	for (auto& mini : this->miniboids)
-	  for (auto& cell : mini._neighbors)
-	  {
-	    if (!cell.empty())
+	const Distance halfDist = dist * portion;
+
+	//// checar BC periódica depois!!!!!!!!!!!!!!!!!!!!
+	if (isPointInSomeTriangle(this->miniboids[0u].position + (halfDist.getDirectionArray() * halfDist.module), super1))
+	{
+	  this->cellNeighbors.remove(cellID2);
+	  for (auto& mini : this->miniboids)
+	    for (auto& cell : mini._neighbors)
 	    {
-	      const super_int superID = cell
-		.front()
-		.miniNeighbor
-		.superboid
-		.ID;
-	      if (superID == super2.ID)
-		cell.clear();
+	      if (!cell.empty())
+	      {
+		const super_int superID = cell
+		  .front()
+		  .miniNeighbor
+		  .superboid
+		  .ID;
+		if (superID == super2.ID)
+		  cell.clear();
+	      }
 	    }
-	  }
+	  break;
+	}
       }
     }
   }

@@ -111,6 +111,7 @@ getParameters(void)
     stream << "# Superboids"  << "\t\t" << p.SUPERBOIDS << std::endl;
     stream << "# Superboids Max"  << "\t" <<  p.MAX_SUPERBOIDS << std::endl;
     stream << "# Miniboids per superboid" << "\t" << p.MINIBOIDS_PER_SUPERBOID << std::endl;
+    stream << "# Harris amount" << "\t\t" << p.HARRIS_AMOUNT << std::endl;
     stream << "# Boxes in edge"     << "\t\t" << p.BOXES_IN_EDGE << std::endl;
     stream << "# Boxes"           << "\t\t\t" << p.BOXES << std::endl;
     stream << "# Range (domain size)" << "\t" << p.RANGE << std::endl;
@@ -459,6 +460,10 @@ Parameters::setRadial(void)
   for (const auto& comp : this->RADIAL_BETA_MEDIUM)
     if (comp < this->REAL_TOLERANCE)
       panic("radial_beta_medium must be bigger than real_tolerance", comp);
+
+  this->HARRIS_AMOUNT = getParameter<std::unsigned long int>("harris_amount");
+  if (this->HARRIS_AMOUNT == 0)
+    panic("harris_amount must be positive");
   
   return;
 }

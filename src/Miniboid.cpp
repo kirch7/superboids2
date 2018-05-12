@@ -419,7 +419,7 @@ real
 Miniboid::getHarrisParameter(const std::vector<std::vector<real>>& matrix, const std::vector<real>& medium) const
 {
   const type_int MY_TYPE = this->superboid.type;
-  const mini_int TOTAL = parameters().MINIBOIDS_PER_SUPERBOID / 3;
+  const mini_int TOTAL = parameters().HARRIS_AMOUNT;
   mini_int total = 0;
   std::vector<mini_int> counts(parameters().TYPES_NO, 0);
 
@@ -527,7 +527,7 @@ Miniboid::setNextVelocity(const step_int STEP)
       const real kapa1 = this->getHarrisParameter(parameters().KAPA, parameters().KAPA_MEDIUM);
       const real kapa2 = miniNeighbor.getHarrisParameter(parameters().KAPA, parameters().KAPA_MEDIUM);
       const real kapa = (kapa1 + kapa2) / 2.0f;
-      const std::valarray<real> f = -kapa * SUBTRACTION * tangent;
+      const std::valarray<real> f = -kapa * SUBTRACTION * parameters().RADIAL_REQ[MY_TYPE] * tangent;
       this->_forceSum += f;
     }
   }

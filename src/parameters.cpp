@@ -461,7 +461,7 @@ Parameters::setRadial(void)
     if (comp < this->REAL_TOLERANCE)
       panic("radial_beta_medium must be bigger than real_tolerance", comp);
 
-  this->HARRIS_AMOUNT = getParameter<std::unsigned long int>("harris_amount");
+  this->HARRIS_AMOUNT = getParameter<unsigned long int>("harris_amount");
   if (this->HARRIS_AMOUNT == 0)
     panic("harris_amount must be positive");
   

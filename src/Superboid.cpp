@@ -318,14 +318,9 @@ Superboid::setGamma(std::vector<Superboid>& superboids)
   for (const auto& superNeighborID : this->cellNeighbors())
   {
     if (this->type == superboids[superNeighborID].type)
-    {
       ++sameTypeNeighborsNo;
-      //// std::cerr << "Same\t"  << this->ID << '\t' << superNeighborID << '\t' << this->type << '\t' << superboids[superNeighborID].type << std::endl;
-    }
     else
-    {
       ++anotherTypeNeighborsNo;
-      //// std::cerr << "ñSame\t"  << this->ID << '\t' << superNeighborID << '\t' << this->type << '\t' << superboids[superNeighborID].type << std::endl;
     }
   }
   
@@ -340,8 +335,6 @@ Superboid::setGamma(std::vector<Superboid>& superboids)
     this->doUseGamma = false;
   }
 
-  //// std::cerr << "###### " << this->ID << '\t' << this->gamma << std::endl;
-  
   return;
 }
 
@@ -518,10 +511,7 @@ Superboid::divide(const super_int divide_by, Superboid& newSuperboid, std::vecto
   this->setShape(step);
   const real p0 = this->perimeter / std::sqrt(this->area);
   if (p0 > parameters().TOLERABLE_P0)
-  {
-    std::cerr << "p0:\t" << p0 << std::endl;
     return false;
-  }
     
   static std::default_random_engine generator;
   std::uniform_int_distribution<int> distribution(0, parameters().TYPES_NO - 1);

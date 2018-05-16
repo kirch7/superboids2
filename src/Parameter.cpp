@@ -2,7 +2,6 @@
 // License specified in LICENSE file.
 
 #include <iostream>
-#include <map>
 #include <tuple>
 #include <sstream>
 #include <exception>
@@ -86,9 +85,9 @@ setParameters(void)
     
   auto& uint_set = Parameter<unsigned long int>::map;
   uint_set.emplace_back("dimensions", false, "2");
-  uint_set.emplace_back("types", false, "cells");
   uint_set.emplace_back("cells", false, "7");
   uint_set.emplace_back("max_cells", false, "cells");
+  uint_set.emplace_back("types", false, "cells");
   uint_set.emplace_back("particles_per_cell", false, "12");
   uint_set.emplace_back("harris_amount", false, "6");
   uint_set.emplace_back("division", true, "0");

@@ -29,7 +29,7 @@ ada: CXXFLAGS=-std=c++14 -fno-strict-aliasing -flto -fPIC -O3 $(GCCWARNINGS)
 ada: $(TARGET)
 
 $(TARGET): $(OBJECTS)
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $(LDFLAGS) $(CXXLIBS) $(OBJECTS) -o $(TARGET)
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $(CXXLIBS) $(OBJECTS) -o $(TARGET)
 
 at_once: 
 	$(CXX) $(CXXFLAGS) $(CXXLIBS) $(CXXSOURCES) -o $(TARGET)

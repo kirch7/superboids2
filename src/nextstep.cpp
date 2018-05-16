@@ -41,7 +41,7 @@ divide(std::vector<Box>& boxes,
     ++atempts;
 
     if (atempts > 16)
-      break;
+      return;
 
     // super_int cellWithBiggestArea = 0u;
     // real      biggestArea = -0.0f;
@@ -70,6 +70,8 @@ divide(std::vector<Box>& boxes,
 	      }
 	    if (ok)
 	      cellsOnTheEdge.emplace_back(super.ID);
+	    else
+	      alreadyTried.push_back(super.ID);
 	  }
       
       if (cellsOnTheEdge.size() == 0)
@@ -94,7 +96,7 @@ divide(std::vector<Box>& boxes,
       // const super_int chosen = cellWithBiggestArea;
       if (superboids[chosen]
 	  .miniboids[0]
-	  .position[X] < 30.0f) //////// TEM QUE PÔR COMO PARÂMETRO!!!!!
+	  .position[X] < parameters().DIVISION_REGION_X)
 	for (auto& super : superboids)
 	  if (super.activated == false)
 	  {

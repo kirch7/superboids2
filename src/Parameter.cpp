@@ -100,6 +100,7 @@ setParameters(void)
   real_set.emplace_back("tolerable_p0", true, "4");
   real_set.emplace_back("domain", false, "100");
   real_set.back().pushDependency("dimensions");
+  real_set.emplace_back("division_region_x", false, "0");
   real_set.emplace_back("neighbor_distance", false, "1.1");
   real_set.emplace_back("initial_distance", true, "2");
   real_set.emplace_back("core_diameter", true, "0.2");

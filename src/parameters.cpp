@@ -156,6 +156,8 @@ getParameters(void)
     stream << "# DIVISION_INTERVAL" << "\t\t" << p.DIVISION_INTERVAL << std::endl;
     stream << "# NON_DIVISION_INTERVAL" << "\t\t" << p.NON_DIVISION_INTERVAL << std::endl;
     stream << "# TOLERABLE_P0" << "\t\t" << p.TOLERABLE_P0 << std::endl;
+    stream << "# DIVISION_REGION_X" << p.DIVISION_REGION_X << std::endl;
+    stream << std::endl;
     
     stream << "# Types no." << "\t\t" << p.TYPES_NO << std::endl;
     stream << std::endl << "# Proportions" << std::endl;

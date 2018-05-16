@@ -47,6 +47,7 @@ public:
   step_int DIVISION_INTERVAL;
   step_int NON_DIVISION_INTERVAL;
   real TOLERABLE_P0;
+  real DIVISION_REGION_X;
 
   dimension_int DIMENSIONS;
   type_int TYPES_NO;

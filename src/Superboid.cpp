@@ -321,7 +321,6 @@ Superboid::setGamma(std::vector<Superboid>& superboids)
       ++sameTypeNeighborsNo;
     else
       ++anotherTypeNeighborsNo;
-    }
   }
   
   if (sameTypeNeighborsNo + anotherTypeNeighborsNo != 0)

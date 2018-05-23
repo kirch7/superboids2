@@ -23,7 +23,7 @@ class Stokes;
 
 enum class BoundaryCondition { PERIODIC, RECTANGLE, STOKES };
 enum class InitialCondition { HEX_CENTER, LEFT_EDGE };
-enum class KillCondition { NONE, RIGHT_EDGE };
+enum class KillCondition { NONE, RIGHT_EDGE, P0, RIGHT_EDGE_OR_P0 };
 
 extern const real    HALF_PI;
 extern const real         PI;
@@ -40,6 +40,7 @@ public:
   BoundaryCondition BC;
   InitialCondition  INITIAL_CONDITION;
   KillCondition     KILL_CONDITION;
+  real P0_LIMIT;
   std::vector<real> RECTANGLE_SIZE;
   
   std::vector<Stokes> STOKES_HOLES;

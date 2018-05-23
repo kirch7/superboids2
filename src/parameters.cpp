@@ -357,8 +357,12 @@ getKC(const std::string& kc)
     return KillCondition::RIGHT_EDGE;
   else if (kc == "none")
     return KillCondition::NONE;
+  else if (kc == "p0")
+    return KillCondition::P0;
+  else if (kc == "right_edge_or_p0")
+    return KillCondition::RIGHT_EDGE_OR_P0;
   else
-    panic("kill must be either right, or none");
+    panic("kill must be either right, none, right_edge_or_p0, or p0");
 }
 
 void
@@ -393,7 +397,9 @@ Parameters::setDomain(void)
   this->BC = getBC(getParameter<std::string>("boundary"));
   this->INITIAL_CONDITION = getIC(getParameter<std::string>("initial"));
   this->KILL_CONDITION    = getKC(getParameter<std::string>("kill"));
-  
+  this->P0_LIMIT          = getParameter<real>("p0_limit");
+  if(this->P0_LIMIT < 3.545 )
+    panic("p0_limit should be greater than 3.545");
   return;
 }
 

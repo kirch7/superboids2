@@ -64,10 +64,16 @@ void
 Miniboid::checkKillCondition()
 {
   
-  if (parameters().KILL_CONDITION == KillCondition::RIGHT_EDGE)
+  if (parameters().KILL_CONDITION == KillCondition::RIGHT_EDGE || parameters().KILL_CONDITION == KillCondition::RIGHT_EDGE_OR_P0)
     if (this->position[X] > parameters().RECTANGLE_SIZE[X] / 2.0f)
       this->superboid.activated = false;
 
+  if (parameters().KILL_CONDITION == KillCondition::P0 || parameters().KILL_CONDITION == KillCondition::RIGHT_EDGE_OR_P0)
+    {
+      const real P0 = this->superboid.perimeter / std::sqrt(this->superboid.area);
+      if ( P0 > parameters().P0_LIMIT )
+	this->superboid.activated = false;
+    }
   return;
 }
 

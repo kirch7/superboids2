@@ -28,7 +28,7 @@ public:
   Distance radialDistance;
   real radialAngle;
 
-  real angleCM;
+  //  real angleCM;
   box_int boxID() const;   // ID of box where *this is.
   bool    inEdge() const;  // True if box where *this is is in edge.
 

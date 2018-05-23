@@ -98,6 +98,7 @@ setParameters(void)
   
   auto& real_set = Parameter<real>::map;
   real_set.emplace_back("tolerable_p0", true, "4");
+  real_set.emplace_back("p0_limit", true, "4.56");
   real_set.emplace_back("domain", false, "100");
   real_set.back().pushDependency("dimensions");
   real_set.emplace_back("division_region_x", false, "0");

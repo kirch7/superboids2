@@ -38,7 +38,7 @@ Miniboid::checkLimits(void)
     this->checkRectangularLimits();
 
   if (parameters().BC == BoundaryCondition::STOKES)
-  this->checkStokesLimits();
+    this->checkStokesLimits();
   this->checkKillCondition();
   
   return;
@@ -69,11 +69,14 @@ Miniboid::checkKillCondition()
       this->superboid.activated = false;
 
   if (parameters().KILL_CONDITION == KillCondition::P0 || parameters().KILL_CONDITION == KillCondition::RIGHT_EDGE_OR_P0)
+  {
+    const real P0 = this->superboid.perimeter / std::sqrt(this->superboid.area);
+    if (P0 > parameters().P0_LIMIT)
     {
-      const real P0 = this->superboid.perimeter / std::sqrt(this->superboid.area);
-      if ( P0 > parameters().P0_LIMIT )
-	this->superboid.activated = false;
+      this->superboid.activated = false;
+      std::cerr << "Death at position " << this->superboid.miniboids[0].position << std::endl;
     }
+  }
   return;
 }
 
@@ -139,7 +142,7 @@ Miniboid::checkStokesLimits()
     }
       
     const real TOLERABLE = (this->ID == 0u && !this->isVirtual)
-      ? (hole.radius + parameters().RADIAL_REQ[this->superboid.type] / 4.0f)
+      ? (hole.radius + parameters().RADIAL_REQ[this->superboid.type] / 2.0f)
       : hole.radius;
     const Distance d(hole.center, this->position);
 

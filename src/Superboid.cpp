@@ -690,7 +690,7 @@ Superboid::checkWrongNeighbors(const std::vector<Superboid>& superboids)
 	const Distance halfDist = dist * portion;
 
 	//// checar BC periódica depois!!!!!!!!!!!!!!!!!!!!
-	if (isPointInSomeTriangle(this->miniboids[0u].position + (halfDist.getDirectionArray() * halfDist.module), super1))
+	if (isPointInSomeNthTriangle(1, this->miniboids[0u].position + (halfDist.getDirectionArray() * halfDist.module), super1))
 	{
 	  this->cellNeighbors.remove(cellID2);
 	  for (auto& mini : this->miniboids)

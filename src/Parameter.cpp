@@ -89,7 +89,6 @@ setParameters(void)
   uint_set.emplace_back("max_cells", false, "cells");
   uint_set.emplace_back("types", false, "cells");
   uint_set.emplace_back("particles_per_cell", false, "12");
-  uint_set.emplace_back("harris_amount", false, "6");
   uint_set.emplace_back("division", true, "0");
   uint_set.emplace_back("non_division", true, "0");
   uint_set.emplace_back("steps", true, "10000");

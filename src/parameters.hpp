@@ -56,7 +56,7 @@ public:
   super_int SUPERBOIDS;
   super_int MAX_SUPERBOIDS;
   mini_int  MINIBOIDS_PER_SUPERBOID;
-  mini_int  HARRIS_AMOUNT;
+  std::vector<mini_int>  HARRIS_AMOUNT;
   
   box_int BOXES_IN_EDGE;
   box_int BOXES;

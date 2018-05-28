@@ -257,7 +257,7 @@ isPointInTriangle(const std::valarray<real>& p_test, const std::valarray<real>& 
 }
 
 bool
-isPointInSomeTriangle(const std::valarray<real>& point, const Superboid& super)
+isPointInSomeNthTriangle(const mini_int nth, const std::valarray<real>& point, const Superboid& super)
 {
   const Miniboid& fatboid = super.miniboids[0u];
   bool inSomeTriangle = false;
@@ -269,15 +269,17 @@ isPointInSomeTriangle(const std::valarray<real>& point, const Superboid& super)
       continue;
     if (inSomeTriangle)
       break;
+    mini_int nextID = realMini.ID % (parameters().MINIBOIDS_PER_SUPERBOID - 1) + nth;
+    nextID %= parameters().MINIBOIDS_PER_SUPERBOID - 1;
+    auxMini = &super.miniboids[nextID];
     inSomeTriangle = isPointInTriangle(point, fatboid.position, auxMini->position, realMini.position);
-    auxMini = &realMini;
   }
 
   return inSomeTriangle;
 }
 
 bool
-Miniboid::isInSomeTriangle(const Superboid& super)
+Miniboid::isInSomeNthTriangle(const mini_int nth, const Superboid& super)
 {
   const Miniboid& fatboid = super.miniboids[0u];
   bool inSomeTriangle = false;
@@ -289,8 +291,10 @@ Miniboid::isInSomeTriangle(const Superboid& super)
       continue;
     if (inSomeTriangle)
       break;
+    mini_int nextID = realMini.ID % (parameters().MINIBOIDS_PER_SUPERBOID - 1) + nth;
+    nextID %= parameters().MINIBOIDS_PER_SUPERBOID - 1;
+    auxMini = &super.miniboids[nextID];
     inSomeTriangle = isPointInTriangle(this->position, fatboid.position, auxMini->position, realMini.position);
-    auxMini = &realMini;
   }
 
   return inSomeTriangle;
@@ -309,59 +313,64 @@ Miniboid::fatInteractions(const step_int STEP, const std::list<Neighbor>& list, 
     
   if (super.ID != this->superboid.ID)
   {
-    std::valarray<real> tangent(parameters().DIMENSIONS);
-      
-    const Miniboid* auxMini = &super.miniboids.back();
-    for (auto& realMini : super.miniboids)
+    for (mini_int nth = 1; nth <= 2; ++nth)
     {
-      if (realMini.ID == 0)
-	continue;
-      if (inSomeTriangle)
-	break;
-      inSomeTriangle = isPointInTriangle(this->position, fatboid.position, auxMini->position, realMini.position);
-      //inSomeTriangle = inSomeTriangle || isPointInTriangle(this->position, fatboid.position, realMini.position, auxMini->position);
+      std::valarray<real> tangent(parameters().DIMENSIONS);
+      
+      const Miniboid* auxMini = nullptr;
+      for (auto& realMini : super.miniboids)
+      {
+	if (realMini.ID == 0)
+	  continue;
+	if (inSomeTriangle)
+	  break;
+	mini_int nextID = realMini.ID % (parameters().MINIBOIDS_PER_SUPERBOID - 1) + nth;
+	nextID %= parameters().MINIBOIDS_PER_SUPERBOID - 1;
+	auxMini = &super.miniboids[nextID];
+	
+	inSomeTriangle = isPointInTriangle(this->position, fatboid.position, auxMini->position, realMini.position);
+	if (inSomeTriangle && interact)
+	{
+	  std::tuple<step_int, std::vector<const Miniboid*>>* h = nullptr;
+	  for (auto& c : this->history)
+	    if (std::get<1>(c).front()->superboid.ID == super.ID)
+	    {
+	      h = &c;
+	      break;
+	    }
+	  if (h)
+	  {
+	    const std::vector<const Miniboid*>& v = std::get<1>(*h);
+	    std::get<0>(*h) = STEP;
+	    tangent = Distance(*v[1], *v[0]).getTangentArray();
+	  }
+	  else {
+	    this->history.push_back(std::tuple<step_int, std::vector<const Miniboid*>>(STEP, std::vector<const Miniboid*>({auxMini, &realMini})));
+	    tangent = Distance(realMini, *auxMini).getTangentArray();
+	  }
+	}
+      }
+      auxMini = nullptr;
+      
       if (inSomeTriangle && interact)
       {
-	std::tuple<step_int, std::vector<const Miniboid*>>* h = nullptr;
-	for (auto& c : this->history)
-	  if (std::get<1>(c).front()->superboid.ID == super.ID)
-	  {
-	    h = &c;
-	    break;
-	  }
-	if (h)
+	// const std::valarray<real> tangent = tangentSignal * Distance(r1, r2).getTangentArray();
+	//const std::valarray<real> tangent = Distance(fatboid.position, r0 - tangent).module > Distance(fatboid.position, r0 + tangent).module ? -tangent : tangent;
+	if (Infinite::write())
 	{
-	  const std::vector<const Miniboid*>& v = std::get<1>(*h);
-	  std::get<0>(*h) = STEP;
-	  tangent = Distance(*v[1], *v[0]).getTangentArray();
+	  std::valarray<real> infThing(parameters().DIMENSIONS * 2u);
+	  for (std::size_t i = 0; i < parameters().DIMENSIONS; ++i)
+	    infThing[i] = this->position[i];
+	  for (std::size_t i = 0; i < parameters().DIMENSIONS; ++i)
+	    infThing[i + parameters().DIMENSIONS] = tangent[i];
+	  this->superboid.infinite2Vectors.push_back(infThing);
 	}
-	else {
-	  this->history.push_back(std::tuple<step_int, std::vector<const Miniboid*>>(STEP, std::vector<const Miniboid*>({auxMini, &realMini})));
-	  tangent = Distance(realMini, *auxMini).getTangentArray();
-	}
+	const std::valarray<real> force1 = (0.9f * parameters().INFINITE_FORCE) * tangent;
+	const std::valarray<real> radial = this->radialDistance.getDirectionArray();
+	const std::valarray<real> force2 = radial * (0.9f * parameters().INFINITE_FORCE);
+	this->_forceSum += force1;
+	this->_forceSum += force2;
       }
-      auxMini = &realMini;
-    }
-    auxMini = nullptr;
-      
-    if (inSomeTriangle && interact)
-    {
-      // const std::valarray<real> tangent = tangentSignal * Distance(r1, r2).getTangentArray();
-      //const std::valarray<real> tangent = Distance(fatboid.position, r0 - tangent).module > Distance(fatboid.position, r0 + tangent).module ? -tangent : tangent;
-      if (Infinite::write())
-      {
-	std::valarray<real> infThing(parameters().DIMENSIONS * 2u);
-	for (std::size_t i = 0; i < parameters().DIMENSIONS; ++i)
-	  infThing[i] = this->position[i];
-	for (std::size_t i = 0; i < parameters().DIMENSIONS; ++i)
-	  infThing[i + parameters().DIMENSIONS] = tangent[i];
-	this->superboid.infinite2Vectors.push_back(infThing);
-      }
-      const std::valarray<real> force1 = (0.9f * parameters().INFINITE_FORCE) * tangent;
-      const std::valarray<real> radial = this->radialDistance.getDirectionArray();
-      const std::valarray<real> force2 = radial * (0.9f * parameters().INFINITE_FORCE);
-      this->_forceSum += force1;
-      this->_forceSum += force2;
     }
   }
 
@@ -428,7 +437,7 @@ real
 Miniboid::getHarrisParameter(const std::vector<std::vector<real>>& matrix, const std::vector<real>& medium) const
 {
   const type_int MY_TYPE = this->superboid.type;
-  const mini_int TOTAL = parameters().HARRIS_AMOUNT;
+  const mini_int TOTAL = parameters().HARRIS_AMOUNT[this->superboid.type];
   mini_int total = 0;
   std::vector<mini_int> counts(parameters().TYPES_NO, 0);
 

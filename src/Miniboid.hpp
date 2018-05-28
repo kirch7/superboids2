@@ -47,7 +47,7 @@ public:
   //const Miniboid* leftN;
   //const Miniboid* rightN;
   std::list<std::tuple<step_int, std::vector<const Miniboid*>>> history;
-  bool isInSomeTriangle(const Superboid& super);
+  bool isInSomeNthTriangle(const mini_int nth, const Superboid& super);
   bool fatInteractions(const step_int, const std::list<Neighbor>&, const bool interact);
   std::list<std::list<Neighbor> > _neighbors; // From different superboid.
 protected:
@@ -112,4 +112,4 @@ inline bool operator!=(const Miniboid& m1, const Miniboid& m2)
 }
 
 bool isPointInTriangle(const std::valarray<real>& p_test, const std::valarray<real>& p0, const std::valarray<real>& p1, const std::valarray<real>& p2);
-bool isPointInSomeTriangle(const std::valarray<real>& point, const Superboid& super);
+bool isPointInSomeNthTriangle(const mini_int nth, const std::valarray<real>& point, const Superboid& super);

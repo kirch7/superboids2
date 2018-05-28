@@ -328,7 +328,7 @@ Miniboid::fatInteractions(const step_int STEP, const std::list<Neighbor>& list, 
 	nextID %= parameters().MINIBOIDS_PER_SUPERBOID - 1;
 	auxMini = &super.miniboids[nextID];
 	
-	inSomeTriangle = isPointInTriangle(this->position, fatboid.position, auxMini->position, realMini.position);
+	inSomeTriangle = isPointInTriangle(this->position, fatboid.position, realMini.position, auxMini->position);
 	if (inSomeTriangle && interact)
 	{
 	  std::tuple<step_int, std::vector<const Miniboid*>>* h = nullptr;

@@ -541,4 +541,22 @@ Parameters::set(void)
     angle = 4.0f * asin(angle);
     this->HARRIS_AMOUNT[t] = (this->MINIBOIDS_PER_SUPERBOID * angle) / TWO_PI;
   }
-};
+
+  if (this->DIVISION_INTERVAL > 0u)
+  {
+    real minRadialReq = this->RANGE;
+    for (type_int t = 0u; t < this->TYPES_NO; ++t)
+      if (this->RADIAL_REQ[t] < minRadialReq)
+	minRadialReq = this->RADIAL_REQ[t];
+    
+    if (this->getDivisionDistance() > minRadialReq / 2.0f)
+      panic("Daughter size two large! Reduce core diameter or number of peripheric miniboids!");
+  }
+}
+
+//// Distância entre núcleo velho e núcleo novo.
+real
+Parameters::getDivisionDistance(void) const
+{
+  return (this->MINIBOIDS_PER_SUPERBOID - 1) * this->CORE_DIAMETER / 6.0 + this->CORE_DIAMETER;
+}

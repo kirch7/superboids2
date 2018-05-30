@@ -546,7 +546,8 @@ Superboid::divide(const super_int divide_by, Superboid& newSuperboid, std::vecto
     //const Distance peripheralDistance = this->getBiggestAxis();
     divisionAngle = this->get0to2piRandom();
     std::valarray<real> peripheralVA({std::cos(divisionAngle), std::sin(divisionAngle)}); //// Arranja um nome melhor!
-    peripheralVA *= static_cast<real>(10.0f / std::sqrt(atempts)) * parameters().CORE_DIAMETER;
+    peripheralVA *= parameters().getDivisionDistance();
+    //peripheralVA *= static_cast<real>(10.0f / std::sqrt(atempts)) * parameters().CORE_DIAMETER;
     //const Distance peripheralDistance = Distance(peripheralVA);
     //const Miniboid& peripheral1 = *peripheralDistance.miniboid1;
     //const Miniboid& peripheral2 = *peripheralDistance.miniboid2;
@@ -560,7 +561,8 @@ Superboid::divide(const super_int divide_by, Superboid& newSuperboid, std::vecto
     // this->miniboids[0u].position = peripheral1.position + differenceArray;
     // newSuperboid.miniboids[0u].position = peripheral2.position - differenceArray;
 
-    const real radius = 3.0f * parameters().CORE_DIAMETER / std::sqrt(atempts);
+    //const real radius = 3.0f * parameters().CORE_DIAMETER / std::sqrt(atempts);
+    const real radius = (parameters().MINIBOIDS_PER_SUPERBOID - 1) * parameters().CORE_DIAMETER / 6.0;
     rearrangePeripherals(*this, radius);
     rearrangePeripherals(newSuperboid, radius);
 

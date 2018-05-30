@@ -103,6 +103,8 @@ public:
   thread_int   THREADS;
 
   real REAL_TOLERANCE;
+
+  real getDivisionDistance(void) const;
 protected:
   void set1(void);
   void setCells(void);

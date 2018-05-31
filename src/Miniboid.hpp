@@ -43,14 +43,12 @@ public:
   friend void exportPositions(const std::vector<Superboid>&, const step_int);
   void setNeighbors(void);
   std::list<TwistNeighbor> _twistNeighbors;
-  //std::list<const Miniboid*> _tangentNeighbors;
-  //const Miniboid* leftN;
-  //const Miniboid* rightN;
   std::list<std::tuple<step_int, std::vector<const Miniboid*>>> history;
   bool isInSomeNthTriangle(const mini_int nth, const Superboid& super);
   bool fatInteractions(const step_int, const std::list<Neighbor>&, const bool interact);
   std::list<std::list<Neighbor> > _neighbors; // From different superboid.
 protected:
+  bool _isInvading;
   std::valarray<real> _noiseSum;    // Related to ETA.
   std::valarray<real> _velocitySum; // Related to ALPHA;
   std::valarray<real> _forceSum;    // Related to BETA.
@@ -77,7 +75,7 @@ inline Miniboid::Miniboid(const mini_int _id, Superboid& super, const bool isVir
   velocity(parameters().DIMENSIONS),
   newVelocity(parameters().DIMENSIONS),
   radialDistance(Distance()),
-  ////equilibriumAngles(getAngles(_id)),
+  _isInvading(false),
   _noiseSum(parameters().DIMENSIONS),
   _velocitySum(parameters().DIMENSIONS),
   _forceSum(parameters().DIMENSIONS),

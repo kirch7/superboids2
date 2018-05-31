@@ -365,11 +365,12 @@ Miniboid::fatInteractions(const step_int STEP, const std::list<Neighbor>& list, 
 	    infThing[i + parameters().DIMENSIONS] = tangent[i];
 	  this->superboid.infinite2Vectors.push_back(infThing);
 	}
-	const std::valarray<real> force1 = (0.9f * parameters().INFINITE_FORCE) * tangent;
-	const std::valarray<real> radial = this->radialDistance.getDirectionArray();
-	const std::valarray<real> force2 = radial * (0.9f * parameters().INFINITE_FORCE);
-	this->_forceSum += force1;
-	this->_forceSum += force2;
+	this->_isInvading = true;
+	// const std::valarray<real> force1 = (0.9f * parameters().INFINITE_FORCE) * tangent;
+	// const std::valarray<real> radial = this->radialDistance.getDirectionArray();
+	// const std::valarray<real> force2 = radial * (0.9f * parameters().INFINITE_FORCE);
+	// this->_forceSum += force1;
+	// this->_forceSum += force2;
       }
     }
   }
@@ -478,14 +479,6 @@ Miniboid::setNextVelocity(const step_int STEP)
   this->noise();        // Find a random noise (ETA).
   const type_int MY_TYPE = this->superboid.type;
 
-  // if (this->superboid.ID == 0u && this->ID == 1u)
-  // {
-  //   this->superboid.insideVectors.push_back(this->position);
-  //   for (const auto& list : this->_neighbors)
-  //     for (const auto& neighbor : list)
-  // 	this->superboid.insideVectors.push_back(neighbor.miniNeighbor.position);
-  // }
-
   // Interact with miniboids of another superboid:
   if (this->ID != 0)
     this->interInteractions(STEP);
@@ -563,11 +556,18 @@ void
 Miniboid::setNextPosition(void)
 {
   this->velocity = this->newVelocity;
-  this->position += parameters().DT * this->velocity; // Velocity is already normalized to V0.
-  if (this->ID != 0 && !this->isVirtual)
-    this->position += this->radialDistance.getDirectionArray() *
-      ((this->superboid.area - parameters().TARGET_AREA[this->superboid.type]) / (20.0f * TWO_PI * this->superboid.meanRadius));
+  if (this->_isInvading)
+    this->position = this->superboid.miniboids[0u].position - (2.0f * parameters().CORE_DIAMETER * this->radialDistance.getDirectionArray());
+  else
+  {
+    this->position += parameters().DT * this->velocity; // Velocity is already normalized to V0.
+    if (this->ID != 0 && !this->isVirtual)
+      this->position += this->radialDistance.getDirectionArray() *
+	((this->superboid.area - parameters().TARGET_AREA[this->superboid.type]) / (20.0f * TWO_PI * this->superboid.meanRadius));
+  }
+  
   this->checkLimits();
+  
   return;
 }
 
@@ -637,6 +637,7 @@ Miniboid::reset(void)
   this->_velocitySum = 0.0f;
   this->_forceSum = 0.0f;
   this->_neighborsPerTypeNos = 0u;
+  this->_isInvading = false;
   
   if (this->ID != 0u || this->isVirtual)
   {

@@ -507,18 +507,11 @@ Superboid::divide(const super_int divide_by, Superboid& newSuperboid, std::vecto
     return false;
   }
 
-  this->setShape(step);
-  const real p0 = this->perimeter / std::sqrt(this->area);
-  if (p0 > parameters().TOLERABLE_P0)
-    return false;
-    
   static std::default_random_engine generator;
   std::uniform_int_distribution<int> distribution(0, parameters().TYPES_NO - 1);
   const type_int newType = distribution(generator);
   
   *const_cast<type_int*>(&(newSuperboid.type)) = newType;
-
-  real divisionAngle = this->get0to2piRandom();
 
   const std::vector<std::valarray<real>> originalPositions = getOriginalPositions(this->miniboids);
   newSuperboid.activated = true;
@@ -543,26 +536,14 @@ Superboid::divide(const super_int divide_by, Superboid& newSuperboid, std::vecto
     
     bool someInvasion = false;
 
-    //const Distance peripheralDistance = this->getBiggestAxis();
-    divisionAngle = this->get0to2piRandom();
-    std::valarray<real> peripheralVA({std::cos(divisionAngle), std::sin(divisionAngle)}); //// Arranja um nome melhor!
-    peripheralVA *= parameters().getDivisionDistance();
-    //peripheralVA *= static_cast<real>(10.0f / std::sqrt(atempts)) * parameters().CORE_DIAMETER;
-    //const Distance peripheralDistance = Distance(peripheralVA);
-    //const Miniboid& peripheral1 = *peripheralDistance.miniboid1;
-    //const Miniboid& peripheral2 = *peripheralDistance.miniboid2;
+    real divisionAngle = this->get0to2piRandom();
+    std::valarray<real> nucleusNucleusDistance({std::cos(divisionAngle), std::sin(divisionAngle)});
+    nucleusNucleusDistance *= parameters().getDivisionDistance();
 
-    //const std::valarray<real> peripheralDistanceArray = peripheralDistance.getDirectionArray() * peripheralDistance.module;
-    //const std::valarray<real> differenceArray = static_cast<real>(0.333333f) * peripheralDistanceArray;
-    const std::valarray<real> differenceArray = peripheralVA;
-  
-    this->miniboids[0u].position = this->miniboids[0u].position + differenceArray;
-    newSuperboid.miniboids[0u].position = this->miniboids[0u].position - differenceArray;
-    // this->miniboids[0u].position = peripheral1.position + differenceArray;
-    // newSuperboid.miniboids[0u].position = peripheral2.position - differenceArray;
+    newSuperboid.miniboids[0u].position = this->miniboids[0u].position - nucleusNucleusDistance;
+    this->miniboids[0u].position        = this->miniboids[0u].position + nucleusNucleusDistance;
 
-    //const real radius = 3.0f * parameters().CORE_DIAMETER / std::sqrt(atempts);
-    const real radius = (parameters().MINIBOIDS_PER_SUPERBOID - 1) * parameters().CORE_DIAMETER / 6.0;
+    const real radius = parameters().getDivisionDistance() - parameters().CORE_DIAMETER / 2.0f;
     rearrangePeripherals(*this, radius);
     rearrangePeripherals(newSuperboid, radius);
 
@@ -575,7 +556,7 @@ Superboid::divide(const super_int divide_by, Superboid& newSuperboid, std::vecto
 	    for (dimension_int dim = 0u; dim < parameters().DIMENSIONS; ++dim)
 	    {
 	      const real HALF_RECTANGLE_SIZE = 0.5f * parameters().RECTANGLE_SIZE[dim];
-	      if (mini.position[dim] < -HALF_RECTANGLE_SIZE)
+	      if (std::abs(mini.position[dim]) > HALF_RECTANGLE_SIZE)
 		insideBox = false;
 	    }
     if (insideBox == false)
@@ -583,7 +564,7 @@ Superboid::divide(const super_int divide_by, Superboid& newSuperboid, std::vecto
     
     nextBoxes(boxes, *this);
     nextBoxes(boxes, newSuperboid);
-    
+
     for (auto super : twoSupers)
     {
       for (auto& mini : super->miniboids)
@@ -612,7 +593,7 @@ Superboid::divide(const super_int divide_by, Superboid& newSuperboid, std::vecto
       break;
   }
   
-  this->lastDivisionStep = step;
+  this->lastDivisionStep        = step;
   newSuperboid.lastDivisionStep = step;
     
   this->reset();

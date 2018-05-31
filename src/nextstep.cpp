@@ -3,6 +3,7 @@
 
 #include <thread>
 #include <valarray>
+#include <set>
 #include "parameters.hpp"
 #include "Superboid.hpp"
 #include "nextstep.hpp"
@@ -11,21 +12,6 @@
 #include <fstream> ////
 #include <random>
 
-// inline static super_int
-// getFirstID(const thread_int THREAD_ID)
-// {
-//   return ((SUPERBOIDS / parameters().THREADS) * THREAD_ID);
-// }
-
-// inline static super_int
-// getLastID(const thread_int THREAD_ID)
-// {
-//   super_int last = (SUPERBOIDS / parameters().THREADS) * (1u + THREAD_ID) - 1u;
-//   if (THREAD_ID == (parameters().THREADS -1u))
-//     last += SUPERBOIDS % parameters().THREADS;
-//   return last;
-// }
-
 static void
 divide(std::vector<Box>& boxes,
        std::vector<Superboid>& superboids,
@@ -33,77 +19,66 @@ divide(std::vector<Box>& boxes,
 {
   const step_int nonDivisionInterval = parameters().NON_DIVISION_INTERVAL > step ? parameters().NON_DIVISION_INTERVAL : step;
 
-  step_int atempts = 0;
-  std::vector<super_int> alreadyTried;
+  std::set<super_int> eligibleCells;
 
+  for (const auto& super : superboids)
+  {
+    if (super.activated == false)
+      continue;
+    if (super.getLastDivisionStep() + parameters().NON_DIVISION_INTERVAL <= nonDivisionInterval)
+    {
+      if (super
+	  .miniboids[0]
+	  .position[X] < parameters().DIVISION_REGION_X)
+	eligibleCells.insert(super.ID);
+    }
+  }
+  
+  step_int atempts = 0;
   while (true)
   {
     ++atempts;
 
     if (atempts > 16)
       return;
+    
+    if (eligibleCells.size() == 0)
+      return;
 
-    // super_int cellWithBiggestArea = 0u;
-    // real      biggestArea = -0.0f;
-    // for (const auto& super : superboids)
-    // 	if (super.activated == true)
-    // 	  if (super.area > biggestArea)
-    // 	  {
-    // 	    cellWithBiggestArea = super.ID;
-    // 	    biggestArea = super.area;
-    // 	  }
+    static std::random_device deviceEngine;
+    static std::default_random_engine generator(deviceEngine());
+    std::uniform_int_distribution<int> distribution(0, eligibleCells.size() - 1);
 
-    //if (INITIAL_CONDITION == InitialCondition::LEFT_EDGE)
+    const super_int chosenOrd = distribution(generator);
+    super_int chosenCount = 0;
+    super_int chosen = 42424;
+    for (const auto superID : eligibleCells)
     {
-      std::vector<super_int> cellsOnTheEdge;
-      for (const auto& super : superboids)
-	if (super.activated == true)
-	  if (super.getLastDivisionStep() + parameters().NON_DIVISION_INTERVAL <= nonDivisionInterval)
-	    //if (super.miniboids[0u].position[X] < (-parameters().RECTANGLE_SIZE[X] / 2.0f + 2.0f * RADIAL_REQ[super.type]))
-	  {
-	    bool ok = true;
-	    for (const auto superID : alreadyTried)
-	      if (superID == super.ID)
-	      {
-		ok = false;
-		break;
-	      }
-	    if (ok)
-	      cellsOnTheEdge.emplace_back(super.ID);
-	    else
-	      alreadyTried.push_back(super.ID);
-	  }
-      
-      if (cellsOnTheEdge.size() == 0)
+      if (chosenCount == chosenOrd)
       {
-	return; //////////
-	
-	super_int closestCellID = 0u;
-	real closestDistance = parameters().RANGE;
-	for (const auto& super : superboids)
-	  if (super.activated == true)
-	    if (super.miniboids[0u].position[X] + parameters().RECTANGLE_SIZE[X] / 2 < closestDistance)
-	    {
-	      closestCellID = super.ID;
-	      closestDistance = super.miniboids[0u].position[X] + parameters().RECTANGLE_SIZE[X] / 2;
-	    }
-	cellsOnTheEdge.emplace_back(closestCellID);
+	chosen = superID;
+	break;
       }
-	
-      static std::default_random_engine generator;
-      std::uniform_int_distribution<int> distribution(0, cellsOnTheEdge.size() - 1);
-      const super_int chosen = cellsOnTheEdge[distribution(generator)];
-      // const super_int chosen = cellWithBiggestArea;
-      if (superboids[chosen]
-	  .miniboids[0]
-	  .position[X] < parameters().DIVISION_REGION_X)
-	for (auto& super : superboids)
-	  if (super.activated == false)
-	  {
-	    if (superboids[chosen].divide(2, super, boxes, step) == true)
-	      return;
-	  }
+      else
+	++chosenCount;
     }
+    
+    superboids[chosen].setShape(step);
+    const real p0 = superboids[chosen].perimeter / std::sqrt(superboids[chosen].area);
+    if (p0 > parameters().TOLERABLE_P0)
+    {
+      eligibleCells.erase(chosen);
+      continue;
+    }
+  
+    for (auto& super : superboids)
+      if (super.activated == false)
+      {
+	if (superboids[chosen].divide(2, super, boxes, step) == true)
+	  return;
+	else
+	  break;
+      }
   }
   
   return;

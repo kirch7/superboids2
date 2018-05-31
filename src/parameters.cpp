@@ -558,5 +558,5 @@ Parameters::set(void)
 real
 Parameters::getDivisionDistance(void) const
 {
-  return (this->MINIBOIDS_PER_SUPERBOID - 1) * this->CORE_DIAMETER / 6.0 + this->CORE_DIAMETER;
+  return (this->MINIBOIDS_PER_SUPERBOID - 1) * this->CORE_DIAMETER / 6.0 + this->CORE_DIAMETER / 2.0f;
 }

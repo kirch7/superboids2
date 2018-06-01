@@ -147,6 +147,19 @@ getParameters(void)
     printVector(stream, p.RECTANGLE_SIZE);
     stream << std::endl << std::endl;
 
+    std::string killCond;
+    if (p.KILL_CONDITION == KillCondition::NONE)
+      killCond = "NONE";
+    else if (p.KILL_CONDITION == KillCondition::P0)
+      killCond = "P0";
+    else if (p.KILL_CONDITION == KillCondition::RIGHT_EDGE)
+      killCond = "RIGHT_EDGE";
+    else if (p.KILL_CONDITION == KillCondition::RIGHT_EDGE_OR_P0)
+      killCond = "RIGHT_EDGE_OR_P0";
+    else
+      std::cerr << std::endl << "UGLY CACACA" << std::endl << std::endl;
+    stream << "# KILL"       << "\t\t\t" << killCond << std::endl;
+    
     stream << "# Stokes holes:" << std::endl;
     for (const auto& hole : p.STOKES_HOLES)
       stream << "#radius: " << hole.radius << "\tcenter: " << hole.center << std::endl;

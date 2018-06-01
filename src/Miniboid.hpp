@@ -33,22 +33,22 @@ public:
   bool    inEdge() const;  // True if box where *this is is in edge.
 
   inline Miniboid(const mini_int _id, Superboid& super, const bool);
-  void checkLimits(void);
+  void checkLimits(const step_int);
   void setNextVelocity(const step_int);
-  void setNextPosition(void);
+  void setNextPosition(const step_int);
   inline void setBox(Box* const b) { _box = b; }
   inline Box& getBox()  const {return *(this->_box);}
   void reset(void);
   real getAreaBetween(const Miniboid&) const;
   friend void exportPositions(const std::vector<Superboid>&, const step_int);
-  void setNeighbors(void);
+  void setNeighbors(const step_int);
   std::list<TwistNeighbor> _twistNeighbors;
   std::list<std::tuple<step_int, std::vector<const Miniboid*>>> history;
   bool isInSomeNthTriangle(const mini_int nth, const Superboid& super);
   bool fatInteractions(const step_int, const std::list<Neighbor>&, const bool interact);
   std::list<std::list<Neighbor> > _neighbors; // From different superboid.
 protected:
-  bool _isInvading;
+  step_int _invasionCounter;
   std::valarray<real> _noiseSum;    // Related to ETA.
   std::valarray<real> _velocitySum; // Related to ALPHA;
   std::valarray<real> _forceSum;    // Related to BETA.
@@ -63,7 +63,7 @@ protected:
   void checkPeriodicLimits();
   void checkRectangularLimits();
   void checkStokesLimits();
-  void checkKillCondition();
+  void checkKillCondition(const step_int);
   real getHarrisParameter(const std::vector<std::vector<real>>&, const std::vector<real>& medium) const;
 };
 
@@ -75,7 +75,7 @@ inline Miniboid::Miniboid(const mini_int _id, Superboid& super, const bool isVir
   velocity(parameters().DIMENSIONS),
   newVelocity(parameters().DIMENSIONS),
   radialDistance(Distance()),
-  _isInvading(false),
+  _invasionCounter(0),
   _noiseSum(parameters().DIMENSIONS),
   _velocitySum(parameters().DIMENSIONS),
   _forceSum(parameters().DIMENSIONS),

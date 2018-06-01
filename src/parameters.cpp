@@ -172,7 +172,7 @@ getParameters(void)
     stream << "# DIVISION_INTERVAL" << "\t\t" << p.DIVISION_INTERVAL << std::endl;
     stream << "# NON_DIVISION_INTERVAL" << "\t\t" << p.NON_DIVISION_INTERVAL << std::endl;
     stream << "# TOLERABLE_P0" << "\t\t" << p.TOLERABLE_P0 << std::endl;
-    stream << "# DIVISION_REGION_X" << p.DIVISION_REGION_X << std::endl;
+    stream << "# DIVISION_REGION_X" << "\t" << p.DIVISION_REGION_X << std::endl;
     stream << std::endl;
     
     stream << "# Types no." << "\t\t" << p.TYPES_NO << std::endl;
@@ -426,6 +426,7 @@ Parameters::setDivision(void)
   this->DIVISION_INTERVAL = getParameter<unsigned long int>("division");
   // A cell can not divide if it is product of a division in the last NON_DIVISION_INTERVAL:
   this->NON_DIVISION_INTERVAL = getParameter<unsigned long int>("non_division");
+  this->DIVISION_REGION_X = getParameter<real>("division_region_x");
   // A cell can not divide if its P0 is greater than TOLERABLE_P0:
   this->TOLERABLE_P0 = getParameter<real>("tolerable_p0");
   if (this->TOLERABLE_P0 < 1.0f)
@@ -562,8 +563,8 @@ Parameters::set(void)
       if (this->RADIAL_REQ[t] < minRadialReq)
 	minRadialReq = this->RADIAL_REQ[t];
     
-    if (this->getDivisionDistance() > minRadialReq / 2.0f)
-      panic("Daughter size two large! Reduce core diameter or number of peripheric miniboids!");
+    if (this->getDivisionDistance() > minRadialReq - this->CORE_DIAMETER)
+      panic("Daughter size too large! Reduce core diameter or number of peripheric miniboids!");
   }
 }
 
@@ -571,5 +572,5 @@ Parameters::set(void)
 real
 Parameters::getDivisionDistance(void) const
 {
-  return (this->MINIBOIDS_PER_SUPERBOID - 1) * this->CORE_DIAMETER / 6.0 + this->CORE_DIAMETER / 2.0f;
+  return (this->MINIBOIDS_PER_SUPERBOID - 1) * this->CORE_DIAMETER / 6.0 + this->CORE_DIAMETER * 2.0f;
 }

@@ -342,7 +342,9 @@ Superboid::setShape(const step_int STEP)
 {
   if (STEP <= this->_shapeStep && STEP != 0)
     return;
-
+  if (this->activated == false)
+    std::cerr << "eita, giovana" << std::endl;
+  
   this->_shapeStep = STEP;
   this->area        = -0.0f;
   this->perimeter   = -0.0f;
@@ -374,7 +376,7 @@ Superboid::setShape(const step_int STEP)
 }
 
 void
-Superboid::checkVirtual(const bool export_)
+Superboid::checkVirtual(const bool export_, const step_int step)
 {
   //this->virtualMiniboids.clear();
   const real _maxDistance = 2.0f * parameters().RADIAL_REQ[this->type] *			\
@@ -411,7 +413,7 @@ Superboid::checkVirtual(const bool export_)
 	virtualMini.position = mini1.position + differenceVector;
 	if (export_)
 	  this->virtualsInfo << virtualMini.position << '\t' << this->type << std::endl;
-	virtualMini.checkLimits();
+	virtualMini.checkLimits(step);
 	virtualMini.reset();
 	//thisMini->leftN = &virtualMini;
 	//virtualMini.rightN = thisMini;
@@ -430,7 +432,7 @@ Superboid::setNextPosition(const step_int step)
 {
   this->setShape(step);
   for (auto& mini : this->miniboids)
-    mini.setNextPosition();
+    mini.setNextPosition(step);
   
   return;
 }
@@ -459,7 +461,8 @@ setOriginalPositions(std::vector<Miniboid>& miniboids, const std::vector<std::va
 static void
 rearrangePeripherals(Superboid& superboid, const real distance)
 {
-  superboid.miniboids[0].checkLimits();
+  superboid.miniboids[0].checkLimits(0);
+  superboid.miniboids[0].reset();
   std::vector<Distance> distances;
   
   /*for (const auto& mini : superboid.miniboids)
@@ -487,7 +490,8 @@ rearrangePeripherals(Superboid& superboid, const real distance)
     std::valarray<real> dist({std::cos(angle), std::sin(angle)});
     dist *= smallest;
     superboid.miniboids[miniID].position = superboid.miniboids[0u].position + dist;
-    superboid.miniboids[miniID].checkLimits();
+    superboid.miniboids[miniID].reset();
+    superboid.miniboids[miniID].checkLimits(0);
   }
   
   return;
@@ -532,7 +536,10 @@ Superboid::divide(const super_int divide_by, Superboid& newSuperboid, std::vecto
     setOriginalPositions(this->miniboids, originalPositions);
 
     if (atempts > 16)
+    {
+      newSuperboid.activated = false;
       return false;
+    }
     
     bool someInvasion = false;
 
@@ -543,7 +550,9 @@ Superboid::divide(const super_int divide_by, Superboid& newSuperboid, std::vecto
     newSuperboid.miniboids[0u].position = this->miniboids[0u].position - nucleusNucleusDistance;
     this->miniboids[0u].position        = this->miniboids[0u].position + nucleusNucleusDistance;
 
-    const real radius = parameters().getDivisionDistance() - parameters().CORE_DIAMETER / 2.0f;
+    const real radius = parameters().getDivisionDistance() - parameters().CORE_DIAMETER * 2.0f;
+    this->_shapeStep = 0;
+    newSuperboid._shapeStep = 0;
     rearrangePeripherals(*this, radius);
     rearrangePeripherals(newSuperboid, radius);
 
@@ -562,8 +571,8 @@ Superboid::divide(const super_int divide_by, Superboid& newSuperboid, std::vecto
     if (insideBox == false)
       continue;
     
-    nextBoxes(boxes, *this);
-    nextBoxes(boxes, newSuperboid);
+    nextBoxes(boxes, *this, step);
+    nextBoxes(boxes, newSuperboid, step);
 
     for (auto super : twoSupers)
     {
@@ -579,7 +588,7 @@ Superboid::divide(const super_int divide_by, Superboid& newSuperboid, std::vecto
 
 	if (!someInvasion)
 	{
-	  mini.setNeighbors();
+	  mini.setNeighbors(step);
 	  for (const auto& list : mini._neighbors)
 	    if (mini.fatInteractions(0, list, false))
 	    {

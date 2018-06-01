@@ -41,7 +41,7 @@ public:
   }
   Superboid(void);
   real get0to2piRandom(void);
-  void checkVirtual(const bool export_);
+  void checkVirtual(const bool export_, const step_int);
   void setNextPosition(const step_int);
   bool divide(const super_int, Superboid&, std::vector<Box>&, const step_int);
   Distance getBiggestAxis() const;

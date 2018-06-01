@@ -218,7 +218,7 @@ oneSystem()
   for (auto& super : superboids)
     if (super.activated == true)
       for (auto& mini : super.miniboids)
-	mini.checkLimits();
+	mini.checkLimits(0);
   
   for (auto& super : superboids)
   {
@@ -238,7 +238,7 @@ oneSystem()
     
     for (auto& mini : super.miniboids)
       mini.reset();
-    if (Shape::write())
+    //if (Shape::write())
       super.setShape(0u);
   }
   

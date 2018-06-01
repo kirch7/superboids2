@@ -116,7 +116,7 @@ nextPosition(const thread_int THREAD_ID, std::vector<Superboid>& superboids, con
 }
 
 static void
-nextNeighbors(const thread_int THREAD_ID, std::vector<Superboid>& superboids)
+nextNeighbors(const thread_int THREAD_ID, std::vector<Superboid>& superboids, const step_int step)
 {
   for (auto& superboid : superboids)
   {
@@ -125,7 +125,7 @@ nextNeighbors(const thread_int THREAD_ID, std::vector<Superboid>& superboids)
     if (superboid.activated == false)
       continue;
     for (auto& mini : superboid.miniboids)
-      mini.setNeighbors(); // Search for neighbors.      
+      mini.setNeighbors(step); // Search for neighbors.
   }
   
   return;
@@ -147,7 +147,7 @@ nextCheckNeighbors(const thread_int THREAD_ID, std::vector<Superboid>& superboid
 }
 
 static void
-nextVirtuals(const thread_int THREAD_ID, std::vector<Superboid>& superboids, const bool export_)
+nextVirtuals(const thread_int THREAD_ID, std::vector<Superboid>& superboids, const bool export_, const step_int step)
 {
   for (auto& superboid : superboids)
   {
@@ -155,7 +155,7 @@ nextVirtuals(const thread_int THREAD_ID, std::vector<Superboid>& superboids, con
       continue;
     if (superboid.activated == false)
       continue;
-    superboid.checkVirtual(export_);
+    superboid.checkVirtual(export_, step);
   }
   
   return;
@@ -179,14 +179,14 @@ nextReset(const thread_int THREAD_ID, std::vector<Superboid>& superboids, const 
 }
 
 static void
-nextBoxes(std::vector<Box>& boxes, std::vector<Superboid>& superboids)
+nextBoxes(std::vector<Box>& boxes, std::vector<Superboid>& superboids, const step_int step)
 {
   for (auto& super : superboids)
     if (super.activated == true)
     {
       for (auto& mini : super.miniboids)
       {
-	mini.checkLimits();
+	mini.checkLimits(step);
 	const box_int newBoxID = Box::getBoxID(mini.position);
 	const box_int oldBoxID = mini.boxID();
 	if (oldBoxID != newBoxID)
@@ -211,12 +211,12 @@ nextBoxes(std::vector<Box>& boxes, std::vector<Superboid>& superboids)
 }
 
 void
-nextBoxes(std::vector<Box>& boxes, Superboid& super)
+nextBoxes(std::vector<Box>& boxes, Superboid& super, const step_int step)
 {
   if (super.activated == true)
     for (auto& mini : super.miniboids)
     {
-      mini.checkLimits();
+      mini.checkLimits(step);
       const box_int newBoxID = Box::getBoxID(mini.position);
       const box_int oldBoxID = mini.boxID();
       if (oldBoxID != newBoxID)
@@ -232,13 +232,13 @@ nextBoxes(std::vector<Box>& boxes, Superboid& super)
 }
 
 static void
-nextBoxes_putVirtuals(std::vector<Box>& boxes, std::vector<Superboid>& superboids)
+nextBoxes_putVirtuals(std::vector<Box>& boxes, std::vector<Superboid>& superboids, const step_int step)
 {
   for (auto& super : superboids)
   {
     for (auto& mini : super.virtualMiniboids)
     {
-      mini.checkLimits();
+      mini.checkLimits(step);
       const box_int newBoxID = Box::getBoxID(mini.position);
       boxes[newBoxID].append(mini);
     }
@@ -370,14 +370,15 @@ nextStepOK(std::vector<Box>& boxes,
     for (thread_int threadCount = 0u; threadCount < parameters().THREADS; ++threadCount)
       virtualThreads[threadCount] = std::thread(nextVirtuals, threadCount, \
 						std::ref(superboids),	\
-						exportVirt);
+						exportVirt,
+						step);
     for (auto& thread : virtualThreads)
       thread.join();
   }
   /////std::cerr << "virtual" << std::endl;
 
   /////std::cerr << "virtual boxes" << std::endl;
-  nextBoxes_putVirtuals(boxes, superboids);
+  nextBoxes_putVirtuals(boxes, superboids, step);
   /////std::cerr << "virtual boxes" << std::endl;
   
   /////std::cerr << "neighbors" << std::endl;
@@ -386,7 +387,8 @@ nextStepOK(std::vector<Box>& boxes,
     for (thread_int threadCount = 0u; threadCount < parameters().THREADS; ++threadCount)
       neighborsThreads[threadCount] = std::thread(nextNeighbors,	\
 						  threadCount,		\
-						  std::ref(superboids));
+						  std::ref(superboids),
+						  step);
     for (auto& thread : neighborsThreads)
       thread.join();
   }
@@ -443,7 +445,7 @@ nextStepOK(std::vector<Box>& boxes,
       divide(boxes, superboids, step);
 
   /////std::cerr << "nextBoxes" << std::endl;
-  nextBoxes(boxes, superboids);
+  nextBoxes(boxes, superboids, step);
   /////std::cerr << "nextBoxes" << std::endl;
   
   return true;

@@ -30,7 +30,7 @@ std::valarray<real> Miniboid::getAngles(const mini_int id)
 }
 
 void
-Miniboid::checkLimits(void)
+Miniboid::checkLimits(const step_int step)
 {
   if (parameters().BC == BoundaryCondition::PERIODIC)
     this->checkPeriodicLimits();
@@ -39,7 +39,9 @@ Miniboid::checkLimits(void)
 
   if (parameters().BC == BoundaryCondition::STOKES)
     this->checkStokesLimits();
-  this->checkKillCondition();
+
+  if (step != 0)
+    this->checkKillCondition(step);
   
   return;
 }
@@ -61,8 +63,10 @@ Miniboid::checkPeriodicLimits()
 }
 
 void
-Miniboid::checkKillCondition()
+Miniboid::checkKillCondition(const step_int step)
 {
+  if (this->superboid.activated == false)
+    return;
   
   if (parameters().KILL_CONDITION == KillCondition::RIGHT_EDGE || parameters().KILL_CONDITION == KillCondition::RIGHT_EDGE_OR_P0)
     if (this->position[X] > parameters().RECTANGLE_SIZE[X] / 2.0f)
@@ -70,11 +74,12 @@ Miniboid::checkKillCondition()
 
   if (parameters().KILL_CONDITION == KillCondition::P0 || parameters().KILL_CONDITION == KillCondition::RIGHT_EDGE_OR_P0)
   {
+    this->superboid.setShape(step);
     const real P0 = this->superboid.perimeter / std::sqrt(this->superboid.area);
     if (P0 > parameters().P0_LIMIT)
     {
       this->superboid.activated = false;
-      std::cerr << "Death at position " << this->superboid.miniboids[0].position << std::endl;
+      std::cerr << "Death with p0\t" << P0 << "\tat position " << this->superboid.miniboids[0].position << std::endl;
     }
   }
   return;
@@ -354,6 +359,7 @@ Miniboid::fatInteractions(const step_int STEP, const std::list<Neighbor>& list, 
       
       if (inSomeTriangle && interact)
       {
+	++(this->_invasionCounter);
 	// const std::valarray<real> tangent = tangentSignal * Distance(r1, r2).getTangentArray();
 	//const std::valarray<real> tangent = Distance(fatboid.position, r0 - tangent).module > Distance(fatboid.position, r0 + tangent).module ? -tangent : tangent;
 	if (Infinite::write())
@@ -365,13 +371,14 @@ Miniboid::fatInteractions(const step_int STEP, const std::list<Neighbor>& list, 
 	    infThing[i + parameters().DIMENSIONS] = tangent[i];
 	  this->superboid.infinite2Vectors.push_back(infThing);
 	}
-	this->_isInvading = true;
-	// const std::valarray<real> force1 = (0.9f * parameters().INFINITE_FORCE) * tangent;
-	// const std::valarray<real> radial = this->radialDistance.getDirectionArray();
-	// const std::valarray<real> force2 = radial * (0.9f * parameters().INFINITE_FORCE);
-	// this->_forceSum += force1;
-	// this->_forceSum += force2;
+	const std::valarray<real> force1 = (0.9f * parameters().INFINITE_FORCE) * tangent;
+	const std::valarray<real> radial = this->radialDistance.getDirectionArray();
+	const std::valarray<real> force2 = radial * (0.9f * parameters().INFINITE_FORCE);
+	this->_forceSum += force1;
+	this->_forceSum += force2;
       }
+      else if (!inSomeTriangle && interact)
+	this->_invasionCounter = 0;
     }
   }
 
@@ -553,11 +560,12 @@ Miniboid::setNextVelocity(const step_int STEP)
 }
 
 void
-Miniboid::setNextPosition(void)
+Miniboid::setNextPosition(const step_int step)
 {
   this->velocity = this->newVelocity;
-  if (this->_isInvading)
+  if (this->_invasionCounter > 5u)
     this->position = this->superboid.miniboids[0u].position - (2.0f * parameters().CORE_DIAMETER * this->radialDistance.getDirectionArray());
+    //this->position = this->superboid.miniboids[0u].position - (0.5f * this->radialDistance.getDirectionArray());
   else
   {
     this->position += parameters().DT * this->velocity; // Velocity is already normalized to V0.
@@ -566,7 +574,7 @@ Miniboid::setNextPosition(void)
 	((this->superboid.area - parameters().TARGET_AREA[this->superboid.type]) / (20.0f * TWO_PI * this->superboid.meanRadius));
   }
   
-  this->checkLimits();
+  this->checkLimits(step);
   
   return;
 }
@@ -578,9 +586,9 @@ Miniboid::inEdge(void) const
 }
 
 void
-Miniboid::setNeighbors(void)
+Miniboid::setNeighbors(const step_int step)
 {
-  this->checkLimits();
+  this->checkLimits(step);
   this->_neighbors.clear(); // Removes all elements.
 
   // Search for neighbors:
@@ -637,7 +645,6 @@ Miniboid::reset(void)
   this->_velocitySum = 0.0f;
   this->_forceSum = 0.0f;
   this->_neighborsPerTypeNos = 0u;
-  this->_isInvading = false;
   
   if (this->ID != 0u || this->isVirtual)
   {
@@ -670,5 +677,6 @@ Miniboid::getAreaBetween(const Miniboid& miniNeighbor) const
     angleBetween(this->radialDistance.getAngle(), miniNeighbor.radialDistance.getAngle()));
   const real area = std::sin(DELTA_ANGLE) * this->radialDistance.module * \
     miniNeighbor.radialDistance.module * 0.5f;
+
   return area;
 }

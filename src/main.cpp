@@ -1,4 +1,5 @@
 // Copyright (C) 2016-2018 Cássio Kirch.
+// Copyright (C) 2018 Leonardo Gregory Brunnet.
 // License specified in LICENSE file.
 
 #include <iostream>
@@ -14,7 +15,6 @@
 #include "parameters.hpp"
 #include "Box.hpp"
 #include "nextstep.hpp"
-#include "Stokes.hpp" ////
 #include "Parameter.hpp"
 
 static void
@@ -203,11 +203,6 @@ oneSystem()
        ++index)
     superboids[index].activated = true;
 
-  //// std::vector<Superboid> superboids(1);
-  //// superboids[0].activated = true;
-  //// for (auto& mini : superboids[0].miniboids)
-  ////   mini.position[X] += 5.5f;
-  
   if (InitialPositions::load())
     loadPositions(superboids);
   
@@ -238,8 +233,8 @@ oneSystem()
     
     for (auto& mini : super.miniboids)
       mini.reset();
-    //if (Shape::write())
-      super.setShape(0u);
+
+    super.setShape(0u);
   }
   
   step_int continuousStep = 0llu;
@@ -314,7 +309,6 @@ oneSystem()
       if(Gamma::write() && step != 0u)
         gamma = true;
 
-      //// checkVirtuals = true;
       ++continuousStep;
 
       if (p.EXIT_FACTOR < p.REAL_TOLERANCE)
@@ -365,12 +359,6 @@ oneSystem()
     SCS::file().close();
   if (Infinite::write())
     Infinite::close();
-  /*for (const auto& box : boxes)
-  {
-    real density = box.getDensity();
-    if (density > 0.2)
-      std::cout << box.ID << '\t' << box.getDensity() << std::endl;
-  }*/
   
   return;
 }

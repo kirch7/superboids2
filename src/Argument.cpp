@@ -1,4 +1,5 @@
 // Copyright (C) 2016-2018 Cássio Kirch.
+// Copyright (C) 2018 Leonardo Gregory Brunnet.
 // License specified in LICENSE file.
 
 #include <cmath>
@@ -273,12 +274,10 @@ getArguments(void)
   list.push_back(Argument("-h", "Show this help message.", false, true, true, printHelp));
   list.push_back(Argument("-p", "Show parameters.", false, true, false, printParameters));
   list.push_back(Argument("-sample", "Show parameters sample.", false, true, true, printParametersSample));
-  ////list.push_back(Argument("-check", "Only check parameters."));
   list.push_back(Argument("-r", "Show ideal tangent radius.", false, true, false, printRadius));
   list.push_back(Argument("-v", "Show number of exit times.", false, true, false, printExitSteps));
   list.push_back(Argument("-range", "Show HALF of range value.", false, true, false, printHalfRange));
   list.push_back(Argument("-t", "Show number of worker threads.", false, true, false, printThreadsNo));
-  ////list.push_back(Argument("-flex", "Run anyway."));
   list.push_back(Argument("-shape", "Export area and perimeter information.", false, false, false, setShapeExportation));
   list.push_back(Argument("-gamma", "Export segregation information.", false, false, false, setGammaExportation));
   list.push_back(Argument("-msd", "Export position of central particle.", false, false, false, setMSD));
@@ -288,7 +287,6 @@ getArguments(void)
   list.emplace_back("-initial", "Load initial positions from file.", false, false, false, setInitialPositionsFile, "[file]");
   list.emplace_back("-scs", "Single cell stability.", false, false, false, setSCS);
   list.emplace_back("-laststep", "Override last step.", false, false, false, setLastStep, "[naturalnumber]");
-  ////list.push_back(Argument("-progress", "Show progress bar."));
   list.push_back(Argument("-param", "Specify file with parameters", true, false, false, setParameters, "[file]"));
   
   return list;

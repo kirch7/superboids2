@@ -1,7 +1,7 @@
 // Copyright (C) 2016-2018 Cássio Kirch.
+// Copyright (C) 2018 Leonardo Gregory Brunnet.
 // License specified in LICENSE file.
 
-#include <iostream> ////
 #include <sstream>
 #include "Stokes.hpp"
 #include "Date.hpp"
@@ -22,22 +22,6 @@ const dimension_int Z = 2u;
 const real    HALF_PI = 1.57079633f;
 const real         PI = 3.14159265359f;
 const real     TWO_PI = 6.283185307179586f;
-
-// static real
-// getMaxValue(const std::vector<std::vector<real>>& matrix)
-// {
-//   if (matrix.size() == 0)
-//     return -0.0f;
-  
-//   real max = -1.0e10f;
-//   for (const auto& v : matrix)
-//     for (const auto elem : v)
-//       if (elem > max)
-// 	max = elem;
-
-//   return max;
-// }
-
 
 template <typename T>
 static void
@@ -311,8 +295,6 @@ Parameters::set1(void)
   this->DT        = getParameter<real>("dt");
   if (this->DT <= 0.0)
     panic("dt must be positive", this->CORE_DIAMETER);
-
-
   
   return;
 }

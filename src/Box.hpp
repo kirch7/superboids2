@@ -1,4 +1,5 @@
 // Copyright (C) 2016-2018 Cássio Kirch.
+// Copyright (C) 2018 Leonardo Gregory Brunnet.
 // License specified in LICENSE file.
 
 #pragma once
@@ -6,6 +7,7 @@
 #include <vector>
 #include <valarray>
 #include <list>
+#include "parameters.hpp"
 
 class Miniboid;
 class Superboid;
@@ -21,7 +23,7 @@ public:
   const bool inEdge; /* True if box is in edge. */
 
   void setNeighbors(std::vector<Box>& boxes);
-  std::vector<const Box*> neighbors; //// Box* const ?
+  std::vector<const Box*> neighbors;
   
   std::list<const Miniboid*> miniboids;
   /* Append a Superboid object to the list in this class. */
@@ -49,5 +51,5 @@ public:
   }
 private:
   static box_int _totalBoxesCount;
-  Box(const Box&); /* Invalidate use of copy constructor. */
+  Box(const Box&) = delete; /* Invalidate use of copy constructor. */
 };

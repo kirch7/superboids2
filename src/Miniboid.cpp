@@ -1,8 +1,8 @@
 // Copyright (C) 2016-2018 Cássio Kirch.
+// Copyright (C) 2018 Leonardo Gregory Brunnet.
 // License specified in LICENSE file.
 
-#include <iostream> ////
-#include <algorithm> ////
+#include <iostream> // operator<<
 #include <list>
 #include <tuple>
 #include "Miniboid.hpp"
@@ -159,9 +159,6 @@ Miniboid::checkStokesLimits()
 	this->position -= direction * (2.0f * delta);
       else
 	this->position = hole.center + (direction * TOLERABLE);
-      //// INCORRETO:
-      //this->velocity    *= -1.0f;
-      //this->newVelocity *= -1.0f;
     }
   }
 
@@ -210,7 +207,7 @@ getFiniteRadialForceWithoutBeta(Distance dist, const real rEq, const type_int TY
   if (module <= parameters().RADIAL_PLASTIC_BEGIN[TYPE] + 1.0e-6)
   {
     const real dif = 1.0f - dist.module / rEq;
-    ////const real difCubicRoot = std::pow(std::fabs(dif), parameters().RADIAL_SPRING_EXP);
+    //// const real difCubicRoot = std::pow(std::fabs(dif), parameters().RADIAL_SPRING_EXP);
     const real scalar = sign(dif) * std::fabs(dif);
     if (std::isfinite(scalar))
     {
@@ -360,8 +357,8 @@ Miniboid::fatInteractions(const step_int STEP, const std::list<Neighbor>& list, 
       if (inSomeTriangle && interact)
       {
 	++(this->_invasionCounter);
-	// const std::valarray<real> tangent = tangentSignal * Distance(r1, r2).getTangentArray();
-	//const std::valarray<real> tangent = Distance(fatboid.position, r0 - tangent).module > Distance(fatboid.position, r0 + tangent).module ? -tangent : tangent;
+	//// const std::valarray<real> tangent = tangentSignal * Distance(r1, r2).getTangentArray();
+	//// const std::valarray<real> tangent = Distance(fatboid.position, r0 - tangent).module > Distance(fatboid.position, r0 + tangent).module ? -tangent : tangent;
 	if (Infinite::write())
 	{
 	  std::valarray<real> infThing(parameters().DIMENSIONS * 2u);
@@ -563,9 +560,12 @@ void
 Miniboid::setNextPosition(const step_int step)
 {
   this->velocity = this->newVelocity;
-  if (this->_invasionCounter > 5u)
+  if (this->_invasionCounter > 15u)
+    this->position = this->superboid.miniboids[0u].position - (1.1f * parameters().CORE_DIAMETER * this->radialDistance.getDirectionArray());
+  else if (this->_invasionCounter > 10u)
     this->position = this->superboid.miniboids[0u].position - (2.0f * parameters().CORE_DIAMETER * this->radialDistance.getDirectionArray());
-    //this->position = this->superboid.miniboids[0u].position - (0.5f * this->radialDistance.getDirectionArray());
+  else if (this->_invasionCounter > 5u)
+    this->position = this->superboid.miniboids[0u].position - (0.5f * this->radialDistance.module * this->radialDistance.getDirectionArray());
   else
   {
     this->position += parameters().DT * this->velocity; // Velocity is already normalized to V0.
@@ -655,12 +655,6 @@ Miniboid::reset(void)
   if (!this->isVirtual)
     for (auto& tn : this->_twistNeighbors)
       tn._distance = Distance(*this, this->superboid.miniboids[tn.ID]);
-  
-  /*if (!this->isVirtual)
-    {
-    this->leftN = nullptr;
-    this->rightN = nullptr;
-    }*/
   
   return;
 }

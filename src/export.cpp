@@ -1,4 +1,5 @@
 // Copyright (C) 2016-2018 Cássio Kirch.
+// Copyright (C) 2018 Leonardo Gregory Brunnet.
 // License specified in LICENSE file.
 
 #include <thread>
@@ -73,9 +74,7 @@ exportMSD(std::ofstream& myFile, std::vector<Superboid>& superboids)
     for (dimension_int dim = 0u; dim < parameters().DIMENSIONS; ++dim)
     {
       float dComp = static_cast<float>(position[dim]);
-      //// myFile << dComp << std::endl;
       myFile.write(reinterpret_cast<char*>(&dComp), sizeof(dComp));
-      ////std::cout << dComp << std::endl;
     }
 
     uint16_t type = static_cast<uint16_t>(super.type);

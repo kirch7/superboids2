@@ -1,4 +1,5 @@
 // Copyright (C) 2016-2018 Cássio Kirch.
+// Copyright (C) 2018 Leonardo Gregory Brunnet.
 // License specified in LICENSE file.
 
 #pragma once
@@ -98,6 +99,5 @@ extern void exportMSD(std::ofstream&, std::vector<Superboid>&);
 extern void exportMSD(std::vector<Superboid>&);
 extern void binPrint(std::vector<Superboid>&);
 extern void binPrint(std::ofstream&, std::vector<Superboid>&);
-//// extern void exportPhi(std::vector<Superboid>&);
 extern void exportPhi(std::ofstream&, const std::vector<Superboid>&);
 extern void exportLastPositionsAndVelocities(const std::vector<Superboid>&, const step_int);

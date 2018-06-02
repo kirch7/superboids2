@@ -65,12 +65,12 @@ Miniboid::checkPeriodicLimits()
 void
 Miniboid::checkKillCondition(const step_int step)
 {
-  if (this->superboid.activated == false)
+  if (this->superboid.isActivated() == false)
     return;
   
   if (parameters().KILL_CONDITION == KillCondition::RIGHT_EDGE || parameters().KILL_CONDITION == KillCondition::RIGHT_EDGE_OR_P0)
     if (this->position[X] > parameters().RECTANGLE_SIZE[X] / 2.0f)
-      this->superboid.activated = false;
+      this->superboid.deactivate();
 
   if (parameters().KILL_CONDITION == KillCondition::P0 || parameters().KILL_CONDITION == KillCondition::RIGHT_EDGE_OR_P0)
   {
@@ -78,7 +78,7 @@ Miniboid::checkKillCondition(const step_int step)
     const real P0 = this->superboid.perimeter / std::sqrt(this->superboid.area);
     if (P0 > parameters().P0_LIMIT)
     {
-      this->superboid.activated = false;
+      this->superboid.deactivate();
       std::cerr << "Death with p0\t" << P0 << "\tat position " << this->superboid.miniboids[0].position << std::endl;
     }
   }

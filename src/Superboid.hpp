@@ -14,7 +14,6 @@
 class Superboid
 {
 public:
-  bool activated;
   std::vector<Miniboid> virtualMiniboids;
   std::vector<Miniboid> miniboids;
   const super_int ID;
@@ -53,13 +52,17 @@ public:
   std::vector<std::valarray<real>> infiniteVectors;
   std::vector<std::valarray<real>> infinite2Vectors;
   std::ostringstream virtualsInfo;
-  step_int getLastDivisionStep(void) const { return this-> lastDivisionStep; }
-  
+  step_int getLastDivisionStep(void) const { return this->_lastDivisionStep; }
+
+  void deactivate(void);
+  inline bool isActivated(void) const { return this->_activated; }
+  friend void oneSystem(void);
 protected:
+  bool _activated;
   static super_int _totalSuperboids;
   std::default_random_engine _randomEngine;
   step_int _shapeStep;
-  step_int lastDivisionStep;
+  step_int _lastDivisionStep;
   inline Superboid(Superboid&);
 };
 

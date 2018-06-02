@@ -60,7 +60,7 @@ exportMSD(std::ofstream& myFile, std::vector<Superboid>& superboids)
 
   super_int activatedNo = 0u;
   for (auto& super : superboids)
-    if (super.activated == true)
+    if (super.isActivated() == true)
       ++activatedNo;
 
   uint16_t activated = static_cast<uint16_t>(activatedNo);
@@ -68,7 +68,7 @@ exportMSD(std::ofstream& myFile, std::vector<Superboid>& superboids)
   
   for (auto& super : superboids)
   {
-    if (super.activated == false)
+    if (super.isActivated() == false)
       continue;
     const std::valarray<real>& position = super.miniboids[0u].position;
     for (dimension_int dim = 0u; dim < parameters().DIMENSIONS; ++dim)
@@ -106,7 +106,7 @@ binPrint(std::ofstream& myFile, std::vector<Superboid>& superboids)
 
   super_int activatedNo = 0u;
   for (auto& super : superboids)
-    if (super.activated == true)
+    if (super.isActivated() == true)
       ++activatedNo;
   
   uint16_t activated = static_cast<uint16_t>(activatedNo * parameters().MINIBOIDS_PER_SUPERBOID);
@@ -114,7 +114,7 @@ binPrint(std::ofstream& myFile, std::vector<Superboid>& superboids)
   
   for (auto& super : superboids)
   {
-    if (super.activated == false)
+    if (super.isActivated() == false)
       continue;
     
     for (const auto& mini : super.miniboids)
@@ -155,13 +155,13 @@ exportLastPositionsAndVelocities(const std::vector<Superboid>& superboids, const
   binaryOutFile << step << std::endl;
   super_int activatedCellsNo = 0;
   for (const auto& super : superboids)
-    if (super.activated)
+    if (super.isActivated() == true)
       ++activatedCellsNo;
   
   binaryOutFile << activatedCellsNo << std::endl;
   for (auto& super : superboids)
   {
-    if (super.activated == false)
+    if (super.isActivated() == false)
       continue;
 
     binaryOutFile << super.type << std::endl;
@@ -181,7 +181,7 @@ void exportPhi(std::ofstream& file, const std::vector<Superboid>& superboids)
   std::valarray<real> meanArray(-0.0, parameters().DIMENSIONS);
   for (const auto& super : superboids)
   {
-    if (super.activated == false)
+    if (super.isActivated() == false)
       continue;
     
     meanArray += super.miniboids[0u].velocity / (parameters().SUPERBOIDS * parameters().SPEED[super.type]);
@@ -201,7 +201,7 @@ SCS::write(const step_int step, const std::vector<Superboid>& superboids)
 {
   for (auto& super : superboids)
   {
-    if (super.activated == false)
+    if (super.isActivated() == false)
       continue;
     
     std::valarray<real> peripheralsCM(-0.0, parameters().DIMENSIONS);
@@ -232,7 +232,7 @@ Infinite::write(std::vector<Superboid>& superboids)
   infinite2File << '#' << std::endl;
   virtFile << '#' << std::endl;
   for (auto& super : superboids) {
-    if (super.activated == false)
+    if (super.isActivated() == false)
       continue;
     
     for (const auto& va : super.infiniteVectors)

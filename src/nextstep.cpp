@@ -17,7 +17,7 @@ nextVelocity(const thread_int THREAD_ID, std::vector<Superboid>& superboids, con
   {
     if (superboid.ID % parameters().THREADS != THREAD_ID)
       continue;
-    if (superboid.activated == false)
+    if (superboid.isActivated() == false)
       continue;
     for (auto& mini : superboid.miniboids)
       mini.setNextVelocity(STEP);
@@ -33,7 +33,7 @@ nextPosition(const thread_int THREAD_ID, std::vector<Superboid>& superboids, con
   {
     if (superboid.ID % parameters().THREADS != THREAD_ID)
       continue;
-    if (superboid.activated == false)
+    if (superboid.isActivated() == false)
       continue;
     superboid.setNextPosition(step);
   }
@@ -48,7 +48,7 @@ nextNeighbors(const thread_int THREAD_ID, std::vector<Superboid>& superboids, co
   {
     if (superboid.ID % parameters().THREADS != THREAD_ID)
       continue;
-    if (superboid.activated == false)
+    if (superboid.isActivated() == false)
       continue;
     for (auto& mini : superboid.miniboids)
       mini.setNeighbors(step); // Search for neighbors.
@@ -64,7 +64,7 @@ nextCheckNeighbors(const thread_int THREAD_ID, std::vector<Superboid>& superboid
   {
     if (superboid.ID % parameters().THREADS != THREAD_ID)
       continue;
-    if (superboid.activated == false)
+    if (superboid.isActivated() == false)
       continue;
     superboid.checkWrongNeighbors(superboids);
   }
@@ -79,7 +79,7 @@ nextVirtuals(const thread_int THREAD_ID, std::vector<Superboid>& superboids, con
   {
     if (superboid.ID % parameters().THREADS != THREAD_ID)
       continue;
-    if (superboid.activated == false)
+    if (superboid.isActivated() == false)
       continue;
     superboid.checkVirtual(export_, step);
   }
@@ -94,7 +94,7 @@ nextReset(const thread_int THREAD_ID, std::vector<Superboid>& superboids, const 
   {
     if (superboid.ID % parameters().THREADS != THREAD_ID)
       continue;
-    if (superboid.activated == false)
+    if (superboid.isActivated() == false)
       continue;
     superboid.reset();
     if (shape)
@@ -108,7 +108,7 @@ static void
 nextBoxes(std::vector<Box>& boxes, std::vector<Superboid>& superboids, const step_int step)
 {
   for (auto& super : superboids)
-    if (super.activated == true)
+    if (super.isActivated() == true)
     {
       for (auto& mini : super.miniboids)
       {
@@ -139,7 +139,7 @@ nextBoxes(std::vector<Box>& boxes, std::vector<Superboid>& superboids, const ste
 void
 nextBoxes(std::vector<Box>& boxes, Superboid& super, const step_int step)
 {
-  if (super.activated == true)
+  if (super.isActivated() == true)
     for (auto& mini : super.miniboids)
     {
       mini.checkLimits(step);
@@ -180,7 +180,7 @@ nextGamma(const thread_int THREAD_ID, std::vector<Superboid>& superboids)
   {
     if (superboid.ID % parameters().THREADS != THREAD_ID)
       continue;
-    if (superboid.activated == false)
+    if (superboid.isActivated() == false)
       continue;
     superboid.setGamma(superboids);
   }
@@ -194,7 +194,7 @@ getMeanPosition(const std::vector<Superboid>& superboids)
   std::valarray<real> mean(parameters().DIMENSIONS);
   super_int divideBy = 0u;
   for (const auto& super : superboids)
-    if (super.activated == true)
+    if (super.isActivated() == true)
     {
       ++divideBy;
       mean += super.miniboids[0u].position;
@@ -209,7 +209,7 @@ correctPositionAndRotation(std::vector<Superboid>& superboids)
 {
   const std::valarray<real> meanPosition = getMeanPosition(superboids);
   for (auto& super : superboids)
-    if (super.activated == true)
+    if (super.isActivated() == true)
       for (auto& mini : super.miniboids)
 	mini.position -= meanPosition;
 }
@@ -300,7 +300,7 @@ nextStepOK(std::vector<Box>& boxes,
   if (checkVirt)
     for (const auto& super : superboids)
     {
-      if (super.activated == false)
+      if (super.isActivated() == false)
 	continue;
       const size_t s = super.virtualMiniboids.size();
       if (s > 4 * parameters().MINIBOIDS_PER_SUPERBOID)

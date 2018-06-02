@@ -38,16 +38,17 @@ public:
   void setNextVelocity(const step_int);
   void setNextPosition(const step_int);
   inline void setBox(Box* const b) { _box = b; }
-  inline Box& getBox()  const {return *(this->_box);}
+  inline Box& getBox(void)    const { return *(this->_box); }
+  inline Box* getBoxPtr(void) const { return this->_box; }
   void reset(void);
   real getAreaBetween(const Miniboid&) const;
-  friend void exportPositions(const std::vector<Superboid>&, const step_int);
   void setNeighbors(const step_int);
   std::list<TwistNeighbor> _twistNeighbors;
   std::list<std::tuple<step_int, std::vector<const Miniboid*>>> history;
   bool isInSomeNthTriangle(const mini_int nth, const Superboid& super);
   bool fatInteractions(const step_int, const std::list<Neighbor>&, const bool interact);
   std::list<std::list<Neighbor> > _neighbors; // From different superboid.
+  friend void exportPositions(const std::vector<Superboid>&, const step_int);
 protected:
   step_int _invasionCounter;
   std::valarray<real> _noiseSum;    // Related to ETA.

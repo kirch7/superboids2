@@ -56,7 +56,7 @@ shapeIt(const std::vector<Superboid>& superboids, std::ofstream& shapeFile, cons
   std::vector<super_int> activatedPerType(p.TYPES_NO, 0);
   for (const auto& super : superboids)
   {
-    if (super.activated == false)
+    if (super.isActivated() == false)
       continue;
     ++activatedPerType[super.type];
     ++cellsActivatedNo;
@@ -119,7 +119,7 @@ shapeIt(const std::vector<Superboid>& superboids, std::ofstream& shapeFile, cons
       
   for (const auto& super : superboids)
   {
-    if (super.activated == false)
+    if (super.isActivated() == false)
       continue;
 	
     msdPerimeter += square(super.perimeter - meanPerimeter);
@@ -188,8 +188,8 @@ shapeIt(const std::vector<Superboid>& superboids, std::ofstream& shapeFile, cons
   return;
 }
 
-static void
-oneSystem()
+void
+oneSystem(void)
 {
   const Parameters& p = parameters();
   
@@ -201,7 +201,7 @@ oneSystem()
   for (super_int index = 0u;
        index < p.SUPERBOIDS;
        ++index)
-    superboids[index].activated = true;
+    superboids[index]._activated = true;
 
   if (InitialPositions::load())
     loadPositions(superboids);
@@ -211,13 +211,13 @@ oneSystem()
     box.setNeighbors(boxes);
 
   for (auto& super : superboids)
-    if (super.activated == true)
+    if (super.isActivated() == true)
       for (auto& mini : super.miniboids)
 	mini.checkLimits(0);
   
   for (auto& super : superboids)
   {
-    if (super.activated == false)
+    if (super.isActivated() == false)
       continue;
     for (auto& mini : super.miniboids)
       boxes[Box::getBoxID(mini.position)].append(mini);
@@ -228,7 +228,7 @@ oneSystem()
 
   for (auto& super : superboids)
   {
-    if (super.activated == false)
+    if (super.isActivated() == false)
       continue;
     
     for (auto& mini : super.miniboids)

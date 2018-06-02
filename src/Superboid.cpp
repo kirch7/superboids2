@@ -166,7 +166,6 @@ getDeltaAngle(void)
 }
 
 Superboid::Superboid(void):
-  activated(false),
   ID(this->_totalSuperboids),
   type(getType(this->_totalSuperboids)),
   area(-0.0f),
@@ -174,8 +173,9 @@ Superboid::Superboid(void):
   meanRadius(-0.0f),
   meanRadius2(-0.0f),
   virtualsInfo(std::ios_base::out),
+  _activated(false),
   _randomEngine(getSeed(ID)),
-  lastDivisionStep(0)
+  _lastDivisionStep(0)
 {
   this->miniboids.reserve(parameters().MINIBOIDS_PER_SUPERBOID);
   this->virtualMiniboids.reserve(64u * parameters().MINIBOIDS_PER_SUPERBOID);
@@ -296,7 +296,7 @@ Superboid::setShape(const step_int STEP)
 {
   if (STEP <= this->_shapeStep && STEP != 0)
     return;
-  if (this->activated == false)
+  if (this->isActivated() == false)
     std::cerr << "eita, giovana" << std::endl;
   
   this->_shapeStep = STEP;
@@ -443,7 +443,7 @@ Superboid::divide(const super_int divide_by, Superboid& newSuperboid, std::vecto
   *const_cast<type_int*>(&(newSuperboid.type)) = newType;
 
   const std::vector<std::valarray<real>> originalPositions = getOriginalPositions(this->miniboids);
-  newSuperboid.activated = true;
+  newSuperboid._activated = true;
   for (mini_int miniID = 0u; miniID < parameters().MINIBOIDS_PER_SUPERBOID; ++miniID)
   {
     newSuperboid.miniboids[miniID].position = this->miniboids[miniID].position;
@@ -462,7 +462,7 @@ Superboid::divide(const super_int divide_by, Superboid& newSuperboid, std::vecto
 
     if (atempts > 16)
     {
-      newSuperboid.activated = false;
+      newSuperboid._activated = false;
       return false;
     }
     
@@ -527,8 +527,8 @@ Superboid::divide(const super_int divide_by, Superboid& newSuperboid, std::vecto
       break;
   }
   
-  this->lastDivisionStep        = step;
-  newSuperboid.lastDivisionStep = step;
+  this->_lastDivisionStep        = step;
+  newSuperboid._lastDivisionStep = step;
     
   this->reset();
   newSuperboid.reset();
@@ -629,4 +629,15 @@ Superboid::checkWrongNeighbors(const std::vector<Superboid>& superboids)
       }
     }
   }
+}
+
+void
+Superboid::deactivate(void)
+{
+  this->_activated = false;
+  for (const auto& mini : this->miniboids)
+    if (mini.getBoxPtr())
+      mini.getBoxPtr()->remove(mini);
+  
+  return;
 }

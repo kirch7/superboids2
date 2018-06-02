@@ -168,7 +168,7 @@ void Box::setNeighbors(std::vector<Box>& boxes)
 void
 Box::append (Miniboid& mini)
 {
-  if (mini.superboid.activated == true)
+  if (mini.superboid.isActivated() == true)
   {
     this->miniboids.push_front(&mini);
     mini.setBox(this);

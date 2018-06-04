@@ -201,7 +201,7 @@ oneSystem(void)
   for (super_int index = 0u;
        index < p.SUPERBOIDS;
        ++index)
-    superboids[index]._activated = true;
+    superboids[index].activate();
 
   if (InitialPositions::load())
     loadPositions(superboids);
@@ -213,7 +213,7 @@ oneSystem(void)
   for (auto& super : superboids)
     if (super.isActivated() == true)
       for (auto& mini : super.miniboids)
-	mini.checkLimits(0);
+	mini.checkLimits();
   
   for (auto& super : superboids)
   {

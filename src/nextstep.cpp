@@ -108,6 +108,10 @@ static void
 nextBoxes(std::vector<Box>& boxes, std::vector<Superboid>& superboids, const step_int step)
 {
   for (auto& super : superboids)
+  {
+    if (super.willDie())
+      super.deactivate();
+  
     if (super.isActivated() == true)
     {
       for (auto& mini : super.miniboids)
@@ -122,10 +126,12 @@ nextBoxes(std::vector<Box>& boxes, std::vector<Superboid>& superboids, const ste
 	}
       }
     }
+  }
+  
   for (auto& box : boxes)
   {
     const std::list<const Miniboid*> miniboids = box.miniboids;
-    for (const auto mini : miniboids)
+    for (const auto& mini : miniboids)
       if (mini->isVirtual)
 	box.remove(*mini);
   }
@@ -153,7 +159,7 @@ nextBoxes(std::vector<Box>& boxes, Superboid& super, const step_int step)
     }
   
   super.virtualMiniboids.clear();
-  
+
   return;
 }
 

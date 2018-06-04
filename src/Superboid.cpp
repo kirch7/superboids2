@@ -174,6 +174,7 @@ Superboid::Superboid(void):
   meanRadius2(-0.0f),
   virtualsInfo(std::ios_base::out),
   _activated(false),
+  _keepActivated(true),
   _randomEngine(getSeed(ID)),
   _lastDivisionStep(0)
 {
@@ -251,7 +252,8 @@ Superboid::Superboid(void):
     }
   }
 
-  ++(this -> _totalSuperboids);
+  this->deactivate();
+  ++(this->_totalSuperboids);
 
   return;
 }
@@ -375,6 +377,19 @@ void
 Superboid::setNextPosition(const step_int step)
 {
   this->setShape(step);
+
+  mini_int samePositionCounter = 0;
+  if (step >= 42)
+    for (const auto& mini : this->miniboids)
+      for (const auto& pos1 : mini._positionHistory)
+	for (const auto& pos2 : mini._positionHistory)
+	  if (getModule<std::valarray<real>>(pos1 - pos2) > 1.0e-10)
+	    if (Distance(pos1, pos2).module < parameters().SPEED[this->type] * parameters().DT)
+	      ++samePositionCounter;
+
+  if (samePositionCounter == this->miniboids.size())
+    std::cerr << "problem with cell " << this->ID << ". " << "position: " << this->miniboids[0].position << std::endl;
+  
   for (auto& mini : this->miniboids)
     mini.setNextPosition(step);
   
@@ -405,7 +420,7 @@ setOriginalPositions(std::vector<Miniboid>& miniboids, const std::vector<std::va
 static void
 rearrangePeripherals(Superboid& superboid, const real distance)
 {
-  superboid.miniboids[0].checkLimits(0);
+  superboid.miniboids[0].checkLimits();
   superboid.miniboids[0].reset();
   std::vector<Distance> distances;
   
@@ -416,7 +431,7 @@ rearrangePeripherals(Superboid& superboid, const real distance)
     dist *= distance + parameters().REAL_TOLERANCE;
     superboid.miniboids[miniID].position = superboid.miniboids[0u].position + dist;
     superboid.miniboids[miniID].reset();
-    superboid.miniboids[miniID].checkLimits(0);
+    superboid.miniboids[miniID].checkLimits();
   }
   
   return;
@@ -436,14 +451,15 @@ Superboid::divide(const super_int divide_by, Superboid& newSuperboid, std::vecto
     return false;
   }
 
-  static std::default_random_engine generator;
+  static std::random_device devRand;
+  static std::default_random_engine generator(devRand());
   std::uniform_int_distribution<int> distribution(0, parameters().TYPES_NO - 1);
   const type_int newType = distribution(generator);
   
   *const_cast<type_int*>(&(newSuperboid.type)) = newType;
 
   const std::vector<std::valarray<real>> originalPositions = getOriginalPositions(this->miniboids);
-  newSuperboid._activated = true;
+  newSuperboid.activate();
   for (mini_int miniID = 0u; miniID < parameters().MINIBOIDS_PER_SUPERBOID; ++miniID)
   {
     newSuperboid.miniboids[miniID].position = this->miniboids[miniID].position;
@@ -462,7 +478,7 @@ Superboid::divide(const super_int divide_by, Superboid& newSuperboid, std::vecto
 
     if (atempts > 16)
     {
-      newSuperboid._activated = false;
+      newSuperboid.setDeactivation();
       return false;
     }
     
@@ -495,10 +511,20 @@ Superboid::divide(const super_int divide_by, Superboid& newSuperboid, std::vecto
 	    }
     if (insideBox == false)
       continue;
-    
-    nextBoxes(boxes, *this, step);
-    nextBoxes(boxes, newSuperboid, step);
 
+    for (auto& mini : newSuperboid.miniboids)
+      mini.setBox(&boxes[Box::getBoxID(mini.position)]);
+
+    nextBoxes(boxes, *this, step);
+    
+    for (auto super : twoSupers)
+    {
+      for (auto& mini : super->miniboids)
+	mini.setNeighbors(step);
+      for (auto& mini : super->virtualMiniboids)
+    	mini.setNeighbors(step);
+    }
+    
     for (auto super : twoSupers)
     {
       for (auto& mini : super->miniboids)
@@ -513,7 +539,6 @@ Superboid::divide(const super_int divide_by, Superboid& newSuperboid, std::vecto
 
 	if (!someInvasion)
 	{
-	  mini.setNeighbors(step);
 	  for (const auto& list : mini._neighbors)
 	    if (mini.fatInteractions(0, list, false))
 	    {
@@ -635,9 +660,22 @@ void
 Superboid::deactivate(void)
 {
   this->_activated = false;
-  for (const auto& mini : this->miniboids)
+  this->setDeactivation();
+  for (auto& mini : this->miniboids)
+  {
     if (mini.getBoxPtr())
       mini.getBoxPtr()->remove(mini);
+    mini.setBox(nullptr);
+  }
   
+  return;
+}
+
+void
+Superboid::activate(void)
+{
+  this->_activated = true;
+  this->_keepActivated = true;
+
   return;
 }

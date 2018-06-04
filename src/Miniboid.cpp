@@ -30,16 +30,24 @@ std::valarray<real> Miniboid::getAngles(const mini_int id)
 }
 
 void
-Miniboid::checkLimits(const step_int step)
+Miniboid::checkLimits(void)
 {
   if (parameters().BC == BoundaryCondition::PERIODIC)
     this->checkPeriodicLimits();
   else if (parameters().BC == BoundaryCondition::RECTANGLE || parameters().BC == BoundaryCondition::STOKES)
     this->checkRectangularLimits();
 
-  if (parameters().BC == BoundaryCondition::STOKES)
+  if (parameters().BC == BoundaryCondition::STOKES && this->isVirtual == false)
     this->checkStokesLimits();
+  
+  return;
+}
 
+void
+Miniboid::checkLimits(const step_int step)
+{
+  this->checkLimits();
+  
   if (step != 0)
     this->checkKillCondition(step);
   
@@ -65,12 +73,12 @@ Miniboid::checkPeriodicLimits()
 void
 Miniboid::checkKillCondition(const step_int step)
 {
-  if (this->superboid.isActivated() == false)
+  if (this->superboid.isActivated() == false || this->superboid.willDie())
     return;
   
   if (parameters().KILL_CONDITION == KillCondition::RIGHT_EDGE || parameters().KILL_CONDITION == KillCondition::RIGHT_EDGE_OR_P0)
     if (this->position[X] > parameters().RECTANGLE_SIZE[X] / 2.0f)
-      this->superboid.deactivate();
+      this->superboid.setDeactivation();
 
   if (parameters().KILL_CONDITION == KillCondition::P0 || parameters().KILL_CONDITION == KillCondition::RIGHT_EDGE_OR_P0)
   {
@@ -78,7 +86,7 @@ Miniboid::checkKillCondition(const step_int step)
     const real P0 = this->superboid.perimeter / std::sqrt(this->superboid.area);
     if (P0 > parameters().P0_LIMIT)
     {
-      this->superboid.deactivate();
+      this->superboid.setDeactivation();
       std::cerr << "Death with p0\t" << P0 << "\tat position " << this->superboid.miniboids[0].position << std::endl;
     }
   }
@@ -559,12 +567,14 @@ Miniboid::setNextVelocity(const step_int STEP)
 void
 Miniboid::setNextPosition(const step_int step)
 {
+  this->_positionHistory[step % 42] = this->position;
+
   this->velocity = this->newVelocity;
-  if (this->_invasionCounter > 15u)
+  if (this->_invasionCounter > 15u && this->ID != 0u)
     this->position = this->superboid.miniboids[0u].position - (1.1f * parameters().CORE_DIAMETER * this->radialDistance.getDirectionArray());
-  else if (this->_invasionCounter > 10u)
+  else if (this->_invasionCounter > 10u && this->ID != 0u)
     this->position = this->superboid.miniboids[0u].position - (2.0f * parameters().CORE_DIAMETER * this->radialDistance.getDirectionArray());
-  else if (this->_invasionCounter > 5u)
+  else if (this->_invasionCounter > 5u && this->ID != 0u)
     this->position = this->superboid.miniboids[0u].position - (0.5f * this->radialDistance.module * this->radialDistance.getDirectionArray());
   else
   {

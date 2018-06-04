@@ -54,11 +54,14 @@ public:
   std::ostringstream virtualsInfo;
   step_int getLastDivisionStep(void) const { return this->_lastDivisionStep; }
 
+  inline void setDeactivation(void) { this->_keepActivated = false; }
+  inline bool willDie(void) { return !this->_keepActivated; }
   void deactivate(void);
   inline bool isActivated(void) const { return this->_activated; }
-  friend void oneSystem(void);
+  void activate(void); // Ignoring boxes.
 protected:
   bool _activated;
+  bool _keepActivated;
   static super_int _totalSuperboids;
   std::default_random_engine _randomEngine;
   step_int _shapeStep;

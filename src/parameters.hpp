@@ -89,6 +89,10 @@ public:
   std::vector<std::vector<real>> KAPA;
   std::vector<real> KAPA_MEDIUM;
 
+  std::vector<real>              TANGENT_REQ;
+  std::vector<std::vector<real>> TANGENT_BETA;
+  std::vector<real>              TANGENT_BETA_MEDIUM;
+
   std::vector<std::vector<real>> INTER_ALPHA;
   std::vector<real> AUTO_ALPHA;
 

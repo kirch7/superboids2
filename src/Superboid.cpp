@@ -378,18 +378,6 @@ Superboid::setNextPosition(const step_int step)
 {
   this->setShape(step);
 
-  mini_int samePositionCounter = 0;
-  if (step >= 42)
-    for (const auto& mini : this->miniboids)
-      for (const auto& pos1 : mini._positionHistory)
-	for (const auto& pos2 : mini._positionHistory)
-	  if (getModule<std::valarray<real>>(pos1 - pos2) > 1.0e-10)
-	    if (Distance(pos1, pos2).module < parameters().SPEED[this->type] * parameters().DT)
-	      ++samePositionCounter;
-
-  if (samePositionCounter == this->miniboids.size())
-    std::cerr << "problem with cell " << this->ID << ". " << "position: " << this->miniboids[0].position << std::endl;
-  
   for (auto& mini : this->miniboids)
     mini.setNextPosition(step);
   

@@ -513,6 +513,9 @@ Parameters::set(void)
   this->KAPA = getParameter<std::vector<std::vector<real>>>("kapa");
   this->KAPA_MEDIUM = getParameter<std::vector<real>>("kapa_medium");
 
+  this->TANGENT_BETA = getParameter<std::vector<std::vector<real>>>("tangent_beta");
+  this->TANGENT_BETA_MEDIUM = getParameter<std::vector<real>>("tangent_beta_medium");
+    
   this->INTER_ALPHA = getParameter<std::vector<std::vector<real>>>("inter_alpha");
   this->AUTO_ALPHA = getParameter<std::vector<real>>("auto_alpha");
 
@@ -548,6 +551,10 @@ Parameters::set(void)
     if (this->getDivisionDistance() > minRadialReq - this->CORE_DIAMETER)
       panic("Daughter size too large! Reduce core diameter or number of peripheric miniboids!");
   }
+
+  this->TANGENT_REQ = std::vector<real>(this->TYPES_NO, -0.0);
+  for (type_int t = 0u; t < this->TYPES_NO; ++t)
+    this->TANGENT_REQ[t] = TWO_PI * this->RADIAL_REQ[t] / (this->MINIBOIDS_PER_SUPERBOID - 1);
 }
 
 //// Distância entre núcleo velho e núcleo novo.

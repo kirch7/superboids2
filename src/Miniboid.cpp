@@ -535,12 +535,13 @@ Miniboid::setNextVelocity(const step_int STEP)
   // Twist
   for (const auto& tn : this->_twistNeighbors)
   {
+    const short int signal = sign(tn.ANGLES[0u]);
     const Miniboid& miniNeighbor = miniboidsInThisCell[tn.ID];
     const real distanceBetween = tn._distance.module;
     std::valarray<real> tangent = (this->radialDistance.getTangentArray());
     if (distanceBetween <= parameters().CORE_DIAMETER)
     {
-      const std::valarray<real> f = sign(tn.ANGLES[0u]) * parameters().INFINITE_FORCE * tangent;
+      const std::valarray<real> f = signal * parameters().INFINITE_FORCE * tangent;
       this->_forceSum += f;
     }
     else
@@ -550,8 +551,11 @@ Miniboid::setNextVelocity(const step_int STEP)
       const real kapa1 = this->getHarrisParameter(parameters().KAPA, parameters().KAPA_MEDIUM);
       const real kapa2 = miniNeighbor.getHarrisParameter(parameters().KAPA, parameters().KAPA_MEDIUM);
       const real kapa = (kapa1 + kapa2) / 2.0f;
-      const std::valarray<real> f = -kapa * SUBTRACTION * parameters().RADIAL_REQ[MY_TYPE] * tangent;
-      this->_forceSum += f;
+      const real beta = this->getHarrisParameter(parameters().TANGENT_BETA, parameters().TANGENT_BETA_MEDIUM);
+      const std::valarray<real> f1 = -kapa * SUBTRACTION * parameters().RADIAL_REQ[MY_TYPE] * tangent;
+      const std::valarray<real> f2 = (signal * beta * tn._distance.module * (1.0f - distanceBetween / parameters().TANGENT_REQ[MY_TYPE])) * tn._distance.getDirectionArray();
+      this->_forceSum += f1;
+      this->_forceSum += f2;
     }
   }
 
@@ -567,8 +571,6 @@ Miniboid::setNextVelocity(const step_int STEP)
 void
 Miniboid::setNextPosition(const step_int step)
 {
-  this->_positionHistory[step % 42] = this->position;
-
   this->velocity = this->newVelocity;
   if (this->_invasionCounter > 15u && this->ID != 0u)
     this->position = this->superboid.miniboids[0u].position - (1.1f * parameters().CORE_DIAMETER * this->radialDistance.getDirectionArray());

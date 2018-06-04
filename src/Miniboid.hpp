@@ -68,8 +68,6 @@ protected:
   void checkStokesLimits();
   void checkKillCondition(const step_int);
   real getHarrisParameter(const std::vector<std::vector<real>>&, const std::vector<real>& medium) const;
-public:
-  std::vector<std::valarray<real>> _positionHistory;
 };
 
 inline Miniboid::Miniboid(const mini_int _id, Superboid& super, const bool isVirt = false):
@@ -85,8 +83,7 @@ inline Miniboid::Miniboid(const mini_int _id, Superboid& super, const bool isVir
   _velocitySum(parameters().DIMENSIONS),
   _forceSum(parameters().DIMENSIONS),
   _box(nullptr),
-  _neighborsPerTypeNos(parameters().TYPES_NO),
-  _positionHistory(std::vector<std::valarray<real>>(42, std::valarray<real>(-0.0, 2)))
+  _neighborsPerTypeNos(parameters().TYPES_NO)
 {
   if (!this->isVirtual)
   {

@@ -94,7 +94,7 @@ setParameters(void)
   uint_set.emplace_back("non_division", true, "0");
   uint_set.emplace_back("steps", true, "10000");
   uint_set.emplace_back("exit_interval", true, "1000");
-  uint_set.emplace_back("threads", true, "8");
+  uint_set.emplace_back("threads", true, "4");
   
   auto& real_set = Parameter<real>::map;
   real_set.emplace_back("tolerable_p0", true, "4");
@@ -129,6 +129,8 @@ setParameters(void)
   vector_set.back().pushDependency("types");
   vector_set.emplace_back("radial_eq", true, "1");
   vector_set.back().pushDependency("types");
+  vector_set.emplace_back("tangent_beta_medium", true, "0.1");
+  vector_set.back().pushDependency("types");
   vector_set.emplace_back("kapa_medium", true, "2");
   vector_set.back().pushDependency("types");
   vector_set.emplace_back("auto_alpha", true, "13");
@@ -137,6 +139,8 @@ setParameters(void)
   vector_set.back().pushDependency("types");
 
   auto& matrix_set = Parameter<std::vector<std::vector<real>>>::map;
+  matrix_set.emplace_back("tangent_beta", true, "0.1");
+  matrix_set.back().pushDependency("types");
   matrix_set.emplace_back("kapa", true, "2");
   matrix_set.back().pushDependency("types");
   matrix_set.emplace_back("inter_eq", true, "0.75");

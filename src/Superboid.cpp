@@ -174,7 +174,7 @@ Superboid::Superboid(void):
   meanRadius2(-0.0f),
   virtualsInfo(std::ios_base::out),
   _activated(false),
-  _keepActivated(true),
+  _keepActivated(false),
   _randomEngine(getSeed(ID)),
   _lastDivisionStep(0)
 {
@@ -464,8 +464,9 @@ Superboid::divide(const super_int divide_by, Superboid& newSuperboid, std::vecto
     ++atempts;
     setOriginalPositions(this->miniboids, originalPositions);
 
-    if (atempts > 16)
+    if (atempts > 6)
     {
+      nextBoxes(boxes, *this, step);
       newSuperboid.setDeactivation();
       return false;
     }
@@ -647,8 +648,12 @@ Superboid::checkWrongNeighbors(const std::vector<Superboid>& superboids)
 void
 Superboid::deactivate(void)
 {
+  std::cerr << "death " << this->ID << std::endl;
+  
+  if (!this->willDie())
+    std::cerr << "eita" << std::endl;
+  
   this->_activated = false;
-  this->setDeactivation();
   for (auto& mini : this->miniboids)
   {
     if (mini.getBoxPtr())

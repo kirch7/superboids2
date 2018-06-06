@@ -109,9 +109,6 @@ nextBoxes(std::vector<Box>& boxes, std::vector<Superboid>& superboids, const ste
 {
   for (auto& super : superboids)
   {
-    if (super.willDie())
-      super.deactivate();
-  
     if (super.isActivated() == true)
     {
       for (auto& mini : super.miniboids)
@@ -235,6 +232,12 @@ nextStepOK(std::vector<Box>& boxes,
 #else
 #warning "You should enable correctPositionAndRotation."
 #endif
+
+  {
+    for(auto& super : superboids)
+      if (super.isActivated() && super.willDie())
+	super.deactivate();
+  }
 
   if (gamma)
   {

@@ -448,6 +448,9 @@ Superboid::divide(const super_int divide_by, Superboid& newSuperboid, std::vecto
 
   const std::vector<std::valarray<real>> originalPositions = getOriginalPositions(this->miniboids);
   newSuperboid.activate();
+  newSuperboid.virtualMiniboids.clear();
+  this->virtualMiniboids.clear();
+  
   for (mini_int miniID = 0u; miniID < parameters().MINIBOIDS_PER_SUPERBOID; ++miniID)
   {
     newSuperboid.miniboids[miniID].position = this->miniboids[miniID].position;

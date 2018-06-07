@@ -594,6 +594,17 @@ Parameters::set(void)
   this->TANGENT_REQ = std::vector<real>(this->TYPES_NO, -0.0);
   for (type_int t = 0u; t < this->TYPES_NO; ++t)
     this->TANGENT_REQ[t] = TWO_PI * this->RADIAL_REQ[t] / (this->MINIBOIDS_PER_SUPERBOID - 1);
+
+  this->TANGENT_PLASTIC_BEGIN = getParameter<std::vector<real>>("tangent_plastic_begin");
+  for (const auto comp : this->TANGENT_PLASTIC_BEGIN)
+    if (comp < this->REAL_TOLERANCE)
+      panic("tangent_plastic_begin must be bigger than real_tolerance", comp);
+  this->TANGENT_PLASTIC_END = getParameter<std::vector<real>>("tangent_plastic_end");
+  for (const auto comp : this->TANGENT_PLASTIC_END)
+    if (comp < this->REAL_TOLERANCE)
+      panic("tangent_plastic_begin must be bigger than real_tolerance", comp);
+
+
 }
 
 //// Distância entre núcleo velho e núcleo novo.

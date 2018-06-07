@@ -92,7 +92,9 @@ public:
   std::vector<real>              TANGENT_REQ;
   std::vector<std::vector<real>> TANGENT_BETA;
   std::vector<real>              TANGENT_BETA_MEDIUM;
-
+  std::vector<real>              TANGENT_PLASTIC_BEGIN;
+  std::vector<real>              TANGENT_PLASTIC_END;
+  
   std::vector<std::vector<real>> INTER_ALPHA;
   std::vector<real> AUTO_ALPHA;
 

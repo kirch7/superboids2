@@ -5,6 +5,7 @@
 #include <iostream> // operator<<
 #include <list>
 #include <tuple>
+#include "elastic_plastic.hpp"
 #include "Miniboid.hpp"
 #include "Box.hpp"
 #include "Distance.hpp"
@@ -173,7 +174,6 @@ Miniboid::checkStokesLimits()
   return;
 }
 
-
 void
 Miniboid::noise(void)
 {
@@ -181,64 +181,6 @@ Miniboid::noise(void)
   _noiseSum = std::valarray<real>({std::cos(angle), std::sin(angle)});
   _noiseSum *= parameters().ETA;
   return;
-}
-
-static inline std::valarray<real>
-getFiniteForce(Distance dist, const real beta, const real rEq)
-{
-  const real& module = dist.module;
-  std::valarray<real> force(0.0f, parameters().DIMENSIONS);
-
-  if (module <= (parameters().INTER_ELASTIC_UP_LIMIT + 1.0e-6)) // Elastic regime or called by recursion.
-  {
-    const real scalar = (1.0f - module / rEq) * beta;
-    if (std::isfinite(scalar))
-    {
-      force = dist.getDirectionArray();
-      force *= scalar;
-    }
-    return force;
-  }
-  else // Constant regime; call recursion.
-  {
-    dist.module = parameters().INTER_ELASTIC_UP_LIMIT;
-    return getFiniteForce(dist, beta, rEq);
-  }
-}
-
-static std::valarray<real>
-getFiniteRadialForceWithoutBeta(Distance dist, const real rEq, const type_int TYPE)
-{
-  const real& module = dist.module;
-  std::valarray<real> force(-0.0f, parameters().DIMENSIONS);
-  
-  if (module <= parameters().RADIAL_PLASTIC_BEGIN[TYPE] + 1.0e-6)
-  {
-    const real dif = 1.0f - dist.module / rEq;
-    //// const real difCubicRoot = std::pow(std::fabs(dif), parameters().RADIAL_SPRING_EXP);
-    const real scalar = sign(dif) * std::fabs(dif);
-    if (std::isfinite(scalar))
-    {
-      force = dist.getDirectionArray();
-      force *= scalar;
-    }
-  }
-  else if (module <= parameters().RADIAL_PLASTIC_END[TYPE] + 1.0e06) // Constant regime; call recursion.
-  {
-    dist.module = parameters().RADIAL_PLASTIC_BEGIN[TYPE];
-    force = getFiniteRadialForceWithoutBeta(dist, rEq, TYPE);
-  }
-  else
-  {
-    const real d = parameters().RADIAL_PLASTIC_END[TYPE] - parameters().RADIAL_PLASTIC_BEGIN[TYPE];
-    const real dif = 1.0f - (dist.module - d) / rEq;
-    if (std::isfinite(dif))
-    {
-      force = dist.getDirectionArray();
-      force *= dif;
-    }
-  }
-  return force;
 }
 
 bool
@@ -553,7 +495,8 @@ Miniboid::setNextVelocity(const step_int STEP)
       const real kapa = (kapa1 + kapa2) / 2.0f;
       const real beta = this->getHarrisParameter(parameters().TANGENT_BETA, parameters().TANGENT_BETA_MEDIUM);
       const std::valarray<real> f1 = -kapa * SUBTRACTION * parameters().RADIAL_REQ[MY_TYPE] * tangent;
-      const std::valarray<real> f2 = (signal * beta * tn._distance.module * (1.0f - distanceBetween / parameters().TANGENT_REQ[MY_TYPE])) * tn._distance.getDirectionArray();
+      const std::vector<real> limits({parameters().TANGENT_PLASTIC_BEGIN[MY_TYPE], parameters().TANGENT_PLASTIC_END[MY_TYPE]});
+      const std::valarray<real> f2 = static_cast<real>(signal) * getFiniteForce(tn._distance, beta, parameters().TANGENT_REQ[MY_TYPE], limits);
       this->_forceSum += f1;
       this->_forceSum += f2;
     }

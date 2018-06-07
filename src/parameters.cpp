@@ -23,10 +23,37 @@ const real    HALF_PI = 1.57079633f;
 const real         PI = 3.14159265359f;
 const real     TWO_PI = 6.283185307179586f;
 
+static std::size_t
+getSignificantNo(const real num)
+{
+  std::ostringstream oss;
+  oss.precision(7);
+  oss << num;
+  const auto str = oss.str();
+  const size_t dot_index = str.find('.');
+  if (dot_index == std::string::npos)
+    return 0;
+  else
+  {
+    return str.size() - dot_index - 1;
+  }
+}
+
 template <typename T>
 static void
 printMatrix(std::ostringstream& st, const std::vector<std::vector<T>>& matrix)
 {
+  std::size_t signifMax = 0;
+  for (const auto& line : matrix)
+    for (const auto& elem : line)
+    {
+      const auto signif = getSignificantNo(elem);
+      if (signif > signifMax)
+	signifMax = signif;
+    }
+
+  const auto precision = st.precision();
+  st.precision(signifMax);
   for (type_int line = 0u; line < matrix.size(); ++line)
   {
     st << '#';
@@ -34,20 +61,32 @@ printMatrix(std::ostringstream& st, const std::vector<std::vector<T>>& matrix)
       st << '\t' << matrix[line][column];
     st << std::endl;
   }
+  st.precision(precision);
   
   return;
 }
 
 template<typename S, typename T>
 static void
-printVector(S& st, const std::vector<T>& matrix)
+printVector(S& st, const std::vector<T>& vec)
 {
+  std::size_t signifMax = 0;
+  for (const auto& elem : vec)
+  {
+    const auto signif = getSignificantNo(elem);
+    if (signif > signifMax)
+      signifMax = signif;
+  }
+
+  const auto precision = st.precision();
+  st.precision(signifMax);
   st << '#';
-  const std::size_t SIZE  = matrix.size();
+  const std::size_t SIZE  = vec.size();
   for (type_int column = 0u; column < SIZE; ++column)
-    st << '\t' << matrix[column];
+    st << '\t' << vec[column];
   st << std::endl;
-  
+  st.precision(precision);
+
   return;
 }
 

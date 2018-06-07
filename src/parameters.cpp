@@ -27,7 +27,9 @@ static std::size_t
 getSignificantNo(const real num)
 {
   std::ostringstream oss;
+
   oss.precision(7);
+  oss << std::fixed;
   oss << num;
   const auto str = oss.str();
   const size_t dot_index = str.find('.');
@@ -35,7 +37,7 @@ getSignificantNo(const real num)
     return 0;
   else
   {
-    return str.size() - dot_index - 1;
+    return str.size() - dot_index;
   }
 }
 
@@ -230,6 +232,18 @@ getParameters(void)
 
     stream << std::endl << "# Auto Alpha:" << std::endl;
     printVector(stream, p.AUTO_ALPHA);
+    stream << std::endl;
+
+    stream << std::endl << "# Tangent R_Eq:" << std::endl;
+    printVector(stream, p.TANGENT_REQ);
+    stream << std::endl;
+
+    stream << std::endl << "# Tangent Plastic Begin:" << std::endl;
+    printVector(stream, p.TANGENT_PLASTIC_BEGIN);
+    stream << std::endl;
+
+    stream << std::endl << "# Tangent Plastic End:" << std::endl;
+    printVector(stream, p.TANGENT_PLASTIC_END);
     stream << std::endl;
 
     stream << std::endl << "# Kapa:" << std::endl;
@@ -591,20 +605,32 @@ Parameters::set(void)
       panic("Daughter size too large! Reduce core diameter or number of peripheric miniboids!");
   }
 
-  this->TANGENT_REQ = std::vector<real>(this->TYPES_NO, -0.0);
+  std::vector<real> arcs(this->TYPES_NO);
   for (type_int t = 0u; t < this->TYPES_NO; ++t)
-    this->TANGENT_REQ[t] = TWO_PI * this->RADIAL_REQ[t] / (this->MINIBOIDS_PER_SUPERBOID - 1);
+    arcs[t] = TWO_PI * this->RADIAL_REQ[t] / (this->MINIBOIDS_PER_SUPERBOID - 1);
+  
+  this->TANGENT_REQ = getParameter<std::vector<real>>("tangent_eq_factor");
+  for (const auto r : this->TANGENT_REQ)
+    if (r < this->REAL_TOLERANCE)
+      panic("tangent_eq_factor too small; should be close to 1", r);
+  for (type_int t = 0u; t < this->TYPES_NO; ++t)
+    this->TANGENT_REQ[t] *= arcs[t];
 
-  this->TANGENT_PLASTIC_BEGIN = getParameter<std::vector<real>>("tangent_plastic_begin");
+  this->TANGENT_PLASTIC_BEGIN = getParameter<std::vector<real>>("tangent_plastic_begin_factor");
   for (const auto comp : this->TANGENT_PLASTIC_BEGIN)
     if (comp < this->REAL_TOLERANCE)
       panic("tangent_plastic_begin must be bigger than real_tolerance", comp);
-  this->TANGENT_PLASTIC_END = getParameter<std::vector<real>>("tangent_plastic_end");
+  for (type_int t = 0u; t < this->TYPES_NO; ++t)
+    this->TANGENT_PLASTIC_BEGIN[t] *= arcs[t];
+  
+  this->TANGENT_PLASTIC_END = getParameter<std::vector<real>>("tangent_plastic_end_factor");
   for (const auto comp : this->TANGENT_PLASTIC_END)
     if (comp < this->REAL_TOLERANCE)
       panic("tangent_plastic_begin must be bigger than real_tolerance", comp);
+  for (type_int t = 0u; t < this->TYPES_NO; ++t)
+    this->TANGENT_PLASTIC_END[t] *= arcs[t];
 
-
+  return;
 }
 
 //// Distância entre núcleo velho e núcleo novo.

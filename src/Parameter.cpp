@@ -121,9 +121,11 @@ setParameters(void)
   vector_set.back().pushDependency("types");
   vector_set.emplace_back("radial_plastic_end", true, "domain");
   vector_set.back().pushDependency("types");
-  vector_set.emplace_back("tangent_plastic_begin", true, "domain");
+  vector_set.emplace_back("tangent_eq_factor", true, "1");
   vector_set.back().pushDependency("types");
-  vector_set.emplace_back("tangent_plastic_end", true, "domain");
+  vector_set.emplace_back("tangent_plastic_begin_factor", true, "domain");
+  vector_set.back().pushDependency("types");
+  vector_set.emplace_back("tangent_plastic_end_factor", true, "domain");
   vector_set.back().pushDependency("types");
   vector_set.emplace_back("proportions", true, "1");
   vector_set.back().pushDependency("types");

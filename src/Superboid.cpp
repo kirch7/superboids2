@@ -174,7 +174,7 @@ Superboid::Superboid(void):
   meanRadius2(-0.0f),
   virtualsInfo(std::ios_base::out),
   _activated(false),
-  _keepActivated(false),
+  _willDie(true),
   _randomEngine(getSeed(ID)),
   _lastDivisionStep(0)
 {
@@ -448,8 +448,8 @@ Superboid::divide(const super_int divide_by, Superboid& newSuperboid, std::vecto
 
   const std::vector<std::valarray<real>> originalPositions = getOriginalPositions(this->miniboids);
   newSuperboid.activate();
-  newSuperboid.virtualMiniboids.clear();
-  this->virtualMiniboids.clear();
+  newSuperboid.clearVirtualMiniboids();
+  this->clearVirtualMiniboids();
   
   for (mini_int miniID = 0u; miniID < parameters().MINIBOIDS_PER_SUPERBOID; ++miniID)
   {
@@ -550,8 +550,8 @@ Superboid::divide(const super_int divide_by, Superboid& newSuperboid, std::vecto
   this->reset();
   newSuperboid.reset();
   
-  this->virtualMiniboids.clear();
-  newSuperboid.virtualMiniboids.clear();
+  this->clearVirtualMiniboids();
+  newSuperboid.clearVirtualMiniboids();
 
   return true;
 }
@@ -671,7 +671,18 @@ void
 Superboid::activate(void)
 {
   this->_activated = true;
-  this->_keepActivated = true;
+  this->_willDie = false;
 
   return;
+}
+
+void
+Superboid::clearVirtualMiniboids(void)
+{
+  for (auto& mini : this->virtualMiniboids)
+  {
+    if (mini.getBoxPtr())
+      mini.getBoxPtr()->remove(mini);
+  }
+  this->virtualMiniboids.clear();
 }

@@ -15,6 +15,8 @@ class Superboid
 {
 public:
   std::vector<Miniboid> virtualMiniboids;
+  void clearVirtualMiniboids(void);
+
   std::vector<Miniboid> miniboids;
   const super_int ID;
   const type_int type;
@@ -54,14 +56,14 @@ public:
   std::ostringstream virtualsInfo;
   step_int getLastDivisionStep(void) const { return this->_lastDivisionStep; }
 
-  inline void setDeactivation(void) { this->_keepActivated = false; }
-  inline bool willDie(void) { return !this->_keepActivated; }
+  inline void setDeactivation(void) { this->_willDie = true; }
+  inline bool willDie(void) const { return this->_willDie; }
   void deactivate(void);
   inline bool isActivated(void) const { return this->_activated; }
   void activate(void); // Ignoring boxes.
 protected:
   bool _activated;
-  bool _keepActivated;
+  bool _willDie;
   static super_int _totalSuperboids;
   std::default_random_engine _randomEngine;
   step_int _shapeStep;

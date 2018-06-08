@@ -155,7 +155,7 @@ nextBoxes(std::vector<Box>& boxes, Superboid& super, const step_int step)
       }
     }
   
-  super.virtualMiniboids.clear();
+  super.clearVirtualMiniboids();
 
   return;
 }

@@ -775,22 +775,23 @@ getSpaces(const std::size_t n)
 std::string
 getParametersSample()
 {
+  const std::size_t charsNo = 36;
   std::stringstream stream;
 
   for (const auto& param : Parameter<std::string>::map)
-    stream << param.name << getSpaces(24 - param.name.size()) << '=' << ' ' << param.defaultValue << std::endl;
+    stream << param.name << getSpaces(charsNo - param.name.size()) << '=' << ' ' << param.defaultValue << std::endl;
 
   for (const auto& param : Parameter<unsigned long int>::map)
-    stream << param.name << getSpaces(24 - param.name.size()) << '=' << ' ' << param.defaultValue << std::endl;
+    stream << param.name << getSpaces(charsNo - param.name.size()) << '=' << ' ' << param.defaultValue << std::endl;
   
   for (const auto& param : Parameter<real>::map)
-    stream << param.name << getSpaces(24 - param.name.size()) << '=' << ' ' << param.defaultValue << std::endl;
+    stream << param.name << getSpaces(charsNo - param.name.size()) << '=' << ' ' << param.defaultValue << std::endl;
   
   for (const auto& param : Parameter<std::vector<real>>::map)
-    stream << param.name << getSpaces(24 - param.name.size()) << '=' << ' ' << param.defaultValue << std::endl;
+    stream << param.name << getSpaces(charsNo - param.name.size()) << '=' << ' ' << param.defaultValue << std::endl;
 
   for (const auto& param : Parameter<std::vector<std::vector<real>>>::map)
-    stream << param.name << getSpaces(24 - param.name.size()) << '=' << ' ' << param.defaultValue << std::endl;
+    stream << param.name << getSpaces(charsNo - param.name.size()) << '=' << ' ' << param.defaultValue << std::endl;
   
   return stream.str();
 }

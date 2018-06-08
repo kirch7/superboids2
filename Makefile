@@ -1,9 +1,17 @@
 BUILDDIR := build
 SRCDIR   := src
 
-CXX ?= clang++
-CXX =  clang++ ##############
-CPP = clang++
+SHELL := /bin/bash
+ifeq ("$(shell clang++ --version > /dev/null 2>&1 ; echo $$?)", "0")
+CXX := clang++
+endif
+ifeq ("clang++", "$(CXX)")
+START := clang
+else
+START := ada
+endif
+
+CPP = $(CXX)
 TARGET = superboids
 CPPFLAGS = -MP -MD
 CXXLIBS = -lpthread
@@ -21,8 +29,10 @@ CXXSOURCES := $(wildcard $(SRCDIR)/*.cpp)
 OBJECTS    := $(CXXSOURCES:$(SRCDIR)/%.cpp=$(BUILDDIR)/%.o)
 DEPS       := $(CXXSOURCES:$(SRCDIR)/%.cpp=$(BUILDDIR)/%.d)
 
-all: CXXFLAGS+=-O3 $(WARNINGS)
-all: $(TARGET)
+all: $(START)
+
+clang: CXXFLAGS+=-O3 $(WARNINGS)
+clang: $(TARGET)
 
 ada: CXX=g++
 ada: CXXFLAGS=-std=c++14 -fno-strict-aliasing -flto -fPIC -O3 $(GCCWARNINGS)

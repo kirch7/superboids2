@@ -27,16 +27,25 @@ static std::size_t
 getSignificantNo(const real num)
 {
   std::ostringstream oss;
-
   oss.precision(7);
   oss << std::fixed;
   oss << num;
-  const auto str = oss.str();
+
+  auto str = oss.str();
   const size_t dot_index = str.find('.');
+  
   if (dot_index == std::string::npos)
     return 0;
   else
   {
+    while (str.size() >= dot_index)
+    {
+      if (str.back() == '0')
+	str.pop_back();
+      else
+	break;
+    }
+    
     return str.size() - dot_index;
   }
 }

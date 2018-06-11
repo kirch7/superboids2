@@ -11,6 +11,13 @@
 #include "Miniboid.hpp"
 #include "CellNeighbors.hpp"
 
+enum class DeathState
+{
+  Live,
+  WillDie,
+  Dead
+};
+
 class Superboid
 {
 public:
@@ -40,6 +47,7 @@ public:
     this->cellNeighbors = CellNeighbors();
     this->infiniteVectors.clear();
     this->infinite2Vectors.clear();
+    this->deathMessage = "";
   }
   Superboid(void);
   real get0to2piRandom(void);
@@ -56,19 +64,19 @@ public:
   std::ostringstream virtualsInfo;
   step_int getLastDivisionStep(void) const { return this->_lastDivisionStep; }
 
-  inline void setDeactivation(void) { this->_willDie = true; }
-  inline bool willDie(void) const { return this->_willDie; }
+  void setDeactivation(void);
+  bool willDie(void) const;
   void deactivate(void);
-  inline bool isActivated(void) const { return this->_activated; }
+  bool isActivated(void) const;
   void activate(void); // Ignoring boxes.
+  std::string deathMessage;
 protected:
-  bool _activated;
-  bool _willDie;
   static super_int _totalSuperboids;
+  DeathState       _deathState;
   std::default_random_engine _randomEngine;
   step_int _shapeStep;
   step_int _lastDivisionStep;
-  inline Superboid(Superboid&);
+  Superboid(Superboid&) = delete;
 };
 
 extern std::ostream& operator<< (std::ostream& os, const Superboid& super);

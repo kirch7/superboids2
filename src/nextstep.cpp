@@ -217,8 +217,8 @@ correctPositionAndRotation(std::vector<Superboid>& superboids)
 	mini.position -= meanPosition;
 }
 
-bool
-nextStepOK(std::vector<Box>& boxes,
+error::NextStepError
+nextStep(std::vector<Box>& boxes,
 	   std::vector<Superboid>& superboids,
 	   const step_int step,
 	   const bool shape,
@@ -235,7 +235,7 @@ nextStepOK(std::vector<Box>& boxes,
 
   {
     for(auto& super : superboids)
-      if (super.isActivated() && super.willDie())
+      if (super.willDie())
 	super.deactivate();
   }
 
@@ -313,7 +313,7 @@ nextStepOK(std::vector<Box>& boxes,
 	continue;
       const size_t s = super.virtualMiniboids.size();
       if (s > 4 * parameters().MINIBOIDS_PER_SUPERBOID)
-        return false;
+        return error::NextStepError::TOO_MANY_VIRTUALS_SINGLE_CELL;
     }
   
   {
@@ -332,5 +332,5 @@ nextStepOK(std::vector<Box>& boxes,
 
   nextBoxes(boxes, superboids, step);
   
-  return true;
+  return error::NextStepError::OK;
 }

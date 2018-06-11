@@ -79,18 +79,26 @@ Miniboid::checkKillCondition(const step_int step)
   
   if (parameters().KILL_CONDITION == KillCondition::RIGHT_EDGE || parameters().KILL_CONDITION == KillCondition::RIGHT_EDGE_OR_P0)
     if (this->position[X] > parameters().RECTANGLE_SIZE[X] / 2.0f)
+    {
+      this->superboid.deathMessage = "right egde";
       this->superboid.setDeactivation();
-
+      std::cerr << "Death (rightEdge) at position " << this->superboid.miniboids[0].position << std::endl;
+      return;
+    }
+  
   if (parameters().KILL_CONDITION == KillCondition::P0 || parameters().KILL_CONDITION == KillCondition::RIGHT_EDGE_OR_P0)
   {
     this->superboid.setShape(step);
     const real P0 = this->superboid.perimeter / std::sqrt(this->superboid.area);
     if (P0 > parameters().P0_LIMIT)
     {
+      this->superboid.deathMessage = "P0";
       this->superboid.setDeactivation();
       std::cerr << "Death with p0\t" << P0 << "\tat position " << this->superboid.miniboids[0].position << std::endl;
+      return;
     }
   }
+  
   return;
 }
 
@@ -515,18 +523,20 @@ void
 Miniboid::setNextPosition(const step_int step)
 {
   this->velocity = this->newVelocity;
-  if (this->_invasionCounter > 15u && this->ID != 0u)
+  if (this->_invasionCounter > 0u && this->ID != 0u)
     this->position = this->superboid.miniboids[0u].position - (1.1f * parameters().CORE_DIAMETER * this->radialDistance.getDirectionArray());
-  else if (this->_invasionCounter > 10u && this->ID != 0u)
-    this->position = this->superboid.miniboids[0u].position - (2.0f * parameters().CORE_DIAMETER * this->radialDistance.getDirectionArray());
-  else if (this->_invasionCounter > 5u && this->ID != 0u)
-    this->position = this->superboid.miniboids[0u].position - (0.5f * this->radialDistance.module * this->radialDistance.getDirectionArray());
+  // if (this->_invasionCounter > 15u && this->ID != 0u)
+  //   this->position = this->superboid.miniboids[0u].position - (1.1f * parameters().CORE_DIAMETER * this->radialDistance.getDirectionArray());
+  // else if (this->_invasionCounter > 10u && this->ID != 0u)
+  //   this->position = this->superboid.miniboids[0u].position - (2.0f * parameters().CORE_DIAMETER * this->radialDistance.getDirectionArray());
+  // else if (this->_invasionCounter > 5u && this->ID != 0u)
+  //   this->position = this->superboid.miniboids[0u].position - (0.5f * this->radialDistance.module * this->radialDistance.getDirectionArray());
   else
   {
     this->position += parameters().DT * this->velocity; // Velocity is already normalized to V0.
-    if (this->ID != 0 && !this->isVirtual)
-      this->position += this->radialDistance.getDirectionArray() *
-	((this->superboid.area - parameters().TARGET_AREA[this->superboid.type]) / (20.0f * TWO_PI * this->superboid.meanRadius));
+    // if (this->ID != 0 && !this->isVirtual)
+    //   this->position += this->radialDistance.getDirectionArray() *
+    // 	((this->superboid.area - parameters().TARGET_AREA[this->superboid.type]) / (20.0f * TWO_PI * this->superboid.meanRadius));
   }
   
   this->checkLimits(step);

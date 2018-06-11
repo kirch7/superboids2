@@ -323,9 +323,17 @@ oneSystem(void)
 	nextExitStep = step + deltaExit;
       }
     }
-    
-    if (nextStepOK(boxes, superboids, step, shape, gamma, checkVirtuals, exportVirtuals) == false)
+
+    auto error = nextStep(boxes, superboids, step, shape, gamma, checkVirtuals, exportVirtuals);
+    if (error != error::NextStepError::OK)
+    {
       keepStepLoop = false;
+      std::cerr << "this program will die soon. ";
+      if (error == error::NextStepError::TOO_MANY_VIRTUALS_SINGLE_CELL)
+	std::cerr << "TOO_MANY_VIRTUALS_SINGLE_CELL" << std::endl;
+      else if (error == error::NextStepError::TOO_MANY_VIRTUALS_AVERAGE)
+	std::cerr << "TOO_MANY_VIRTUALS_AVERAGE" << std::endl;
+    }
     
     // Mean gamma measure.
     if (gamma == true)

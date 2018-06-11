@@ -513,8 +513,8 @@ Miniboid::setNextVelocity(const step_int STEP)
   // Finalizing
   const std::valarray<real> sum = this->_noiseSum + this->_velocitySum + this->_forceSum;
   const real module = getModule(sum);
-  if (module != 0.0f)
-    this->newVelocity = parameters().SPEED[MY_TYPE] * (sum / module);
+  if (module > 1.0e-6f)
+    this->newVelocity = (parameters().SPEED[MY_TYPE] / module) * sum;
 
   return;
 }
@@ -537,6 +537,45 @@ Miniboid::setNextPosition(const step_int step)
     // if (this->ID != 0 && !this->isVirtual)
     //   this->position += this->radialDistance.getDirectionArray() *
     // 	((this->superboid.area - parameters().TARGET_AREA[this->superboid.type]) / (20.0f * TWO_PI * this->superboid.meanRadius));
+    if (this->ID == 0 && !this->isVirtual)
+    {
+      bool isFatOut = true;
+      for (mini_int miniID = 2; miniID < parameters().MINIBOIDS_PER_SUPERBOID; ++miniID)
+	if (isPointInTriangle(this->position,
+			      this->superboid.miniboids[1u].position,
+			      this->superboid.miniboids[miniID].position,
+			      this->superboid.miniboids[miniID + 1].position))
+	{
+	  isFatOut = false;
+	  break;
+	}
+
+      /*if (isFatOut)
+      {
+	Distance dist(std::valarray<real>(-0.0f, parameters().DIMENSIONS));
+	std::vector<bool> ok(parameters().DIMENSIONS, true);
+	for (const auto& mini1 : this->superboid.miniboids)
+	  for (const auto& mini2 : this->superboid.miniboids)
+	    if (mini1.ID != mini2.ID)
+	      if (mini1.ID != 0u && mini2.ID != 0u)
+		//{
+		
+		for (dimension_int dim = 0; dim < parameters().DIMENSIONS; ++dim)
+		  if (mini1.position[dim] - mini2.position[dim] > parameters().RANGE * 0.5f)
+		    ok[dim] = false;
+	
+	std::valarray<real> cm(-0.0f, parameters().DIMENSIONS);
+	for (const auto& mini : this->superboid.miniboids)
+	  if (mini.ID != 0)
+	    for (dimension_int dim = 0; dim < parameters().DIMENSIONS; ++dim)
+	    {
+	      if (ok[dim])
+		cm[dim] += mini.position[dim];
+	      //else
+		
+	    }
+	    }*/
+    }
   }
   
   this->checkLimits(step);

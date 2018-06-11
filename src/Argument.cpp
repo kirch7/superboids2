@@ -223,7 +223,7 @@ setInfinite(const std::string&)
   Infinite::_inf2File.open(Date::compactRunTime + "_inf2.dat", std::ios::out);
   Infinite::_virtFile.open(Date::compactRunTime + "_virt.dat", std::ios::out);
   if (!BinPrint::write())
-    return setBinPrint(nullptr);
+    return setBinPrint(std::string());
   return 0;
 }
 

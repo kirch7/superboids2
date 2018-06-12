@@ -38,6 +38,7 @@ public:
   void checkLimits(void);
   void setNextVelocity(const step_int);
   void setNextPosition(const step_int);
+  void checkFatOut(void);
   inline void setBox(Box* const b) { _box = b; }
   inline Box& getBox(void)    const { return *(this->_box); }
   inline Box* getBoxPtr(void) const { return this->_box; }

@@ -55,18 +55,26 @@ Miniboid::checkLimits(const step_int step)
   return;
 }
 
-void
-Miniboid::checkPeriodicLimits()
+static void
+checkPeriodicLimits(std::valarray<real>& position)
 {
   static const real HALF_RANGE(parameters().RANGE / 2.0f);
   
-  for (auto& component : this -> position)
+  for (auto& component : position)
   {
     while (component <= -HALF_RANGE)
       component += parameters().RANGE;
     while (component >   HALF_RANGE)
       component -= parameters().RANGE;
   }
+  
+  return;
+}
+
+void
+Miniboid::checkPeriodicLimits()
+{
+  ::checkPeriodicLimits(this->position);
   
   return;
 }
@@ -183,11 +191,47 @@ Miniboid::checkStokesLimits()
 }
 
 void
+Miniboid::checkFatOut(void)
+{
+  if (this->ID != 0 || this->isVirtual)
+    return;
+
+  bool isFatOut = true;
+  for (mini_int miniID = 2; miniID < parameters().MINIBOIDS_PER_SUPERBOID - 1; ++miniID)
+    if (isPointInTriangle(this->position,
+			  this->superboid.miniboids[1u].position,
+			  this->superboid.miniboids[miniID].position,
+			  this->superboid.miniboids[miniID + 1].position))
+    {
+      isFatOut = false;
+      break;
+    }
+
+  if (isFatOut)
+  {
+    std::valarray<real> cm(-0.0f, parameters().DIMENSIONS);
+    for (const auto& mini : this->superboid.miniboids)
+      if (mini.ID > 1)
+      {
+	Distance d(mini, this->superboid.miniboids[1]);
+	cm += d.module * d.getDirectionArray();
+      }
+    cm /= static_cast<real>(parameters().MINIBOIDS_PER_SUPERBOID - 2);
+    cm = this->superboid.miniboids[1].position - cm;
+    ::checkPeriodicLimits(cm);
+    this->position = cm;
+  }
+  
+  return;
+}
+
+void
 Miniboid::noise(void)
 {
   real angle = this->superboid.get0to2piRandom();
-  _noiseSum = std::valarray<real>({std::cos(angle), std::sin(angle)});
-  _noiseSum *= parameters().ETA;
+  this->_noiseSum = std::valarray<real>({std::cos(angle), std::sin(angle)});
+  this->_noiseSum *= parameters().ETA;
+
   return;
 }
 
@@ -449,39 +493,39 @@ Miniboid::setNextVelocity(const step_int STEP)
   const auto& miniboidsInThisCell = this->superboid.miniboids;
   for (const auto& mini : miniboidsInThisCell)
     this->_velocitySum += parameters().AUTO_ALPHA[MY_TYPE] * mini.velocity;
+
+  // Radial:
+  if (this->ID == 0u)
   {
-    // Radial:
-    if (this->ID == 0u)
-    {
-      for (auto& mini : miniboidsInThisCell)
-	if (mini.ID != 0u)
-	{
-	  if (mini.radialDistance.module <= parameters().CORE_DIAMETER)
-	    this->_forceSum += parameters().INFINITE_FORCE * mini.radialDistance.getDirectionArray();
-	  else
-	  {
-	    const real beta = mini.getHarrisParameter(parameters().RADIAL_BETA, parameters().RADIAL_BETA_MEDIUM);
-	    std::valarray<real> force = beta * getFiniteRadialForceWithoutBeta(mini.radialDistance, parameters().RADIAL_REQ[MY_TYPE], MY_TYPE);
-	    this->_forceSum += force;
-	  }
-	}
-    }
-    else
-      if (this->ID != 0u)
+    for (auto& mini : miniboidsInThisCell)
+      if (mini.ID != 0u)
       {
-	Distance distance = (this->radialDistance);
-	// lest cost in -real than -Distance.
-	if (distance.module <= parameters().CORE_DIAMETER)
-	  this->_forceSum += -parameters().INFINITE_FORCE * distance.getDirectionArray();
+	if (mini.radialDistance.module <= parameters().CORE_DIAMETER)
+	  this->_forceSum += parameters().INFINITE_FORCE * mini.radialDistance.getDirectionArray();
 	else
 	{
-	  // lest cost in -real than -Distance.
-	  const real beta = this->getHarrisParameter(parameters().RADIAL_BETA, parameters().RADIAL_BETA_MEDIUM);
-	  std::valarray<real> force = -beta * getFiniteRadialForceWithoutBeta(distance, parameters().RADIAL_REQ[MY_TYPE], MY_TYPE);
+	  const real beta = mini.getHarrisParameter(parameters().RADIAL_BETA, parameters().RADIAL_BETA_MEDIUM);
+	  std::valarray<real> force = beta * getFiniteRadialForceWithoutBeta(mini.radialDistance, parameters().RADIAL_REQ[MY_TYPE], MY_TYPE);
 	  this->_forceSum += force;
 	}
       }
   }
+  else
+    if (this->ID != 0u)
+    {
+      Distance distance = (this->radialDistance);
+      // lest cost in -real than -Distance.
+      if (distance.module <= parameters().CORE_DIAMETER)
+	this->_forceSum += -parameters().INFINITE_FORCE * distance.getDirectionArray();
+      else
+      {
+	// lest cost in -real than -Distance.
+	const real beta = this->getHarrisParameter(parameters().RADIAL_BETA, parameters().RADIAL_BETA_MEDIUM);
+	std::valarray<real> force = -beta * getFiniteRadialForceWithoutBeta(distance, parameters().RADIAL_REQ[MY_TYPE], MY_TYPE);
+	this->_forceSum += force;
+      }
+    }
+  
   // Twist
   for (const auto& tn : this->_twistNeighbors)
   {
@@ -537,45 +581,6 @@ Miniboid::setNextPosition(const step_int step)
     // if (this->ID != 0 && !this->isVirtual)
     //   this->position += this->radialDistance.getDirectionArray() *
     // 	((this->superboid.area - parameters().TARGET_AREA[this->superboid.type]) / (20.0f * TWO_PI * this->superboid.meanRadius));
-    if (this->ID == 0 && !this->isVirtual)
-    {
-      bool isFatOut = true;
-      for (mini_int miniID = 2; miniID < parameters().MINIBOIDS_PER_SUPERBOID; ++miniID)
-	if (isPointInTriangle(this->position,
-			      this->superboid.miniboids[1u].position,
-			      this->superboid.miniboids[miniID].position,
-			      this->superboid.miniboids[miniID + 1].position))
-	{
-	  isFatOut = false;
-	  break;
-	}
-
-      /*if (isFatOut)
-      {
-	Distance dist(std::valarray<real>(-0.0f, parameters().DIMENSIONS));
-	std::vector<bool> ok(parameters().DIMENSIONS, true);
-	for (const auto& mini1 : this->superboid.miniboids)
-	  for (const auto& mini2 : this->superboid.miniboids)
-	    if (mini1.ID != mini2.ID)
-	      if (mini1.ID != 0u && mini2.ID != 0u)
-		//{
-		
-		for (dimension_int dim = 0; dim < parameters().DIMENSIONS; ++dim)
-		  if (mini1.position[dim] - mini2.position[dim] > parameters().RANGE * 0.5f)
-		    ok[dim] = false;
-	
-	std::valarray<real> cm(-0.0f, parameters().DIMENSIONS);
-	for (const auto& mini : this->superboid.miniboids)
-	  if (mini.ID != 0)
-	    for (dimension_int dim = 0; dim < parameters().DIMENSIONS; ++dim)
-	    {
-	      if (ok[dim])
-		cm[dim] += mini.position[dim];
-	      //else
-		
-	    }
-	    }*/
-    }
   }
   
   this->checkLimits(step);

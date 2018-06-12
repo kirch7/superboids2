@@ -379,6 +379,8 @@ Superboid::setNextPosition(const step_int step)
 
   for (auto& mini : this->miniboids)
     mini.setNextPosition(step);
+
+  this->miniboids[0].checkFatOut();
   
   return;
 }

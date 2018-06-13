@@ -70,6 +70,7 @@ public:
   bool isActivated(void) const;
   void activate(void); // Ignoring boxes.
   std::string deathMessage;
+  void checkBackInTime(const step_int);
 protected:
   static super_int _totalSuperboids;
   DeathState       _deathState;

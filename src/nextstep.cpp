@@ -42,6 +42,21 @@ nextPosition(const thread_int THREAD_ID, std::vector<Superboid>& superboids, con
 }
 
 static void
+nextBackInTime(const thread_int THREAD_ID, std::vector<Superboid>& superboids, const step_int step)
+{
+  for (auto& superboid : superboids)
+  {
+    if (superboid.ID % parameters().THREADS != THREAD_ID)
+      continue;
+    if (superboid.isActivated() == false)
+      continue;
+    superboid.checkBackInTime(step);
+  }
+  
+  return;
+}
+
+static void
 nextNeighbors(const thread_int THREAD_ID, std::vector<Superboid>& superboids, const step_int step)
 {
   for (auto& superboid : superboids)
@@ -323,6 +338,16 @@ nextStep(std::vector<Box>& boxes,
                                                  std::ref(superboids),	\
 						 step);
     for (auto& thread : positionThreads)
+      thread.join();
+  }
+  
+  {
+    static std::vector<std::thread> backThreads(parameters().THREADS);
+    for (thread_int threadCount = 0u; threadCount < parameters().THREADS; ++threadCount)
+      backThreads[threadCount] = std::thread(nextBackInTime, threadCount,
+					     std::ref(superboids),
+					     step);
+    for (auto& thread : backThreads)
       thread.join();
   }
   

@@ -195,7 +195,9 @@ Miniboid::checkFatOut(void)
 {
   if (this->ID != 0 || this->isVirtual)
     return;
-
+  else
+    return;
+  
   bool isFatOut = true;
   for (mini_int miniID = 2; miniID < parameters().MINIBOIDS_PER_SUPERBOID - 1; ++miniID)
     if (isPointInTriangle(this->position,
@@ -355,10 +357,12 @@ Miniboid::fatInteractions(const step_int STEP, const std::list<Neighbor>& list, 
 	}
       }
       auxMini = nullptr;
+
+      if (inSomeTriangle)
+	this->_lastInvasionStep = STEP;
       
       if (inSomeTriangle && interact)
       {
-	++(this->_invasionCounter);
 	//// const std::valarray<real> tangent = tangentSignal * Distance(r1, r2).getTangentArray();
 	//// const std::valarray<real> tangent = Distance(fatboid.position, r0 - tangent).module > Distance(fatboid.position, r0 + tangent).module ? -tangent : tangent;
 	if (Infinite::write())
@@ -376,8 +380,6 @@ Miniboid::fatInteractions(const step_int STEP, const std::list<Neighbor>& list, 
 	this->_forceSum += force1;
 	this->_forceSum += force2;
       }
-      else if (!inSomeTriangle && interact)
-	this->_invasionCounter = 0;
     }
   }
 
@@ -434,7 +436,8 @@ Miniboid::interInteractions(const step_int STEP)
     }
     
     // Check if interacts with fatboid:
-    this->fatInteractions(STEP, list, true);
+    //// this->fatInteractions(STEP, list, true);
+    this->fatInteractions(STEP, list, false);
   } // end of for list in _neighbors.
   
   return;
@@ -566,16 +569,17 @@ Miniboid::setNextVelocity(const step_int STEP)
 void
 Miniboid::setNextPosition(const step_int step)
 {
+  // const step_int invasionCounter = step - this->_lastInvasionStep;;
   this->velocity = this->newVelocity;
-  if (this->_invasionCounter > 0u && this->ID != 0u)
-    this->position = this->superboid.miniboids[0u].position - (1.1f * parameters().CORE_DIAMETER * this->radialDistance.getDirectionArray());
-  // if (this->_invasionCounter > 15u && this->ID != 0u)
+  // if (invasionCounter > 0u && this->ID != 0u)
   //   this->position = this->superboid.miniboids[0u].position - (1.1f * parameters().CORE_DIAMETER * this->radialDistance.getDirectionArray());
-  // else if (this->_invasionCounter > 10u && this->ID != 0u)
+  // if (invasionCounter > 15u && this->ID != 0u)
+  //   this->position = this->superboid.miniboids[0u].position - (1.1f * parameters().CORE_DIAMETER * this->radialDistance.getDirectionArray());
+  // else if (invasionCounter > 10u && this->ID != 0u)
   //   this->position = this->superboid.miniboids[0u].position - (2.0f * parameters().CORE_DIAMETER * this->radialDistance.getDirectionArray());
-  // else if (this->_invasionCounter > 5u && this->ID != 0u)
+  // else if (invasionCounter > 5u && this->ID != 0u)
   //   this->position = this->superboid.miniboids[0u].position - (0.5f * this->radialDistance.module * this->radialDistance.getDirectionArray());
-  else
+  // else
   {
     this->position += parameters().DT * this->velocity; // Velocity is already normalized to V0.
     // if (this->ID != 0 && !this->isVirtual)
@@ -584,6 +588,20 @@ Miniboid::setNextPosition(const step_int step)
   }
   
   this->checkLimits(step);
+  
+  return;
+}
+
+void
+Miniboid::checkBackInTime(const step_int step)
+{
+  if (step > 0 && this->_lastInvasionStep == step)
+  {
+    this->position = this->_oldPosition;
+    this->checkLimits(step);
+  }
+  else
+    this->_oldPosition = this->position;
   
   return;
 }

@@ -707,3 +707,12 @@ Superboid::isActivated(void) const
 {
   return this->_deathState != DeathState::Dead;
 }
+
+void
+Superboid::checkBackInTime(const step_int step)
+{
+  for (auto& mini : this->miniboids)
+    mini.checkBackInTime(step);
+  
+  return;
+}

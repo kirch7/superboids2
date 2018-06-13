@@ -39,6 +39,7 @@ public:
   void setNextVelocity(const step_int);
   void setNextPosition(const step_int);
   void checkFatOut(void);
+  void checkBackInTime(const step_int);
   inline void setBox(Box* const b) { _box = b; }
   inline Box& getBox(void)    const { return *(this->_box); }
   inline Box* getBoxPtr(void) const { return this->_box; }
@@ -52,7 +53,8 @@ public:
   std::list<std::list<Neighbor> > _neighbors; // From different superboid.
   friend void exportPositions(const std::vector<Superboid>&, const step_int);
 protected:
-  step_int _invasionCounter;
+  std::valarray<real> _oldPosition;
+  step_int _lastInvasionStep;
   std::valarray<real> _noiseSum;    // Related to ETA.
   std::valarray<real> _velocitySum; // Related to ALPHA;
   std::valarray<real> _forceSum;    // Related to BETA.
@@ -64,9 +66,9 @@ protected:
   inline Miniboid(void); /* Declared but intentionally not defined. */
   void setNewVelocity(void);
   void interInteractions(const step_int);
-  void checkPeriodicLimits();
-  void checkRectangularLimits();
-  void checkStokesLimits();
+  void checkPeriodicLimits(void);
+  void checkRectangularLimits(void);
+  void checkStokesLimits(void);
   void checkKillCondition(const step_int);
   real getHarrisParameter(const std::vector<std::vector<real>>&, const std::vector<real>& medium) const;
 };
@@ -79,7 +81,8 @@ inline Miniboid::Miniboid(const mini_int _id, Superboid& super, const bool isVir
   velocity(parameters().DIMENSIONS),
   newVelocity(parameters().DIMENSIONS),
   radialDistance(Distance()),
-  _invasionCounter(0),
+  _oldPosition(parameters().DIMENSIONS),
+  _lastInvasionStep(0),
   _noiseSum(parameters().DIMENSIONS),
   _velocitySum(parameters().DIMENSIONS),
   _forceSum(parameters().DIMENSIONS),

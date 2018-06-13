@@ -595,7 +595,9 @@ Miniboid::setNextPosition(const step_int step)
 void
 Miniboid::checkBackInTime(const step_int step)
 {
-  if (step > 0 && this->_lastInvasionStep == step)
+  if (step == 0)
+    this->_oldPosition = this->position;
+  else if (this->_lastInvasionStep == step)
   {
     this->position = this->_oldPosition;
     this->checkLimits(step);

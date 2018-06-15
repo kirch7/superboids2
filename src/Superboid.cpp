@@ -151,7 +151,7 @@ getPeripheralMiniboidPosition(const type_int TYPE, const real ANGLE)
   std::valarray<real> position(parameters().DIMENSIONS);
   position[X] = distance * std::cos(ANGLE);
   position[Y] = distance * std::sin(ANGLE);
-  position += initialNoise(parameters().CORE_DIAMETER / 10.0f);
+  //// position += initialNoise(parameters().CORE_DIAMETER / 10.0f);
   
   return position;
 }
@@ -533,8 +533,8 @@ Superboid::divide(const super_int divide_by, Superboid& newSuperboid, std::vecto
 
 	if (!someInvasion)
 	{
-	  for (const auto& list : mini._neighbors)
-	    if (mini.fatInteractions(0, list, false))
+	  for (const auto& pair : mini._neighbors)
+	    if (mini.fatInteractions(0, std::get<1>(pair), false))
 	    {
 	      someInvasion = true;
 	      break;
@@ -630,8 +630,9 @@ Superboid::checkWrongNeighbors(const std::vector<Superboid>& superboids)
 	{
 	  this->cellNeighbors.remove(cellID2);
 	  for (auto& mini : this->miniboids)
-	    for (auto& cell : mini._neighbors)
+	    for (auto& pair : mini._neighbors)
 	    {
+	      auto& cell = std::get<1>(pair);
 	      if (!cell.empty())
 	      {
 		const super_int superID = cell

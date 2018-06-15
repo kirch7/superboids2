@@ -6,6 +6,7 @@
 #include <iostream>
 #include <valarray>
 #include <list>
+#include <map>
 #include <tuple>
 #include "Neighbor.hpp"
 #include "TwistNeighbor.hpp"
@@ -47,12 +48,12 @@ public:
   real getAreaBetween(const Miniboid&) const;
   void setNeighbors(const step_int);
   std::list<TwistNeighbor> _twistNeighbors;
-  std::list<std::tuple<step_int, std::vector<const Miniboid*>>> history;
   bool isInSomeNthTriangle(const mini_int nth, const Superboid& super);
   bool fatInteractions(const step_int, const std::list<Neighbor>&, const bool interact);
-  std::list<std::list<Neighbor> > _neighbors; // From different superboid.
+  std::map<super_int, std::list<Neighbor>> _neighbors; // From different superboid.
   friend void exportPositions(const std::vector<Superboid>&, const step_int);
 protected:
+  std::list<std::tuple<step_int, std::vector<const Miniboid*>>> history;
   std::valarray<real> _oldPosition;
   step_int _lastInvasionStep;
   std::valarray<real> _noiseSum;    // Related to ETA.
@@ -66,6 +67,7 @@ protected:
   inline Miniboid(void); /* Declared but intentionally not defined. */
   void setNewVelocity(void);
   void interInteractions(const step_int);
+  void interInteractions(const Neighbor&);
   void checkPeriodicLimits(void);
   void checkRectangularLimits(void);
   void checkStokesLimits(void);

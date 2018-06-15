@@ -14,3 +14,5 @@ public:
   Neighbor(const Miniboid&, const Distance&);
   Neighbor(const Distance&, const Miniboid&);
 };
+
+bool operator<(const Neighbor&, const Neighbor&);

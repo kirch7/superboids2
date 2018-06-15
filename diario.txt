@@ -1,0 +1,7 @@
+Dia 15/06/2018
+- Implementado o algoritmo de iteração com o ponto mais próximo. A
+força intercelular que cada periférico sofre é calculada com base no
+ponto de menor distância à célula vizinha. Para determinar a posição
+deste ponto tomamos a posição das duas periféricas mais próximas
+pertencentes à célula vizinha.
+

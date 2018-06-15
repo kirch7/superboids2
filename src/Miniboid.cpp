@@ -5,6 +5,7 @@
 #include <iostream> // operator<<
 #include <list>
 #include <tuple>
+#include <algorithm>
 #include "elastic_plastic.hpp"
 #include "Miniboid.hpp"
 #include "Box.hpp"
@@ -129,9 +130,9 @@ Miniboid::checkRectangularLimits()
     {
       real delta = this->position[dim] + HALF_RECTANGLE_SIZE;
       if (-2.0f * delta < parameters().DT * parameters().SPEED[this->superboid.type])
-	this->position[dim] -= 2.0f * delta;
+        this->position[dim] -= 2.0f * delta;
       else
-	this->position[dim] = -HALF_RECTANGLE_SIZE + parameters().REAL_TOLERANCE;
+        this->position[dim] = -HALF_RECTANGLE_SIZE + parameters().REAL_TOLERANCE;
       this->velocity[dim]    *= -1.0f;
       this->newVelocity[dim] *= -1.0f;
     }
@@ -139,9 +140,9 @@ Miniboid::checkRectangularLimits()
     {
       real delta = this->position[dim] - HALF_RECTANGLE_SIZE;
       if (2.0f * delta < parameters().DT * parameters().SPEED[this->superboid.type])
-	this->position[dim] -= 2.0f * delta;
+        this->position[dim] -= 2.0f * delta;
       else
-	this->position[dim] = HALF_RECTANGLE_SIZE - parameters().REAL_TOLERANCE;
+        this->position[dim] = HALF_RECTANGLE_SIZE - parameters().REAL_TOLERANCE;
       this->velocity[dim]    *= -1.0f;
       this->newVelocity[dim] *= -1.0f;
     }
@@ -160,15 +161,15 @@ Miniboid::checkStokesLimits()
       const box_int myBoxID = Box::getBoxID(this->position);
       for (const auto boxID : hole.boxIDs)
       {
-    	if (boxID == myBoxID)
-    	{
-	  skip = false;
-    	  break;
-    	}
+        if (boxID == myBoxID)
+        {
+          skip = false;
+          break;
+        }
       }
       
       if (skip)
-    	continue;
+        continue;
     }
       
     const real TOLERABLE = (this->ID == 0u && !this->isVirtual)
@@ -181,9 +182,9 @@ Miniboid::checkStokesLimits()
       std::valarray<real> direction = d.getDirectionArray();
       real delta = d.module - TOLERABLE;
       if (2.0f * delta < parameters().DT * parameters().SPEED[this->superboid.type])
-	this->position -= direction * (2.0f * delta);
+        this->position -= direction * (2.0f * delta);
       else
-	this->position = hole.center + (direction * TOLERABLE);
+        this->position = hole.center + (direction * TOLERABLE);
     }
   }
 
@@ -201,9 +202,9 @@ Miniboid::checkFatOut(void)
   bool isFatOut = true;
   for (mini_int miniID = 2; miniID < parameters().MINIBOIDS_PER_SUPERBOID - 1; ++miniID)
     if (isPointInTriangle(this->position,
-			  this->superboid.miniboids[1u].position,
-			  this->superboid.miniboids[miniID].position,
-			  this->superboid.miniboids[miniID + 1].position))
+                          this->superboid.miniboids[1u].position,
+                          this->superboid.miniboids[miniID].position,
+                          this->superboid.miniboids[miniID + 1].position))
     {
       isFatOut = false;
       break;
@@ -215,8 +216,8 @@ Miniboid::checkFatOut(void)
     for (const auto& mini : this->superboid.miniboids)
       if (mini.ID > 1)
       {
-	Distance d(mini, this->superboid.miniboids[1]);
-	cm += d.module * d.getDirectionArray();
+        Distance d(mini, this->superboid.miniboids[1]);
+        cm += d.module * d.getDirectionArray();
       }
     cm /= static_cast<real>(parameters().MINIBOIDS_PER_SUPERBOID - 2);
     cm = this->superboid.miniboids[1].position - cm;
@@ -307,7 +308,9 @@ Miniboid::isInSomeNthTriangle(const mini_int nth, const Superboid& super)
 }
 
 bool
-Miniboid::fatInteractions(const step_int STEP, const std::list<Neighbor>& list, const bool interact)
+Miniboid::fatInteractions(const step_int STEP,
+			  const std::list<Neighbor>& list,
+			  const bool interact)
 {
   bool inSomeTriangle = false;
 
@@ -326,64 +329,107 @@ Miniboid::fatInteractions(const step_int STEP, const std::list<Neighbor>& list, 
       const Miniboid* auxMini = nullptr;
       for (auto& realMini : super.miniboids)
       {
-	if (realMini.ID == 0)
-	  continue;
-	if (inSomeTriangle)
-	  break;
-	mini_int nextID = realMini.ID % (parameters().MINIBOIDS_PER_SUPERBOID - 1) + nth;
-	nextID %= parameters().MINIBOIDS_PER_SUPERBOID - 1;
-	auxMini = &super.miniboids[nextID];
-	
-	inSomeTriangle = isPointInTriangle(this->position, fatboid.position, realMini.position, auxMini->position);
-	if (inSomeTriangle && interact)
-	{
-	  std::tuple<step_int, std::vector<const Miniboid*>>* h = nullptr;
-	  for (auto& c : this->history)
-	    if (std::get<1>(c).front()->superboid.ID == super.ID)
-	    {
-	      h = &c;
-	      break;
-	    }
-	  if (h)
-	  {
-	    const std::vector<const Miniboid*>& v = std::get<1>(*h);
-	    std::get<0>(*h) = STEP;
-	    tangent = Distance(*v[1], *v[0]).getTangentArray();
-	  }
-	  else {
-	    this->history.push_back(std::tuple<step_int, std::vector<const Miniboid*>>(STEP, std::vector<const Miniboid*>({auxMini, &realMini})));
-	    tangent = Distance(realMini, *auxMini).getTangentArray();
-	  }
-	}
+        if (realMini.ID == 0)
+          continue;
+        if (inSomeTriangle)
+          break;
+        mini_int nextID = realMini.ID % (parameters().MINIBOIDS_PER_SUPERBOID - 1) + nth;
+        nextID %= parameters().MINIBOIDS_PER_SUPERBOID - 1;
+        auxMini = &super.miniboids[nextID];
+        
+        inSomeTriangle = isPointInTriangle(this->position, fatboid.position, realMini.position, auxMini->position);
+        if (inSomeTriangle && interact)
+        {
+          std::tuple<step_int, std::vector<const Miniboid*>>* h = nullptr;
+          for (auto& c : this->history)
+            if (std::get<1>(c).front()->superboid.ID == super.ID)
+            {
+              h = &c;
+              break;
+            }
+          if (h)
+          {
+            const std::vector<const Miniboid*>& v = std::get<1>(*h);
+            std::get<0>(*h) = STEP;
+            tangent = Distance(*v[1], *v[0]).getTangentArray();
+          }
+          else {
+            this->history.push_back(std::tuple<step_int, std::vector<const Miniboid*>>(STEP, std::vector<const Miniboid*>({auxMini, &realMini})));
+            tangent = Distance(realMini, *auxMini).getTangentArray();
+          }
+        }
       }
       auxMini = nullptr;
 
       if (inSomeTriangle)
-	this->_lastInvasionStep = STEP;
+        this->_lastInvasionStep = STEP;
       
       if (inSomeTriangle && interact)
       {
-	//// const std::valarray<real> tangent = tangentSignal * Distance(r1, r2).getTangentArray();
-	//// const std::valarray<real> tangent = Distance(fatboid.position, r0 - tangent).module > Distance(fatboid.position, r0 + tangent).module ? -tangent : tangent;
+        //// const std::valarray<real> tangent = tangentSignal * Distance(r1, r2).getTangentArray();
+        //// const std::valarray<real> tangent = Distance(fatboid.position, r0 - tangent).module > Distance(fatboid.position, r0 + tangent).module ? -tangent : tangent;
+        const std::valarray<real> force1 = (0.9f * parameters().INFINITE_FORCE) * tangent;
+        const std::valarray<real> radial = this->radialDistance.getDirectionArray();
+        const std::valarray<real> force2 = radial * (0.9f * parameters().INFINITE_FORCE);
 	if (Infinite::write())
-	{
-	  std::valarray<real> infThing(parameters().DIMENSIONS * 2u);
-	  for (std::size_t i = 0; i < parameters().DIMENSIONS; ++i)
-	    infThing[i] = this->position[i];
-	  for (std::size_t i = 0; i < parameters().DIMENSIONS; ++i)
-	    infThing[i + parameters().DIMENSIONS] = tangent[i];
-	  this->superboid.infinite2Vectors.push_back(infThing);
-	}
-	const std::valarray<real> force1 = (0.9f * parameters().INFINITE_FORCE) * tangent;
-	const std::valarray<real> radial = this->radialDistance.getDirectionArray();
-	const std::valarray<real> force2 = radial * (0.9f * parameters().INFINITE_FORCE);
-	this->_forceSum += force1;
-	this->_forceSum += force2;
+        {
+	  std::valarray<real> direction = tangent + radial;
+	  direction /= getModule(direction);
+          std::valarray<real> infThing(parameters().DIMENSIONS * 2u);
+          for (std::size_t i = 0; i < parameters().DIMENSIONS; ++i)
+            infThing[i] = this->position[i];
+          for (std::size_t i = 0; i < parameters().DIMENSIONS; ++i)
+            infThing[i + parameters().DIMENSIONS] = direction[i];
+          this->superboid.infinite2Vectors.push_back(infThing);
+        }
+        
+        this->_forceSum += force1;
+        this->_forceSum += force2;
       }
     }
   }
 
   return inSomeTriangle;
+}
+
+void
+Miniboid::interInteractions(const Neighbor& neighbor)
+{
+  const Miniboid& miniNeighbor = neighbor.miniNeighbor;
+  if (this->superboid.ID != miniNeighbor.superboid.ID)
+  {
+    const type_int MY_TYPE = this->superboid.type;
+    const type_int NEIGHBOR_TYPE = miniNeighbor.superboid.type;
+    
+    // Sum velocity (ALPHA):
+    this->_velocitySum += miniNeighbor.velocity * parameters().INTER_ALPHA[MY_TYPE][NEIGHBOR_TYPE];
+    
+    // Sum force (BETA):
+    const real beta = parameters().INTER_BETA[MY_TYPE][NEIGHBOR_TYPE];
+    const real rEq  = parameters().INTER_REQ[MY_TYPE][NEIGHBOR_TYPE];
+    if (neighbor.distance.module <= parameters().CORE_DIAMETER)
+    {
+      const std::valarray<real> d = neighbor.distance.getDirectionArray();
+      this->_forceSum += -parameters().INFINITE_FORCE * d;
+      
+      if (Infinite::write())
+      {              
+	std::valarray<real> infThing(parameters().DIMENSIONS * 2u);
+	for (std::size_t i = 0; i < parameters().DIMENSIONS; ++i)
+	  infThing[i] = this->position[i];
+	for (std::size_t i = 0; i < parameters().DIMENSIONS; ++i)
+	  infThing[i + parameters().DIMENSIONS] = -d[i];
+	this->superboid.infiniteVectors.push_back(infThing);
+      }
+    }
+    else
+    {
+     std::valarray<real> force = -getFiniteForce(neighbor.distance, beta, rEq);
+      this->_forceSum += force;
+    }
+  }
+
+  return;
 }
 
 void
@@ -396,49 +442,56 @@ Miniboid::interInteractions(const step_int STEP)
       break;
     }
 
-  const type_int MY_TYPE = this->superboid.type;
-  for (const auto& list : this->_neighbors)
+  for (const auto& pair : this->_neighbors)
   {
+    const auto& list = std::get<1>(pair);
     // Interaction with peripheral miniboids:
-    for (const auto& neighbor : list)
+    if (true)
     {
-      const Miniboid& miniNeighbor = neighbor.miniNeighbor;
-      if ((!miniNeighbor.isVirtual) && (this->superboid.ID != miniNeighbor.superboid.ID))
+      if (list.size() == 1)
+	this->interInteractions(list.front());
+      else if (list.size() > 1)
       {
-	const type_int NEIGHBOR_TYPE = miniNeighbor.superboid.type;
-	    
-	// Sum velocity (ALPHA):
-	this->_velocitySum += miniNeighbor.velocity * parameters().INTER_ALPHA[MY_TYPE][NEIGHBOR_TYPE];
-	    
-	// Sum force (BETA):
-	const real beta = parameters().INTER_BETA[MY_TYPE][NEIGHBOR_TYPE];
-	const real rEq  = parameters().INTER_REQ[MY_TYPE][NEIGHBOR_TYPE];
-	if (neighbor.distance.module <= parameters().CORE_DIAMETER)
+	super_int count = 0;
+	const Miniboid* firstMini = nullptr;
+	const Distance* firstDistance = nullptr;
+	const Miniboid* secondMini = nullptr;
+	//// const Distance* secondDistance = nullptr;
+	
+	for (const auto& particleNei : list)
 	{
-	  const std::valarray<real> d = neighbor.distance.getDirectionArray();
-	  this->_forceSum += -parameters().INFINITE_FORCE * d;
-	  if (Infinite::write())
-	  {	      
-	    std::valarray<real> infThing(parameters().DIMENSIONS * 2u);
-	    for (std::size_t i = 0; i < parameters().DIMENSIONS; ++i)
-	      infThing[i] = this->position[i];
-	    for (std::size_t i = 0; i < parameters().DIMENSIONS; ++i)
-	      infThing[i + parameters().DIMENSIONS] = -d[i];
-	    this->superboid.infiniteVectors.push_back(infThing);
+	  if (count == 0)
+	  {
+	    firstMini = &particleNei.miniNeighbor;
+	    firstDistance = &particleNei.distance;
 	  }
+	  else if (count == 1)
+	  {
+	    secondMini = &particleNei.miniNeighbor;
+	    //// secondDistance = &particleNei.distance;
+	  }
+	  else
+	    break;
+	  ++count;
 	}
-	else
-	{
-	  std::valarray<real> force = -getFiniteForce(neighbor.distance, beta, rEq);
-	  this->_forceSum += force;
-	}
+	
+	Miniboid mini(0, firstMini->superboid, true);
+	mini.velocity = firstMini->velocity;
+	const real angularCoeff = getAngularCoefficient(firstMini->position, secondMini->position);
+	mini.position = getClosestPoint(angularCoeff, firstMini->position, this->position);
+	const Distance dist(*this, mini);
+	const Neighbor miniN(mini, dist);
+	this->interInteractions(miniN);
       }
     }
-    
+    else
+      for (const auto& particleNei : list)
+	this->interInteractions(particleNei);
+
     // Check if interacts with fatboid:
-    //// this->fatInteractions(STEP, list, true);
-    this->fatInteractions(STEP, list, false);
-  } // end of for list in _neighbors.
+    this->fatInteractions(STEP, list, true);
+    
+  } // end of for pair in _neighbors.
   
   return;
 }
@@ -451,15 +504,18 @@ Miniboid::getHarrisParameter(const std::vector<std::vector<real>>& matrix, const
   mini_int total = 0;
   std::vector<mini_int> counts(parameters().TYPES_NO, 0);
 
-  for (const auto& superList : this->_neighbors)
+  for (const auto& pair : this->_neighbors)
+  {
+    const auto& superList = std::get<1>(pair);
     for (const auto& neighbor : superList)
     {
       ++counts[neighbor
-	       .miniNeighbor
-	       .superboid
-	       .type];
+               .miniNeighbor
+               .superboid
+               .type];
       ++total;
     }
+  }
 
   real harris = -0.0f;
 
@@ -489,7 +545,7 @@ Miniboid::setNextVelocity(const step_int STEP)
   const type_int MY_TYPE = this->superboid.type;
 
   // Interact with miniboids of another superboid:
-  if (this->ID != 0)
+  if (this->ID != 0 && !this->isVirtual)
     this->interInteractions(STEP);
   
   // Same superboid:
@@ -503,14 +559,14 @@ Miniboid::setNextVelocity(const step_int STEP)
     for (auto& mini : miniboidsInThisCell)
       if (mini.ID != 0u)
       {
-	if (mini.radialDistance.module <= parameters().CORE_DIAMETER)
-	  this->_forceSum += parameters().INFINITE_FORCE * mini.radialDistance.getDirectionArray();
-	else
-	{
-	  const real beta = mini.getHarrisParameter(parameters().RADIAL_BETA, parameters().RADIAL_BETA_MEDIUM);
-	  std::valarray<real> force = beta * getFiniteRadialForceWithoutBeta(mini.radialDistance, parameters().RADIAL_REQ[MY_TYPE], MY_TYPE);
-	  this->_forceSum += force;
-	}
+        if (mini.radialDistance.module <= parameters().CORE_DIAMETER)
+          this->_forceSum += parameters().INFINITE_FORCE * mini.radialDistance.getDirectionArray();
+        else
+        {
+          const real beta = mini.getHarrisParameter(parameters().RADIAL_BETA, parameters().RADIAL_BETA_MEDIUM);
+          std::valarray<real> force = beta * getFiniteRadialForceWithoutBeta(mini.radialDistance, parameters().RADIAL_REQ[MY_TYPE], MY_TYPE);
+          this->_forceSum += force;
+        }
       }
   }
   else
@@ -519,13 +575,13 @@ Miniboid::setNextVelocity(const step_int STEP)
       Distance distance = (this->radialDistance);
       // lest cost in -real than -Distance.
       if (distance.module <= parameters().CORE_DIAMETER)
-	this->_forceSum += -parameters().INFINITE_FORCE * distance.getDirectionArray();
+        this->_forceSum += -parameters().INFINITE_FORCE * distance.getDirectionArray();
       else
       {
-	// lest cost in -real than -Distance.
-	const real beta = this->getHarrisParameter(parameters().RADIAL_BETA, parameters().RADIAL_BETA_MEDIUM);
-	std::valarray<real> force = -beta * getFiniteRadialForceWithoutBeta(distance, parameters().RADIAL_REQ[MY_TYPE], MY_TYPE);
-	this->_forceSum += force;
+        // lest cost in -real than -Distance.
+        const real beta = this->getHarrisParameter(parameters().RADIAL_BETA, parameters().RADIAL_BETA_MEDIUM);
+        std::valarray<real> force = -beta * getFiniteRadialForceWithoutBeta(distance, parameters().RADIAL_REQ[MY_TYPE], MY_TYPE);
+        this->_forceSum += force;
       }
     }
   
@@ -584,7 +640,7 @@ Miniboid::setNextPosition(const step_int step)
     this->position += parameters().DT * this->velocity; // Velocity is already normalized to V0.
     // if (this->ID != 0 && !this->isVirtual)
     //   this->position += this->radialDistance.getDirectionArray() *
-    // 	((this->superboid.area - parameters().TARGET_AREA[this->superboid.type]) / (20.0f * TWO_PI * this->superboid.meanRadius));
+    //         ((this->superboid.area - parameters().TARGET_AREA[this->superboid.type]) / (20.0f * TWO_PI * this->superboid.meanRadius));
   }
   
   this->checkLimits(step);
@@ -595,6 +651,8 @@ Miniboid::setNextPosition(const step_int step)
 void
 Miniboid::checkBackInTime(const step_int step)
 {
+  return;
+  
   if (step == 0)
     this->_oldPosition = this->position;
   else if (this->_lastInvasionStep == step)
@@ -624,31 +682,23 @@ Miniboid::setNeighbors(const step_int step)
   for (auto box : this->_box->neighbors)
     for (auto miniPointer : box->miniboids)
       if (miniPointer->superboid.ID != this->superboid.ID)
-	if (miniPointer->ID != 0u)
-	{
-	  const Miniboid& mini = *miniPointer;
-	  Distance distance(*this, mini);
-	  if (distance.module <= parameters().NEIGHBOR_DISTANCE)
-	  {
-	    this->superboid.cellNeighbors.append(mini.superboid.ID); // Potential data race!!!!!!!!
-	    ++(this->_neighborsPerTypeNos[miniPointer->superboid.type]); //// ERRADO?
-	    bool alreadyInSomeList = false;
-	    for (auto& list : this->_neighbors) // For each list in list of lists
-	      if (!(list.empty())) // If list not empty
-		if (list.front().miniNeighbor.superboid.ID == mini.superboid.ID)
-		{
-		  list.emplace_back(mini, distance); // construct and append.
-		  alreadyInSomeList = true;
-		  break;
-		}
-	    if (!alreadyInSomeList)
-	    {
-	      this->_neighbors.emplace_back();
-	      this->_neighbors.back().emplace_back(mini, distance);
-	    }
+        if (miniPointer->ID != 0u)
+        {
+          const Miniboid& mini = *miniPointer;
+          Distance distance(*this, mini);
+          if (distance.module <= parameters().NEIGHBOR_DISTANCE)
+          {
+            this->superboid.cellNeighbors.append(mini.superboid.ID); // Potential data race!!!!!!!!
+            ++(this->_neighborsPerTypeNos[mini.superboid.type]); //// ERRADO?
+	    std::list<Neighbor>& c = this->_neighbors[mini.superboid.ID];
+	    c.emplace_back(mini, distance);
 	  }
-	}
-
+        }
+  
+  // Sort each list in terms of distance:
+  for (auto& pair : this->_neighbors)
+    std::get<1>(pair).sort();
+  
   return;
 }
 

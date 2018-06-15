@@ -14,3 +14,9 @@ Neighbor::Neighbor(const Distance& d, const Miniboid& m):
   miniNeighbor(m),
   distance(d)
 { return; }
+
+bool
+operator<(const Neighbor& n1, const Neighbor& n2)
+{
+  return n1.distance.module < n2.distance.module;
+}

@@ -71,6 +71,7 @@ public:
   void activate(void); // Ignoring boxes.
   std::string deathMessage;
   void checkBackInTime(const step_int);
+  real getRadialReq(const step_int) const;
 protected:
   static super_int _totalSuperboids;
   DeathState       _deathState;

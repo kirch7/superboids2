@@ -564,7 +564,8 @@ Miniboid::setNextVelocity(const step_int STEP)
         else
         {
           const real beta = mini.getHarrisParameter(parameters().RADIAL_BETA, parameters().RADIAL_BETA_MEDIUM);
-          std::valarray<real> force = beta * getFiniteRadialForceWithoutBeta(mini.radialDistance, parameters().RADIAL_REQ[MY_TYPE], MY_TYPE);
+	  const real req = this->superboid.getRadialReq(STEP);
+          std::valarray<real> force = beta * getFiniteRadialForceWithoutBeta(mini.radialDistance, req, MY_TYPE);
           this->_forceSum += force;
         }
       }

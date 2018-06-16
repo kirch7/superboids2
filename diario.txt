@@ -5,3 +5,8 @@ ponto de menor distância à célula vizinha. Para determinar a posição
 deste ponto tomamos a posição das duas periféricas mais próximas
 pertencentes à célula vizinha.
 
+Dia 16/06/2018
+
+- A partir da divisão de uma célula, seu raio de equilíbrio aumenta a
+cada passo de tempo e depois fica constante.
+

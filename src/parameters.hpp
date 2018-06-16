@@ -50,6 +50,7 @@ public:
   step_int NON_DIVISION_INTERVAL;
   real TOLERABLE_P0;
   real DIVISION_REGION_X;
+  real DIVISION_DISTANCE;
 
   dimension_int DIMENSIONS;
   type_int TYPES_NO;
@@ -110,8 +111,6 @@ public:
   thread_int   THREADS;
 
   real REAL_TOLERANCE;
-
-  real getDivisionDistance(void) const;
 protected:
   void set1(void);
   void setCells(void);
@@ -120,6 +119,8 @@ protected:
   void setRadial(void);
   void setInter(void);
   void setStokes(void);
+
+  real getDivisionDistance(void) const;
 };
 
 template<typename T>

@@ -609,8 +609,9 @@ Parameters::set(void)
     for (type_int t = 0u; t < this->TYPES_NO; ++t)
       if (this->RADIAL_REQ[t] < minRadialReq)
 	minRadialReq = this->RADIAL_REQ[t];
-    
-    if (this->getDivisionDistance() > minRadialReq - this->CORE_DIAMETER)
+
+    this->DIVISION_DISTANCE = this->getDivisionDistance();
+    if (this->DIVISION_DISTANCE > minRadialReq - this->CORE_DIAMETER)
       panic("Daughter size too large! Reduce core diameter or number of peripheric miniboids!");
   }
 

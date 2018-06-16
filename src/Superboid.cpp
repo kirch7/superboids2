@@ -480,12 +480,12 @@ Superboid::divide(const super_int divide_by, Superboid& newSuperboid, std::vecto
 
     real divisionAngle = this->get0to2piRandom();
     std::valarray<real> nucleusNucleusDistance({std::cos(divisionAngle), std::sin(divisionAngle)});
-    nucleusNucleusDistance *= parameters().getDivisionDistance();
+    nucleusNucleusDistance *= parameters().DIVISION_DISTANCE;
 
     newSuperboid.miniboids[0u].position = this->miniboids[0u].position - nucleusNucleusDistance;
     this->miniboids[0u].position        = this->miniboids[0u].position + nucleusNucleusDistance;
 
-    const real radius = parameters().getDivisionDistance() - parameters().CORE_DIAMETER * 2.0f;
+    const real radius = parameters().DIVISION_DISTANCE - parameters().CORE_DIAMETER * 2.0f;
     this->_shapeStep = 0;
     newSuperboid._shapeStep = 0;
     rearrangePeripherals(*this, radius);
@@ -716,4 +716,19 @@ Superboid::checkBackInTime(const step_int step)
     mini.checkBackInTime(step);
   
   return;
+}
+
+real
+Superboid::getRadialReq(const step_int step) const
+{
+  if (parameters().NON_DIVISION_INTERVAL == 0)
+    return parameters().RADIAL_REQ[this->type];
+  const step_int deltaT = step - this->_lastDivisionStep;
+  if (deltaT > parameters().NON_DIVISION_INTERVAL)
+    return parameters().RADIAL_REQ[this->type];
+
+  real angular = parameters().RADIAL_REQ[this->type] - parameters().DIVISION_DISTANCE;
+  angular /= parameters().NON_DIVISION_INTERVAL;
+  
+  return parameters().DIVISION_DISTANCE + angular * deltaT;
 }

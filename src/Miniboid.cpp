@@ -196,8 +196,6 @@ Miniboid::checkFatOut(void)
 {
   if (this->ID != 0 || this->isVirtual)
     return;
-  else
-    return;
   
   bool isFatOut = true;
   for (mini_int miniID = 2; miniID < parameters().MINIBOIDS_PER_SUPERBOID - 1; ++miniID)
@@ -212,17 +210,18 @@ Miniboid::checkFatOut(void)
 
   if (isFatOut)
   {
-    std::valarray<real> cm(-0.0f, parameters().DIMENSIONS);
-    for (const auto& mini : this->superboid.miniboids)
-      if (mini.ID > 1)
-      {
-        Distance d(mini, this->superboid.miniboids[1]);
-        cm += d.module * d.getDirectionArray();
-      }
-    cm /= static_cast<real>(parameters().MINIBOIDS_PER_SUPERBOID - 2);
-    cm = this->superboid.miniboids[1].position - cm;
-    ::checkPeriodicLimits(cm);
-    this->position = cm;
+    this->superboid.setDeactivation();
+    // std::valarray<real> cm(-0.0f, parameters().DIMENSIONS);
+    // for (const auto& mini : this->superboid.miniboids)
+    //   if (mini.ID > 1)
+    //   {
+    //     Distance d(mini, this->superboid.miniboids[1]);
+    //     cm += d.module * d.getDirectionArray();
+    //   }
+    // cm /= static_cast<real>(parameters().MINIBOIDS_PER_SUPERBOID - 2);
+    // cm = this->superboid.miniboids[1].position - cm;
+    // ::checkPeriodicLimits(cm);
+    // this->position = cm;
   }
   
   return;

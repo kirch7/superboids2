@@ -131,8 +131,6 @@ setParameters(void)
   vector_set.back().pushDependency("types");
   vector_set.emplace_back("radial_beta_medium", true, "0.1");
   vector_set.back().pushDependency("types");
-  vector_set.emplace_back("target_area", true, "3.141592");
-  vector_set.back().pushDependency("types");
   vector_set.emplace_back("radial_eq", true, "1");
   vector_set.back().pushDependency("types");
   vector_set.emplace_back("tangent_beta_medium", true, "0.1");

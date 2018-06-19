@@ -72,6 +72,7 @@ public:
   std::string deathMessage;
   void checkBackInTime(const step_int);
   real getRadialReq(const step_int) const;
+  real getTangentReq(const step_int) const;
 protected:
   static super_int _totalSuperboids;
   DeathState       _deathState;
@@ -82,10 +83,12 @@ protected:
 };
 
 extern std::ostream& operator<< (std::ostream& os, const Superboid& super);
+
 inline bool operator!=   (const Superboid& s1, const Superboid& s2)
 {
   return (s1.ID != s2.ID);
 }
+
 inline bool operator==   (const Superboid& s1, const Superboid& s2)
 {
   return (s1.ID == s2.ID);

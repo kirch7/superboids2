@@ -54,8 +54,9 @@ getFiniteForce(Distance dist, const real beta, const real rEq, const std::vector
 }
 
 std::valarray<real>
-getFiniteForce(Distance dist, const real beta, const real rEq)
+getFiniteForce(const Distance& d, const real beta, const real rEq)
 {
+  Distance dist(d);
   const real& module = dist.module;
   std::valarray<real> force(0.0f, parameters().DIMENSIONS);
 
@@ -74,39 +75,4 @@ getFiniteForce(Distance dist, const real beta, const real rEq)
     dist.module = parameters().INTER_ELASTIC_UP_LIMIT;
     return getFiniteForce(dist, beta, rEq);
   }
-}
-
-std::valarray<real>
-getFiniteRadialForceWithoutBeta(Distance dist, const real rEq, const type_int TYPE)
-{
-  const real& module = dist.module;
-  std::valarray<real> force(-0.0f, parameters().DIMENSIONS);
-  
-  if (module <= parameters().RADIAL_PLASTIC_BEGIN[TYPE] + 1.0e-6)
-  {
-    const real dif = 1.0f - dist.module / rEq;
-    //// const real difCubicRoot = std::pow(std::fabs(dif), parameters().RADIAL_SPRING_EXP);
-    const real scalar = sign(dif) * std::fabs(dif);
-    if (std::isfinite(scalar))
-    {
-      force = dist.getDirectionArray();
-      force *= scalar;
-    }
-  }
-  else if (module <= parameters().RADIAL_PLASTIC_END[TYPE] + 1.0e06) // Constant regime; call recursion.
-  {
-    dist.module = parameters().RADIAL_PLASTIC_BEGIN[TYPE];
-    force = getFiniteRadialForceWithoutBeta(dist, rEq, TYPE);
-  }
-  else
-  {
-    const real d = parameters().RADIAL_PLASTIC_END[TYPE] - parameters().RADIAL_PLASTIC_BEGIN[TYPE];
-    const real dif = 1.0f - (dist.module - d) / rEq;
-    if (std::isfinite(dif))
-    {
-      force = dist.getDirectionArray();
-      force *= dif;
-    }
-  }
-  return force;
 }

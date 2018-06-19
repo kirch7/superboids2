@@ -424,7 +424,7 @@ Miniboid::interInteractions(const Neighbor& neighbor)
     else
     {
      std::valarray<real> force = -getFiniteForce(neighbor.distance, beta, rEq);
-      this->_forceSum += force;
+     this->_forceSum += force;
     }
   }
 
@@ -453,24 +453,17 @@ Miniboid::interInteractions(const step_int STEP)
       {
 	super_int count = 0;
 	const Miniboid* firstMini = nullptr;
-	const Distance* firstDistance = nullptr;
 	const Miniboid* secondMini = nullptr;
-	//// const Distance* secondDistance = nullptr;
 	
 	for (const auto& particleNei : list)
 	{
 	  if (count == 0)
-	  {
 	    firstMini = &particleNei.miniNeighbor;
-	    firstDistance = &particleNei.distance;
-	  }
 	  else if (count == 1)
-	  {
 	    secondMini = &particleNei.miniNeighbor;
-	    //// secondDistance = &particleNei.distance;
-	  }
 	  else
 	    break;
+
 	  ++count;
 	}
 	
@@ -564,7 +557,7 @@ Miniboid::setNextVelocity(const step_int STEP)
         {
           const real beta = mini.getHarrisParameter(parameters().RADIAL_BETA, parameters().RADIAL_BETA_MEDIUM);
 	  const real req = this->superboid.getRadialReq(STEP);
-          std::valarray<real> force = beta * getFiniteRadialForceWithoutBeta(mini.radialDistance, req, MY_TYPE);
+          std::valarray<real> force = getFiniteForce(mini.radialDistance, beta, req);
           this->_forceSum += force;
         }
       }
@@ -580,7 +573,8 @@ Miniboid::setNextVelocity(const step_int STEP)
       {
         // lest cost in -real than -Distance.
         const real beta = this->getHarrisParameter(parameters().RADIAL_BETA, parameters().RADIAL_BETA_MEDIUM);
-        std::valarray<real> force = -beta * getFiniteRadialForceWithoutBeta(distance, parameters().RADIAL_REQ[MY_TYPE], MY_TYPE);
+	const real req = this->superboid.getRadialReq(STEP);
+	std::valarray<real> force = getFiniteForce(distance, -beta, req);
         this->_forceSum += force;
       }
     }
@@ -606,8 +600,9 @@ Miniboid::setNextVelocity(const step_int STEP)
       const real kapa = (kapa1 + kapa2) / 2.0f;
       const real beta = this->getHarrisParameter(parameters().TANGENT_BETA, parameters().TANGENT_BETA_MEDIUM);
       const std::valarray<real> f1 = -kapa * SUBTRACTION * parameters().RADIAL_REQ[MY_TYPE] * tangent;
-      const std::vector<real> limits({parameters().TANGENT_PLASTIC_BEGIN[MY_TYPE], parameters().TANGENT_PLASTIC_END[MY_TYPE]});
-      const std::valarray<real> f2 = static_cast<real>(signal) * getFiniteForce(tn._distance, beta, parameters().TANGENT_REQ[MY_TYPE], limits);
+      const std::vector<real> limits({parameters().TANGENT_PLASTIC_BEGIN[MY_TYPE], parameters().TANGENT_PLASTIC_END[MY_TYPE]}); ////
+      const real req = this->superboid.getTangentReq(STEP);
+      const std::valarray<real> f2 = static_cast<real>(signal) * getFiniteForce(tn._distance, beta, req, limits);
       this->_forceSum += f1;
       this->_forceSum += f2;
     }

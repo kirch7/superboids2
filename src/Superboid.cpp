@@ -721,7 +721,7 @@ Superboid::checkBackInTime(const step_int step)
 real
 Superboid::getRadialReq(const step_int step) const
 {
-  if (parameters().NON_DIVISION_INTERVAL == 0)
+  if (parameters().DIVISION_INTERVAL == 0)
     return parameters().RADIAL_REQ[this->type];
   const step_int deltaT = step - this->_lastDivisionStep;
   if (deltaT > parameters().NON_DIVISION_INTERVAL)
@@ -731,4 +731,17 @@ Superboid::getRadialReq(const step_int step) const
   angular /= parameters().NON_DIVISION_INTERVAL;
   
   return parameters().DIVISION_DISTANCE + angular * deltaT;
+}
+
+real
+Superboid::getTangentReq(const step_int step) const
+{
+  if (parameters().DIVISION_INTERVAL == 0)
+    return parameters().TANGENT_REQ[this->type];
+  const step_int deltaT = step - this->_lastDivisionStep;
+  if (deltaT > parameters().NON_DIVISION_INTERVAL)
+    return parameters().TANGENT_REQ[this->type];
+
+  const real r = this->getRadialReq(step);
+  return parameters().TANGENT_REQ[this->type] * r / parameters().RADIAL_REQ[this->type];
 }

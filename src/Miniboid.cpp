@@ -602,7 +602,7 @@ Miniboid::setNextVelocity(const step_int STEP)
       const std::valarray<real> f1 = -kapa * SUBTRACTION * parameters().RADIAL_REQ[MY_TYPE] * tangent;
       const std::vector<real> limits({parameters().TANGENT_PLASTIC_BEGIN[MY_TYPE], parameters().TANGENT_PLASTIC_END[MY_TYPE]}); ////
       const real req = this->superboid.getTangentReq(STEP);
-      const std::valarray<real> f2 = static_cast<real>(signal) * getFiniteForce(tn._distance, beta, req, limits);
+      const std::valarray<real> f2 = -getFiniteForce(tn._distance, beta, req, limits);
       this->_forceSum += f1;
       this->_forceSum += f2;
     }

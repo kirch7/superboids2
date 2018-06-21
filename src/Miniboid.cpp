@@ -210,7 +210,7 @@ Miniboid::checkFatOut(void)
 
   if (isFatOut)
   {
-    this->superboid.deathMessage = "umbrella"
+    this->superboid.deathMessage = "umbrella";
     this->superboid.setDeactivation();
     // std::valarray<real> cm(-0.0f, parameters().DIMENSIONS);
     // for (const auto& mini : this->superboid.miniboids)

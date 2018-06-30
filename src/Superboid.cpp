@@ -215,7 +215,7 @@ Superboid::Superboid(void):
 	      for (const auto& hole : parameters().STOKES_HOLES)
 	      {
 		const Distance d(hole.center, this->miniboids[0u].position);
-		if (d.module < hole.radius + parameters().INITIAL_DISTANCE / 2.0f - 0.1f)
+		if (d.module < hole.radius + parameters().RADIAL_REQ[this->type] - 0.1f)
 		  ready = false;
 	      }
 	  }

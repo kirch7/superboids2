@@ -16,6 +16,7 @@
 #include "Box.hpp"
 #include "nextstep.hpp"
 #include "Parameter.hpp"
+#include "Stokes.hpp"
 
 static void
 shapeIt(const std::vector<Superboid>& superboids, std::ofstream& shapeFile, const step_int step)
@@ -202,7 +203,17 @@ oneSystem(void)
        index < p.SUPERBOIDS;
        ++index)
     superboids[index].activate();
-
+  for (const auto& hole : parameters().STOKES_HOLES)
+    for (auto& super : superboids)
+      if (super.isActivated())
+	for (const auto& mini : super.miniboids)
+	  if (hole.isInside(mini.position))
+	  {
+	    super.setDeactivation();
+	    super.deactivate();
+	    break;
+	  }
+    
   if (InitialPositions::load())
     loadPositions(superboids);
   

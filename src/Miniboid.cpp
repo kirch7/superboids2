@@ -48,10 +48,10 @@ Miniboid::checkLimits(void)
 void
 Miniboid::checkLimits(const step_int step)
 {
-  this->checkLimits();
-  
   if (step != 0)
     this->checkKillCondition(step);
+
+  this->checkLimits();
   
   return;
 }

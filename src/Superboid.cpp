@@ -602,7 +602,8 @@ void Superboid::deactivate(void) {
 
 void Superboid::activate(void) {
   this->_deathState = DeathState::Live;
-
+  this->deathMessage = "";
+  
   return;
 }
 

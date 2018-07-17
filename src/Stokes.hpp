@@ -3,8 +3,8 @@
 // License specified in LICENSE file.
 
 #pragma once
-#include <valarray>
 #include "parameters.hpp"
+#include <valarray>
 
 class Stokes {
 public:
@@ -12,5 +12,5 @@ public:
   const std::valarray<real> center;
   const real radius;
   const std::vector<box_int> boxIDs;
-  bool isInside(const std::valarray<real>& position) const;
+  bool isInside(const std::valarray<real> &position) const;
 };

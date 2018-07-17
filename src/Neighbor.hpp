@@ -6,13 +6,12 @@
 #include "Distance.hpp"
 class Miniboid;
 
-class Neighbor
-{
+class Neighbor {
 public:
-  const Miniboid& miniNeighbor;
-  const Distance  distance;
-  Neighbor(const Miniboid&, const Distance&);
-  Neighbor(const Distance&, const Miniboid&);
+  const Miniboid &miniNeighbor;
+  const Distance distance;
+  Neighbor(const Miniboid &, const Distance &);
+  Neighbor(const Distance &, const Miniboid &);
 };
 
-bool operator<(const Neighbor&, const Neighbor&);
+bool operator<(const Neighbor &, const Neighbor &);

@@ -3,23 +3,17 @@
 // License specified in LICENSE file.
 
 #pragma once
+#include "CellNeighbors.hpp"
+#include "Miniboid.hpp"
 #include <iostream> // operator<< .
-#include <vector>
-#include <valarray>
 #include <random>
 #include <sstream>
-#include "Miniboid.hpp"
-#include "CellNeighbors.hpp"
+#include <valarray>
+#include <vector>
 
-enum class DeathState
-{
-  Live,
-  WillDie,
-  Dead
-};
+enum class DeathState { Live, WillDie, Dead };
 
-class Superboid
-{
+class Superboid {
 public:
   std::vector<Miniboid> virtualMiniboids;
   void clearVirtualMiniboids(void);
@@ -27,7 +21,7 @@ public:
   std::vector<Miniboid> miniboids;
   const super_int ID;
   const type_int type;
-  void setGamma(std::vector<Superboid>&);
+  void setGamma(std::vector<Superboid> &);
   real gamma;
   bool doUseGamma;
 
@@ -36,11 +30,9 @@ public:
   real perimeter;
   real meanRadius;
   real meanRadius2;
-  
-  inline void reset(void)
-  {
-    for (auto& mini : this->miniboids)
-    {
+
+  inline void reset(void) {
+    for (auto &mini : this->miniboids) {
       mini.reset();
       ////mini._tangentNeighbors.clear();
     }
@@ -53,12 +45,12 @@ public:
   real get0to2piRandom(void);
   void checkVirtual(const bool export_, const step_int);
   void setNextPosition(const step_int);
-  bool divide(const super_int, Superboid&, std::vector<Box>&, const step_int);
+  bool divide(const super_int, Superboid &, std::vector<Box> &, const step_int);
   Distance getBiggestAxis() const;
-  
+
   CellNeighbors cellNeighbors;
-  void checkWrongNeighbors(const std::vector<Superboid>&);
-  
+  void checkWrongNeighbors(const std::vector<Superboid> &);
+
   std::vector<std::valarray<real>> infiniteVectors;
   std::vector<std::valarray<real>> infinite2Vectors;
   std::ostringstream virtualsInfo;
@@ -73,23 +65,22 @@ public:
   void checkBackInTime(const step_int);
   real getRadialReq(const step_int) const;
   real getTangentReq(const step_int) const;
+
 protected:
   static super_int _totalSuperboids;
-  DeathState       _deathState;
+  DeathState _deathState;
   std::default_random_engine _randomEngine;
   step_int _shapeStep;
   step_int _lastDivisionStep;
-  Superboid(Superboid&) = delete;
+  Superboid(Superboid &) = delete;
 };
 
-extern std::ostream& operator<< (std::ostream& os, const Superboid& super);
+extern std::ostream &operator<<(std::ostream &os, const Superboid &super);
 
-inline bool operator!=   (const Superboid& s1, const Superboid& s2)
-{
+inline bool operator!=(const Superboid &s1, const Superboid &s2) {
   return (s1.ID != s2.ID);
 }
 
-inline bool operator==   (const Superboid& s1, const Superboid& s2)
-{
+inline bool operator==(const Superboid &s1, const Superboid &s2) {
   return (s1.ID == s2.ID);
 }

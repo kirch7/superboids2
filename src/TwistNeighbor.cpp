@@ -2,22 +2,21 @@
 // Copyright (C) 2018 Leonardo Gregory Brunnet.
 // License specified in LICENSE file.
 
+#include "TwistNeighbor.hpp"
 #include <cmath>
 #include <vector>
-#include "TwistNeighbor.hpp"
 
-static std::vector<real>
-getAngles(const mini_int myID, const mini_int neighborID)
-{
+static std::vector<real> getAngles(const mini_int myID,
+                                   const mini_int neighborID) {
   std::vector<real> angles;
-  
-  static const mini_int M = static_cast<mini_int>(std::ceil((parameters().MINIBOIDS_PER_SUPERBOID - 1u)/2u));
 
-  if (parameters().MINIBOIDS_PER_SUPERBOID > 3u)
-  {
-    if (myID != 0u)
-    {
-      std::vector<mini_int> ms(2u, myID); // vector of two components filled with myID value.
+  static const mini_int M = static_cast<mini_int>(
+      std::ceil((parameters().MINIBOIDS_PER_SUPERBOID - 1u) / 2u));
+
+  if (parameters().MINIBOIDS_PER_SUPERBOID > 3u) {
+    if (myID != 0u) {
+      std::vector<mini_int> ms(
+          2u, myID); // vector of two components filled with myID value.
       std::vector<std::vector<int>> orientationMatrix;
       {
         std::vector<int> line;
@@ -27,20 +26,18 @@ getAngles(const mini_int myID, const mini_int neighborID)
       }
       {
         std::vector<int> line;
-        line.push_back(1);  // position
-        line.push_back(1);  // orientation
+        line.push_back(1); // position
+        line.push_back(1); // orientation
         orientationMatrix.push_back(line);
       }
-      
+
       bool keep = true;
-      for (mini_int m = 1u; m <= M && keep; ++m)
-      {
-        for (const auto& line : orientationMatrix)
-        {
+      for (mini_int m = 1u; m <= M && keep; ++m) {
+        for (const auto &line : orientationMatrix) {
           ms[line[0u]] = getTangentNeighborID(ms[line[0u]], line[1u]);
-          if (neighborID == ms[line[0u]])
-          {
-            ////angles.push_back(real(m * TWO_PI / (MINIBOIDS_PER_SUPERBOID - 1u)));
+          if (neighborID == ms[line[0u]]) {
+            ////angles.push_back(real(m * TWO_PI / (MINIBOIDS_PER_SUPERBOID -
+            ///1u)));
             angles.push_back(line[1] * m * parameters().TWIST_EQ_ANGLE);
             keep = false;
             break;
@@ -48,47 +45,36 @@ getAngles(const mini_int myID, const mini_int neighborID)
         }
       }
     }
-  }
-  else
-  {
+  } else {
     if (myID == 1u && neighborID == 2u)
       angles.push_back(parameters().TWIST_EQ_ANGLE);
     else if (myID == 2u && neighborID == 1u)
       angles.push_back(-parameters().TWIST_EQ_ANGLE);
   }
-  
-  //std::cout << angles[0u] << std::endl;
+
+  // std::cout << angles[0u] << std::endl;
   return angles;
 }
 
-
-
-TwistNeighbor::TwistNeighbor (const mini_int myID, const mini_int neighborID):
-  ID(neighborID),
-  ANGLES(getAngles(myID, neighborID)),
-  _distance(Distance())
-{;
+TwistNeighbor::TwistNeighbor(const mini_int myID, const mini_int neighborID)
+    : ID(neighborID), ANGLES(getAngles(myID, neighborID)),
+      _distance(Distance()) {
+  ;
   return;
 }
 
-mini_int
-getTangentNeighborID(const mini_int MY_ID, const int SIDE)
-{
+mini_int getTangentNeighborID(const mini_int MY_ID, const int SIDE) {
   if (SIDE == 0u)
     return 0u;
-  else if (SIDE > 0)
-  {
+  else if (SIDE > 0) {
     if (MY_ID < parameters().MINIBOIDS_PER_SUPERBOID - 1u)
       return (MY_ID + 1u);
     else
       return 1u;
-  }
-  else
-  {
+  } else {
     if (MY_ID > 1u)
       return (MY_ID - 1u);
     else
       return (parameters().MINIBOIDS_PER_SUPERBOID - 1u);
   }
 }
-

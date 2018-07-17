@@ -2,12 +2,11 @@
 // Copyright (C) 2018 Leonardo Gregory Brunnet.
 // License specified in LICENSE file.
 
-#include <cmath>
 #include "lines.hpp"
+#include <cmath>
 
-real
-getAngularCoefficient(const std::valarray<real> pointA, const std::valarray<real> pointB)
-{
+real getAngularCoefficient(const std::valarray<real> pointA,
+                           const std::valarray<real> pointB) {
   const real deltaX = pointB[X] - pointA[X];
   const real deltaY = pointB[Y] - pointA[Y];
 
@@ -17,9 +16,9 @@ getAngularCoefficient(const std::valarray<real> pointA, const std::valarray<real
     return deltaY / deltaX;
 }
 
-std::valarray<real>
-getClosestPoint(const real m, const std::valarray<real> pointA, const std::valarray<real> pointC)
-{
+std::valarray<real> getClosestPoint(const real m,
+                                    const std::valarray<real> pointA,
+                                    const std::valarray<real> pointC) {
   const real x1 = pointA[X];
   const real x3 = pointC[X];
   const real y1 = pointA[Y];
@@ -29,8 +28,7 @@ getClosestPoint(const real m, const std::valarray<real> pointA, const std::valar
     return std::valarray<real>({x3, y1});
   else if (!std::isnormal(m))
     return std::valarray<real>({x1, y3});
-  else
-  {
+  else {
     const real div = m + 1.0f / m;
     const real commonX = ((x3 / m) + y3 + (m * x1) - y1) / div;
     const real commonY = m * (commonX - x1) + y1;

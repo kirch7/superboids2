@@ -2,74 +2,58 @@
 // Copyright (C) 2018 Leonardo Gregory Brunnet.
 // License specified in LICENSE file.
 
-#include <valarray>
-#include <vector>
+#include "Box.hpp"
 #include "Miniboid.hpp"
 #include "Superboid.hpp"
-#include "Box.hpp"
+#include <valarray>
+#include <vector>
 
-namespace boxID
-{
-  static box_int
-  south (const box_int centralBoxID)
-  {
-    if (centralBoxID >= parameters().BOXES_IN_EDGE)
-      return (centralBoxID - parameters().BOXES_IN_EDGE);
-    else
-      return (parameters().BOXES - parameters().BOXES_IN_EDGE + centralBoxID);
-  }
-  
-  static box_int
-  north (const box_int centralBoxID)
-  {
-    if (centralBoxID < parameters().BOXES - parameters().BOXES_IN_EDGE)
-      return (centralBoxID + parameters().BOXES_IN_EDGE);
-    else
-      return (centralBoxID + parameters().BOXES_IN_EDGE - parameters().BOXES);
-  }
-  
-  static box_int
-  west (const box_int centralBoxID)
-  {
-    if (centralBoxID % parameters().BOXES_IN_EDGE != 0)
-      return (centralBoxID - 1);
-    else
-      return (centralBoxID + parameters().BOXES_IN_EDGE - 1);
-  }
-  
-  static box_int
-  east (const box_int centralBoxID)
-  {
-    if (centralBoxID % parameters().BOXES_IN_EDGE != parameters().BOXES_IN_EDGE - 1u)
-      return (centralBoxID + 1);
-    else
-      return (centralBoxID - parameters().BOXES_IN_EDGE + 1u);
-  }
-  
-  static box_int
-  northeast (const box_int centralBoxID)
-  {
-    return (north(east(centralBoxID)));
-  }
-  
-  static box_int
-  northwest (const box_int centralBoxID)
-  {
-    return (north(west(centralBoxID)));
-  }
-  
-  static box_int
-  southeast (const box_int centralBoxID)
-  {
-    return (south(east(centralBoxID)));
-  }
-  
-  static box_int
-  southwest (const box_int centralBoxID)
-  {
-    return (south(west(centralBoxID)));
-  }
-} /* End of boxID namespace. */
+namespace boxID {
+static box_int south(const box_int centralBoxID) {
+  if (centralBoxID >= parameters().BOXES_IN_EDGE)
+    return (centralBoxID - parameters().BOXES_IN_EDGE);
+  else
+    return (parameters().BOXES - parameters().BOXES_IN_EDGE + centralBoxID);
+}
+
+static box_int north(const box_int centralBoxID) {
+  if (centralBoxID < parameters().BOXES - parameters().BOXES_IN_EDGE)
+    return (centralBoxID + parameters().BOXES_IN_EDGE);
+  else
+    return (centralBoxID + parameters().BOXES_IN_EDGE - parameters().BOXES);
+}
+
+static box_int west(const box_int centralBoxID) {
+  if (centralBoxID % parameters().BOXES_IN_EDGE != 0)
+    return (centralBoxID - 1);
+  else
+    return (centralBoxID + parameters().BOXES_IN_EDGE - 1);
+}
+
+static box_int east(const box_int centralBoxID) {
+  if (centralBoxID % parameters().BOXES_IN_EDGE !=
+      parameters().BOXES_IN_EDGE - 1u)
+    return (centralBoxID + 1);
+  else
+    return (centralBoxID - parameters().BOXES_IN_EDGE + 1u);
+}
+
+static box_int northeast(const box_int centralBoxID) {
+  return (north(east(centralBoxID)));
+}
+
+static box_int northwest(const box_int centralBoxID) {
+  return (north(west(centralBoxID)));
+}
+
+static box_int southeast(const box_int centralBoxID) {
+  return (south(east(centralBoxID)));
+}
+
+static box_int southwest(const box_int centralBoxID) {
+  return (south(west(centralBoxID)));
+}
+} // namespace boxID
 
 box_int Box::_totalBoxesCount(0u);
 
@@ -78,38 +62,40 @@ box_int Box::_totalBoxesCount(0u);
  ******************/
 
 /* Box unique constructor: */
-Box::Box(void):
-  ID(_totalBoxesCount++),
-  inEdge(Box::getIsInEdge(ID)), /* Construct boolean. */
-  neighbors (9u, nullptr), /* Construct a vector with 9 null pointer elements. */
-  miniboids()  /* Construct superboids as a empty list. */
+Box::Box(void)
+    : ID(_totalBoxesCount++),
+      inEdge(Box::getIsInEdge(ID)), /* Construct boolean. */
+      neighbors(9u,
+                nullptr), /* Construct a vector with 9 null pointer elements. */
+      miniboids()         /* Construct superboids as a empty list. */
 {
-  #ifdef DEBUG
-  if (_totalBoxesCount > parameters().BOXES)
-  {
-    std::cerr << "There must be only " << parameters().BOXES << " boxes." << std::endl;
+#ifdef DEBUG
+  if (_totalBoxesCount > parameters().BOXES) {
+    std::cerr << "There must be only " << parameters().BOXES << " boxes."
+              << std::endl;
     exit(30);
   }
-  #endif
-  
+#endif
+
   return;
 }
 
-box_int
-Box::getBoxID (std::valarray<real> position) /* Parameter by copy. */
+box_int Box::getBoxID(std::valarray<real> position) /* Parameter by copy. */
 {
-  static const real BOX_SIZE_INVERSE = static_cast<real>(parameters().BOXES_IN_EDGE)/parameters().RANGE; // 1/BOX_SIZE
-  
-  position += 0.5f * parameters().RANGE;     /* Translate */
-  position *= BOX_SIZE_INVERSE; /* Normalize */
+  static const real BOX_SIZE_INVERSE =
+      static_cast<real>(parameters().BOXES_IN_EDGE) /
+      parameters().RANGE; // 1/BOX_SIZE
+
+  position += 0.5f * parameters().RANGE; /* Translate */
+  position *= BOX_SIZE_INVERSE;          /* Normalize */
 
   std::vector<box_int> truncated;
-  for (dimension_int dimension = 0u; dimension < parameters().DIMENSIONS; ++dimension)
+  for (dimension_int dimension = 0u; dimension < parameters().DIMENSIONS;
+       ++dimension)
     truncated.push_back(static_cast<box_int>(position[dimension]));
-  
+
   box_int tmpBoxID(0u);
-  for (dimension_int dim = 0u; dim < parameters().DIMENSIONS; ++dim)
-  {
+  for (dimension_int dim = 0u; dim < parameters().DIMENSIONS; ++dim) {
     box_int sum = truncated[dim];
     for (dimension_int power = 0u; power < dim; ++power)
       sum *= parameters().BOXES_IN_EDGE;
@@ -117,8 +103,7 @@ Box::getBoxID (std::valarray<real> position) /* Parameter by copy. */
   }
 
   for (dimension_int dim = 0u; dim < parameters().DIMENSIONS; ++dim)
-    if (position[dim] == parameters().BOXES_IN_EDGE)
-    {
+    if (position[dim] == parameters().BOXES_IN_EDGE) {
       box_int sum = 1;
       for (dimension_int power = 0u; power < dim; ++power)
         sum *= parameters().BOXES_IN_EDGE;
@@ -128,51 +113,50 @@ Box::getBoxID (std::valarray<real> position) /* Parameter by copy. */
   return tmpBoxID;
 }
 
-bool Box::getIsInEdge(const box_int boxID)
-{
-  if      (boxID < parameters().BOXES_IN_EDGE)
+bool Box::getIsInEdge(const box_int boxID) {
+  if (boxID < parameters().BOXES_IN_EDGE)
     return true;
-  
+
   else if (boxID >= parameters().BOXES - parameters().BOXES_IN_EDGE)
     return true;
-  
+
   else if (boxID % parameters().BOXES_IN_EDGE == 0)
     return true;
-  
+
   else if (boxID % parameters().BOXES_IN_EDGE == parameters().BOXES_IN_EDGE - 1)
     return true;
-  
+
   else
     return false;
 }
 
-void Box::setNeighbors(std::vector<Box>& boxes)
-{
+void Box::setNeighbors(std::vector<Box> &boxes) {
   using namespace boxID;
-  
+
   neighbors[static_cast<uint16_t>(CardinalPoint::ACTUAL)] = &boxes[ID];
-  
+
   neighbors[static_cast<uint16_t>(CardinalPoint::NORTH)] = &boxes[north(ID)];
   neighbors[static_cast<uint16_t>(CardinalPoint::SOUTH)] = &boxes[south(ID)];
-  neighbors[static_cast<uint16_t>(CardinalPoint::EAST)]  = &boxes[east(ID)];
-  neighbors[static_cast<uint16_t>(CardinalPoint::WEST)]  = &boxes[west(ID)];
+  neighbors[static_cast<uint16_t>(CardinalPoint::EAST)] = &boxes[east(ID)];
+  neighbors[static_cast<uint16_t>(CardinalPoint::WEST)] = &boxes[west(ID)];
 
-  neighbors[static_cast<uint16_t>(CardinalPoint::NORTHWEST)] = &boxes[northwest(ID)];
-  neighbors[static_cast<uint16_t>(CardinalPoint::NORTHEAST)] = &boxes[northeast(ID)];
-  neighbors[static_cast<uint16_t>(CardinalPoint::SOUTHWEST)] = &boxes[southwest(ID)];
-  neighbors[static_cast<uint16_t>(CardinalPoint::SOUTHEAST)] = &boxes[southeast(ID)];
+  neighbors[static_cast<uint16_t>(CardinalPoint::NORTHWEST)] =
+      &boxes[northwest(ID)];
+  neighbors[static_cast<uint16_t>(CardinalPoint::NORTHEAST)] =
+      &boxes[northeast(ID)];
+  neighbors[static_cast<uint16_t>(CardinalPoint::SOUTHWEST)] =
+      &boxes[southwest(ID)];
+  neighbors[static_cast<uint16_t>(CardinalPoint::SOUTHEAST)] =
+      &boxes[southeast(ID)];
 
   return;
 }
 
-void
-Box::append (Miniboid& mini)
-{
-  if (mini.superboid.isActivated() == true)
-  {
+void Box::append(Miniboid &mini) {
+  if (mini.superboid.isActivated() == true) {
     this->miniboids.push_front(&mini);
     mini.setBox(this);
   }
-  
+
   return;
 }

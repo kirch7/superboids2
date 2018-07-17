@@ -3,59 +3,59 @@
 // License specified in LICENSE file.
 
 #pragma once
-#include "parameters.hpp"
 #include <vector>
+#include "parameters.hpp"
 
 class Superboid;
 
 class MSD {
-public:
+ public:
   virtual void youCannotMakeAInstanceOfMe(void) = 0;
   static inline bool write(void) { return _export; }
   static inline std::ofstream &file(void) { return _file; }
   virtual inline ~MSD() { ; }
   friend int setMSD(const std::string &);
 
-private:
+ private:
   static std::ofstream _file;
   static bool _export;
 };
 
 class BinPrint {
-public:
+ public:
   virtual void youCannotMakeAInstanceOfMe(void) = 0;
   static inline bool write(void) { return _export; }
   static inline std::ofstream &file(void) { return _file; }
   virtual inline ~BinPrint() { ; }
   friend int setBinPrint(const std::string &);
 
-private:
+ private:
   static std::ofstream _file;
   static bool _export;
 };
 
 class Shape {
-public:
+ public:
   virtual void youCannotMakeAInstanceOfMe(void) = 0;
   static inline bool write(void) { return _export; }
   friend int setShapeExportation(const std::string &);
 
-private:
+ private:
   static bool _export;
 };
 
 class Gamma {
-public:
+ public:
   virtual void youCannotMakeAInstanceOfMe(void) = 0;
   static inline bool write(void) { return _export; }
   friend int setGammaExportation(const std::string &);
 
-private:
+ private:
   static bool _export;
 };
 
 class SCS {
-public:
+ public:
   virtual void youCannotMakeAInstanceOfMe(void) = 0;
   static inline bool write(void) { return _export; }
   friend int setSCS(const std::string &);
@@ -63,13 +63,13 @@ public:
                     const std::vector<Superboid> &superboids);
   static inline std::ofstream &file(void) { return _file; }
 
-private:
+ private:
   static std::ofstream _file;
   static bool _export;
 };
 
 class Infinite {
-public:
+ public:
   virtual void youCannotMakeAInstanceOfMe(void) = 0;
   static inline bool write(void) { return _export; }
   friend int setInfinite(const std::string &);
@@ -79,7 +79,7 @@ public:
   static inline std::ofstream &virtualsFile(void) { return _virtFile; }
   static void close(void);
 
-private:
+ private:
   static std::ofstream _infFile;
   static std::ofstream _inf2File;
   static std::ofstream _virtFile;
@@ -87,12 +87,12 @@ private:
 };
 
 class Phi {
-public:
+ public:
   virtual void youCannotMakeAInstanceOfMe(void) = 0;
   static inline bool write(void) { return _export; }
   friend int setPhi(const std::string &);
 
-private:
+ private:
   static bool _export;
 };
 

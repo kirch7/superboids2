@@ -4,9 +4,9 @@
 
 #pragma once
 
+#include <vector>
 #include "Box.hpp"
 #include "Superboid.hpp"
-#include <vector>
 
 namespace error {
 enum class NextStepError {

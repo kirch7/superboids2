@@ -3,10 +3,10 @@
 // License specified in LICENSE file.
 
 #include "parameters.hpp"
+#include <sstream>
 #include "Date.hpp"
 #include "Parameter.hpp"
 #include "Stokes.hpp"
-#include <sstream>
 
 Parameters _p;
 
@@ -49,8 +49,7 @@ static void printMatrix(std::ostringstream &st,
   for (const auto &line : matrix)
     for (const auto &elem : line) {
       const auto signif = getSignificantNo(elem);
-      if (signif > signifMax)
-        signifMax = signif;
+      if (signif > signifMax) signifMax = signif;
     }
 
   const auto precision = st.precision();
@@ -71,16 +70,14 @@ static void printVector(S &st, const std::vector<T> &vec) {
   std::size_t signifMax = 0;
   for (const auto &elem : vec) {
     const auto signif = getSignificantNo(elem);
-    if (signif > signifMax)
-      signifMax = signif;
+    if (signif > signifMax) signifMax = signif;
   }
 
   const auto precision = st.precision();
   st.precision(signifMax);
   st << '#';
   const std::size_t SIZE = vec.size();
-  for (type_int column = 0u; column < SIZE; ++column)
-    st << '\t' << vec[column];
+  for (type_int column = 0u; column < SIZE; ++column) st << '\t' << vec[column];
   st << std::endl;
   st.precision(precision);
 
@@ -89,25 +86,20 @@ static void printVector(S &st, const std::vector<T> &vec) {
 
 static std::vector<real> getTargetAreas(const std::vector<real> &reqs) {
   std::vector<real> v(reqs.size());
-  for (type_int t = 0; t < v.size(); ++t)
-    v[t] = square(reqs[t]) * PI;
+  for (type_int t = 0; t < v.size(); ++t) v[t] = square(reqs[t]) * PI;
   return v;
 }
 
 static std::vector<real> normalize(const std::vector<real> &v) {
   std::vector<real> vec = v;
   real sum = -0.0f;
-  for (const auto &i : vec)
-    sum += i;
-  for (auto &i : vec)
-    i /= sum;
+  for (const auto &i : vec) sum += i;
+  for (auto &i : vec) i /= sum;
 
   sum = -0.0f;
-  for (const auto &i : vec)
-    sum += i;
+  for (const auto &i : vec) sum += i;
 
-  if (sum < 1.0f)
-    vec[0] += (1.0f - sum);
+  if (sum < 1.0f) vec[0] += (1.0f - sum);
 
   return vec;
 }
@@ -319,8 +311,7 @@ void Parameters::set1(void) {
 
   this->DIMENSIONS = getParameter<unsigned long int>("dimensions");
   ;
-  if (this->DIMENSIONS != 2)
-    panic("only 2D for now");
+  if (this->DIMENSIONS != 2) panic("only 2D for now");
 
   // Last step number:
   this->STEPS = getParameter<unsigned long int>("steps");
@@ -339,12 +330,12 @@ void Parameters::set1(void) {
   else if (this->INITIAL_DISTANCE > this->RANGE)
     panic("initial_distance too big", this->INITIAL_DISTANCE);
 
-  this->INITIAL_ANGLE_BETWEEN = HALF_PI; // rad  // Nowadays it is unused. It
-                                         // was used in twist spring tests.
-  this->INITIAL_ANGLE_ID1 =
-      0.0f; // rad  // Nowadays it is unused. It was used in twist spring tests.
-  this->TWIST_EQ_ANGLE =
-      2.0f; // rad  // Nowadays it is unused. It was used in twist spring tests.
+  this->INITIAL_ANGLE_BETWEEN = HALF_PI;  // rad  // Nowadays it is unused. It
+                                          // was used in twist spring tests.
+  this->INITIAL_ANGLE_ID1 = 0.0f;  // rad  // Nowadays it is unused. It was used
+                                   // in twist spring tests.
+  this->TWIST_EQ_ANGLE = 2.0f;  // rad  // Nowadays it is unused. It was used in
+                                // twist spring tests.
   // "Infinite" force maximum reach distance:
   this->CORE_DIAMETER = getParameter<real>("core_diameter");
   if (this->CORE_DIAMETER < 0.0)
@@ -363,8 +354,7 @@ void Parameters::set1(void) {
   this->ETA = getParameter<real>("eta");
   // Delta time. Time step jump value:
   this->DT = getParameter<real>("dt");
-  if (this->DT <= 0.0)
-    panic("dt must be positive", this->CORE_DIAMETER);
+  if (this->DT <= 0.0) panic("dt must be positive", this->CORE_DIAMETER);
 
   return;
 }
@@ -457,8 +447,7 @@ void Parameters::setDomain(void) {
   this->INITIAL_CONDITION = getIC(getParameter<std::string>("initial"));
   this->KILL_CONDITION = getKC(getParameter<std::string>("kill"));
   this->P0_LIMIT = getParameter<real>("p0_limit");
-  if (this->P0_LIMIT < 3.545)
-    panic("p0_limit should be greater than 3.545");
+  if (this->P0_LIMIT < 3.545) panic("p0_limit should be greater than 3.545");
   return;
 }
 
@@ -491,8 +480,7 @@ void Parameters::setInter(void) {
   this->INTER_BETA = getParameter<std::vector<std::vector<real>>>("inter_beta");
   for (const auto &vec : this->INTER_BETA)
     for (const auto &comp : vec)
-      if (comp < 0.0f)
-        panic("inter_eq must be bigger positive or nule", comp);
+      if (comp < 0.0f) panic("inter_eq must be bigger positive or nule", comp);
 
   return;
 }
@@ -510,8 +498,8 @@ void Parameters::setRadial(void) {
       panic("radial_plastic_begin must be bigger than real_tolerance", comp);
 
   this->RADIAL_SPRING_EXP =
-      1.0f; //// Deixa-me harmônico. O código tá "otimizado" (não genérico
-            ///(embora haja código genérico comentado)) para molas lineares.
+      1.0f;  //// Deixa-me harmônico. O código tá "otimizado" (não genérico
+             ///(embora haja código genérico comentado)) para molas lineares.
   this->RADIAL_REQ = getParameter<std::vector<real>>("radial_eq");
   for (const auto &comp : this->RADIAL_REQ)
     if (comp < this->REAL_TOLERANCE)
@@ -521,8 +509,7 @@ void Parameters::setRadial(void) {
       getParameter<std::vector<std::vector<real>>>("radial_beta");
   for (const auto &vec : this->RADIAL_BETA)
     for (const auto &comp : vec)
-      if (comp < 0.0f)
-        panic("radial_eq must be bigger positive or nule", comp);
+      if (comp < 0.0f) panic("radial_eq must be bigger positive or nule", comp);
 
   this->RADIAL_BETA_MEDIUM =
       getParameter<std::vector<real>>("radial_beta_medium");
@@ -536,8 +523,7 @@ void Parameters::setRadial(void) {
 void Parameters::setStokes(void) {
   this->STOKES_HOLES = std::vector<Stokes>();
   const auto &vec = getParameter<std::vector<real>>("stokes");
-  if (vec.size() % (this->DIMENSIONS + 1) != 0)
-    panic("algorithm problem");
+  if (vec.size() % (this->DIMENSIONS + 1) != 0) panic("algorithm problem");
   const std::size_t stokesNo = vec.size() / (this->DIMENSIONS + 1);
   for (std::size_t stokesID = 0; stokesID < stokesNo; ++stokesID) {
     std::valarray<real> position(this->DIMENSIONS);
@@ -584,7 +570,7 @@ void Parameters::set(void) {
   this->SPEED = getParameter<std::vector<real>>("speed");
 
   this->THREADS =
-      getParameter<unsigned long int>("threads"); // Threads quantity.
+      getParameter<unsigned long int>("threads");  // Threads quantity.
 
   this->TARGET_AREA = getTargetAreas(this->RADIAL_REQ);
 
@@ -610,8 +596,9 @@ void Parameters::set(void) {
 
     this->DIVISION_DISTANCE = this->getDivisionDistance();
     if (this->DIVISION_DISTANCE > minRadialReq - this->CORE_DIAMETER)
-      panic("Daughter size too large! Reduce core diameter or number of "
-            "peripheric miniboids!");
+      panic(
+          "Daughter size too large! Reduce core diameter or number of "
+          "peripheric miniboids!");
   }
 
   std::vector<real> arcs(this->TYPES_NO);

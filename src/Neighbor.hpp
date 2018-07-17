@@ -7,7 +7,7 @@
 class Miniboid;
 
 class Neighbor {
-public:
+ public:
   const Miniboid &miniNeighbor;
   const Distance distance;
   Neighbor(const Miniboid &, const Distance &);

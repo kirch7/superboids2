@@ -3,11 +3,11 @@
 // License specified in LICENSE file.
 
 #pragma once
-#include "parameters.hpp"
 #include <cstdint>
 #include <list>
 #include <valarray>
 #include <vector>
+#include "parameters.hpp"
 
 class Miniboid;
 class Superboid;
@@ -25,7 +25,7 @@ enum class CardinalPoint : uint16_t {
 };
 
 class Box {
-public:
+ public:
   Box(void);         /* Constructor. */
   const box_int ID;  /* Unique ID. */
   const bool inEdge; /* True if box is in edge. */
@@ -52,11 +52,10 @@ public:
   static bool getIsInEdge(const box_int boxID);
   static box_int getBoxID(const std::valarray<real> position);
   static inline void setNeighborBoxes(std::vector<Box> &boxes) {
-    for (auto &box : boxes)
-      box.setNeighbors(boxes);
+    for (auto &box : boxes) box.setNeighbors(boxes);
   }
 
-private:
+ private:
   static box_int _totalBoxesCount;
   Box(const Box &) = delete; /* Invalidate use of copy constructor. */
 };

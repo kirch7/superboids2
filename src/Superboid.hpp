@@ -3,18 +3,18 @@
 // License specified in LICENSE file.
 
 #pragma once
-#include "CellNeighbors.hpp"
-#include "Miniboid.hpp"
-#include <iostream> // operator<< .
+#include <iostream>  // operator<< .
 #include <random>
 #include <sstream>
 #include <valarray>
 #include <vector>
+#include "CellNeighbors.hpp"
+#include "Miniboid.hpp"
 
 enum class DeathState { Live, WillDie, Dead };
 
 class Superboid {
-public:
+ public:
   std::vector<Miniboid> virtualMiniboids;
   void clearVirtualMiniboids(void);
 
@@ -60,13 +60,13 @@ public:
   bool willDie(void) const;
   void deactivate(void);
   bool isActivated(void) const;
-  void activate(void); // Ignoring boxes.
+  void activate(void);  // Ignoring boxes.
   std::string deathMessage;
   void checkBackInTime(const step_int);
   real getRadialReq(const step_int) const;
   real getTangentReq(const step_int) const;
 
-protected:
+ protected:
   static super_int _totalSuperboids;
   DeathState _deathState;
   std::default_random_engine _randomEngine;

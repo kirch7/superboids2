@@ -4,10 +4,10 @@
 
 #pragma once
 
+#include <vector>
 #include "Box.hpp"
 #include "Superboid.hpp"
 #include "parameters.hpp"
-#include <vector>
 
 extern void divide(std::vector<Box> &, std::vector<Superboid> &,
                    const step_int);

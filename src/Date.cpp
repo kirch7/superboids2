@@ -3,9 +3,9 @@
 // License specified in LICENSE file.
 
 #include "Date.hpp"
-#include "parameters.hpp"
 #include <fstream>
 #include <sstream>
+#include "parameters.hpp"
 
 const std::string Date::compiledTime(__DATE__ "  " __TIME__);
 const time_t Date::rawTime = time(NULL);

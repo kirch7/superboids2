@@ -3,9 +3,9 @@
 // License specified in LICENSE file.
 
 #include "Stokes.hpp"
+#include <algorithm>
 #include "Box.hpp"
 #include "Distance.hpp"
-#include <algorithm>
 
 static std::vector<box_int> getBoxIDs(const std::valarray<real> &center,
                                       const real radius) {

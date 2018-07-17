@@ -4,14 +4,14 @@
 
 #pragma once
 
-#include "parameters.hpp"
 #include <iostream>
 #include <valarray>
+#include "parameters.hpp"
 
 class Miniboid;
 
 class Distance {
-public:
+ public:
   const Miniboid *miniboid1;
   const Miniboid *miniboid2;
   real module;
@@ -24,8 +24,11 @@ public:
     return;
   }
   inline Distance(const Distance &d)
-      : miniboid1(d.miniboid1), miniboid2(d.miniboid2), module(d.module),
-        sine(d.sine), cosine(d.cosine) {
+      : miniboid1(d.miniboid1),
+        miniboid2(d.miniboid2),
+        module(d.module),
+        sine(d.sine),
+        cosine(d.cosine) {
     return;
   }
   Distance(const std::valarray<real> &);

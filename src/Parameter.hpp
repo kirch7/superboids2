@@ -11,13 +11,19 @@
 // extern std::vector<std::vector<real>> getParameter_matrix(const
 // std::string&);
 
-template <typename Eita> Eita getParameter(const std::string &);
+template <typename Eita>
+Eita getParameter(const std::string &);
 
-template <> std::string getParameter(const std::string &);
-template <> real getParameter(const std::string &);
-template <> unsigned long int getParameter(const std::string &);
-template <> std::vector<real> getParameter(const std::string &);
-template <> std::vector<std::vector<real>> getParameter(const std::string &);
+template <>
+std::string getParameter(const std::string &);
+template <>
+real getParameter(const std::string &);
+template <>
+unsigned long int getParameter(const std::string &);
+template <>
+std::vector<real> getParameter(const std::string &);
+template <>
+std::vector<std::vector<real>> getParameter(const std::string &);
 
 extern void loadParametersFromString(const std::string &);
 extern std::string getParametersSample();

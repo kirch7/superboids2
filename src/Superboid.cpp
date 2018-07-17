@@ -3,15 +3,15 @@
 // License specified in LICENSE file.
 
 #include "Superboid.hpp"
+#include <ctime>
+#include <random>
+#include <vector>
 #include "Box.hpp"
 #include "Miniboid.hpp"
 #include "Stokes.hpp"
 #include "export.hpp"
 #include "nextstep.hpp"
 #include "parameters.hpp"
-#include <ctime>
-#include <random>
-#include <vector>
 
 unsigned long long int getSeed(const super_int id) {
   return std::time(NULL) + id;
@@ -20,8 +20,7 @@ unsigned long long int getSeed(const super_int id) {
 super_int Superboid::_totalSuperboids(0u);
 
 std::ostream &operator<<(std::ostream &os, const Superboid &super) {
-  for (const auto &mini : super.miniboids)
-    os << mini << std::endl;
+  for (const auto &mini : super.miniboids) os << mini << std::endl;
   os << std::endl;
   return os;
 }
@@ -144,10 +143,16 @@ static real getDeltaAngle(void) {
 }
 
 Superboid::Superboid(void)
-    : ID(this->_totalSuperboids), type(getType(this->_totalSuperboids)),
-      area(-0.0f), perimeter(-0.0f), meanRadius(-0.0f), meanRadius2(-0.0f),
-      virtualsInfo(std::ios_base::out), _deathState(DeathState::WillDie),
-      _randomEngine(getSeed(ID)), _lastDivisionStep(0) {
+    : ID(this->_totalSuperboids),
+      type(getType(this->_totalSuperboids)),
+      area(-0.0f),
+      perimeter(-0.0f),
+      meanRadius(-0.0f),
+      meanRadius2(-0.0f),
+      virtualsInfo(std::ios_base::out),
+      _deathState(DeathState::WillDie),
+      _randomEngine(getSeed(ID)),
+      _lastDivisionStep(0) {
   this->miniboids.reserve(parameters().MINIBOIDS_PER_SUPERBOID);
   this->virtualMiniboids.reserve(64u * parameters().MINIBOIDS_PER_SUPERBOID);
 
@@ -262,10 +267,8 @@ void Superboid::setGamma(std::vector<Superboid> &superboids) {
 }
 
 void Superboid::setShape(const step_int STEP) {
-  if (STEP <= this->_shapeStep && STEP != 0)
-    return;
-  if (this->isActivated() == false)
-    std::cerr << "eita, giovana" << std::endl;
+  if (STEP <= this->_shapeStep && STEP != 0) return;
+  if (this->isActivated() == false) std::cerr << "eita, giovana" << std::endl;
 
   this->_shapeStep = STEP;
   this->area = -0.0f;
@@ -278,11 +281,11 @@ void Superboid::setShape(const step_int STEP) {
       // If central miniboid, then continue loop in the next miniboid.
       continue;
     else if (mini1.ID ==
-             parameters().MINIBOIDS_PER_SUPERBOID - 1u) // Last miniboid.
+             parameters().MINIBOIDS_PER_SUPERBOID - 1u)  // Last miniboid.
     {
       this->perimeter += Distance(mini1, this->miniboids[1u]).module;
       this->area += mini1.getAreaBetween(this->miniboids[1u]);
-    } else // Another peripheral but the last.
+    } else  // Another peripheral but the last.
     {
       this->perimeter += Distance(mini1, this->miniboids[mini1.ID + 1u]).module;
       this->area += mini1.getAreaBetween(this->miniboids[mini1.ID + 1u]);
@@ -302,11 +305,9 @@ void Superboid::checkVirtual(const bool export_, const step_int step) {
       std::sqrt(2.0f *
                 (1.0f - std::cos(2.0 * PI /
                                  (parameters().MINIBOIDS_PER_SUPERBOID - 1u))));
-  if (export_)
-    this->virtualsInfo.str(std::string(""));
+  if (export_) this->virtualsInfo.str(std::string(""));
   for (auto &mini1 : this->miniboids) {
-    if (mini1.ID == 0u)
-      continue;
+    if (mini1.ID == 0u) continue;
     std::vector<real> vec;
     for (auto &tn : mini1._twistNeighbors)
       if (tn._distance.module > parameters().CORE_DIAMETER)
@@ -341,30 +342,27 @@ void Superboid::checkVirtual(const bool export_, const step_int step) {
 void Superboid::setNextPosition(const step_int step) {
   this->setShape(step);
 
-  for (auto &mini : this->miniboids)
-    mini.setNextPosition(step);
+  for (auto &mini : this->miniboids) mini.setNextPosition(step);
 
   this->miniboids[0].checkFatOut();
 
   return;
 }
 
-static std::vector<std::valarray<real>>
-getOriginalPositions(const std::vector<Miniboid> &miniboids) {
+static std::vector<std::valarray<real>> getOriginalPositions(
+    const std::vector<Miniboid> &miniboids) {
   std::vector<std::valarray<real>> v;
   v.reserve(miniboids.size());
 
-  for (const auto &mini : miniboids)
-    v.push_back(mini.position);
+  for (const auto &mini : miniboids) v.push_back(mini.position);
 
   return v;
 }
 
-static void
-setOriginalPositions(std::vector<Miniboid> &miniboids,
-                     const std::vector<std::valarray<real>> &original) {
-  for (auto &mini : miniboids)
-    mini.position = original[mini.ID];
+static void setOriginalPositions(
+    std::vector<Miniboid> &miniboids,
+    const std::vector<std::valarray<real>> &original) {
+  for (auto &mini : miniboids) mini.position = original[mini.ID];
 
   return;
 }
@@ -469,8 +467,7 @@ bool Superboid::divide(const super_int divide_by, Superboid &newSuperboid,
               if (std::abs(mini.position[dim]) > HALF_RECTANGLE_SIZE)
                 insideBox = false;
             }
-    if (insideBox == false)
-      continue;
+    if (insideBox == false) continue;
 
     for (auto &mini : newSuperboid.miniboids)
       mini.setBox(&boxes[Box::getBoxID(mini.position)]);
@@ -478,10 +475,8 @@ bool Superboid::divide(const super_int divide_by, Superboid &newSuperboid,
     nextBoxes(boxes, *this, step);
 
     for (auto super : twoSupers) {
-      for (auto &mini : super->miniboids)
-        mini.setNeighbors(step);
-      for (auto &mini : super->virtualMiniboids)
-        mini.setNeighbors(step);
+      for (auto &mini : super->miniboids) mini.setNeighbors(step);
+      for (auto &mini : super->virtualMiniboids) mini.setNeighbors(step);
     }
 
     for (auto super : twoSupers) {
@@ -502,8 +497,7 @@ bool Superboid::divide(const super_int divide_by, Superboid &newSuperboid,
         }
       }
     }
-    if (!someInvasion)
-      break;
+    if (!someInvasion) break;
   }
 
   this->_lastDivisionStep = step;
@@ -531,17 +525,17 @@ Distance Superboid::getBiggestAxis() const {
       miniIDs2.emplace_back(opposite1);
       miniIDs2.emplace_back(opposite1 + 1);
       miniIDs2.emplace_back(opposite1 + 2);
-    } else // MINIBOIDS_PER_SUPERBOID % 2 == 1
+    } else  // MINIBOIDS_PER_SUPERBOID % 2 == 1
     {
       miniIDs2.emplace_back(opposite1 - 1);
       miniIDs2.emplace_back(opposite1);
       miniIDs2.emplace_back(opposite1 + 1);
     }
 
-    for (auto &miniID2 : miniIDs2) // Reference.
+    for (auto &miniID2 : miniIDs2)  // Reference.
       if (miniID2 >= parameters().MINIBOIDS_PER_SUPERBOID)
         miniID2 -= peripheralNo;
-    for (auto miniID2 : miniIDs2) // Copy.
+    for (auto miniID2 : miniIDs2)  // Copy.
       if (miniID2 > miniID1)
         distances.emplace_back(this->miniboids[miniID1],
                                this->miniboids[miniID2]);
@@ -554,15 +548,12 @@ Distance Superboid::getBiggestAxis() const {
 
 void Superboid::checkWrongNeighbors(const std::vector<Superboid> &superboids) {
   const std::list<super_int> neighbors =
-      this->cellNeighbors(); // Value, not referece.
+      this->cellNeighbors();  // Value, not referece.
   for (const auto cellID1 : neighbors) {
     for (const auto cellID2 : neighbors) {
-      if (cellID1 == cellID2)
-        continue;
-      if (this->ID == cellID1)
-        continue;
-      if (this->ID == cellID2)
-        continue;
+      if (cellID1 == cellID2) continue;
+      if (this->ID == cellID1) continue;
+      if (this->ID == cellID2) continue;
 
       const Superboid &super1 = superboids[cellID1];
       const Superboid &super2 = superboids[cellID2];
@@ -586,8 +577,7 @@ void Superboid::checkWrongNeighbors(const std::vector<Superboid> &superboids) {
               if (!cell.empty()) {
                 const super_int superID =
                     cell.front().miniNeighbor.superboid.ID;
-                if (superID == super2.ID)
-                  cell.clear();
+                if (superID == super2.ID) cell.clear();
               }
             }
           break;
@@ -601,8 +591,7 @@ void Superboid::deactivate(void) {
   std::cerr << "death " << this->ID << ": " << this->deathMessage << std::endl;
 
   for (auto &mini : this->miniboids) {
-    if (mini.getBoxPtr())
-      mini.getBoxPtr()->remove(mini);
+    if (mini.getBoxPtr()) mini.getBoxPtr()->remove(mini);
     mini.setBox(nullptr);
   }
 
@@ -619,8 +608,7 @@ void Superboid::activate(void) {
 
 void Superboid::clearVirtualMiniboids(void) {
   for (auto &mini : this->virtualMiniboids) {
-    if (mini.getBoxPtr())
-      mini.getBoxPtr()->remove(mini);
+    if (mini.getBoxPtr()) mini.getBoxPtr()->remove(mini);
   }
   this->virtualMiniboids.clear();
 
@@ -642,8 +630,7 @@ bool Superboid::isActivated(void) const {
 }
 
 void Superboid::checkBackInTime(const step_int step) {
-  for (auto &mini : this->miniboids)
-    mini.checkBackInTime(step);
+  for (auto &mini : this->miniboids) mini.checkBackInTime(step);
 
   return;
 }

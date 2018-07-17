@@ -3,11 +3,11 @@
 // License specified in LICENSE file.
 
 #pragma once
-#include "parameters.hpp"
 #include <valarray>
+#include "parameters.hpp"
 
 class Stokes {
-public:
+ public:
   Stokes(std::valarray<real> _center, real _radius);
   const std::valarray<real> center;
   const real radius;

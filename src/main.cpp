@@ -2,6 +2,11 @@
 // Copyright (C) 2018 Leonardo Gregory Brunnet.
 // License specified in LICENSE file.
 
+#include <fstream>
+#include <iostream>
+#include <limits>
+#include <thread>
+#include <vector>
 #include "Argument.hpp"
 #include "Box.hpp"
 #include "Date.hpp"
@@ -12,11 +17,6 @@
 #include "load.hpp"
 #include "nextstep.hpp"
 #include "parameters.hpp"
-#include <fstream>
-#include <iostream>
-#include <limits>
-#include <thread>
-#include <vector>
 
 static void shapeIt(const std::vector<Superboid> &superboids,
                     std::ofstream &shapeFile, const step_int step) {
@@ -55,8 +55,7 @@ static void shapeIt(const std::vector<Superboid> &superboids,
   super_int cellsActivatedNo = 0;
   std::vector<super_int> activatedPerType(p.TYPES_NO, 0);
   for (const auto &super : superboids) {
-    if (super.isActivated() == false)
-      continue;
+    if (super.isActivated() == false) continue;
     ++activatedPerType[super.type];
     ++cellsActivatedNo;
 
@@ -73,27 +72,17 @@ static void shapeIt(const std::vector<Superboid> &superboids,
     radiusSumVec[super.type] += super.meanRadius;
     radius2SumVec[super.type] += super.meanRadius2;
 
-    if (ratio < minRatio)
-      minRatio = ratio;
-    if (ratio > maxRatio)
-      maxRatio = ratio;
-    if (super.area < minArea)
-      minArea = super.area;
-    if (super.area > maxArea)
-      maxArea = super.area;
-    if (super.perimeter < minPerimeter)
-      minPerimeter = super.perimeter;
-    if (super.perimeter > maxPerimeter)
-      maxPerimeter = super.perimeter;
-    if (super.meanRadius < minRadius)
-      minRadius = super.meanRadius;
-    if (super.meanRadius > maxRadius)
-      maxRadius = super.meanRadius;
+    if (ratio < minRatio) minRatio = ratio;
+    if (ratio > maxRatio) maxRatio = ratio;
+    if (super.area < minArea) minArea = super.area;
+    if (super.area > maxArea) maxArea = super.area;
+    if (super.perimeter < minPerimeter) minPerimeter = super.perimeter;
+    if (super.perimeter > maxPerimeter) maxPerimeter = super.perimeter;
+    if (super.meanRadius < minRadius) minRadius = super.meanRadius;
+    if (super.meanRadius > maxRadius) maxRadius = super.meanRadius;
 
-    if (ratio < minRatioVec[super.type])
-      minRatioVec[super.type] = ratio;
-    if (ratio > maxRatioVec[super.type])
-      maxRatioVec[super.type] = ratio;
+    if (ratio < minRatioVec[super.type]) minRatioVec[super.type] = ratio;
+    if (ratio > maxRatioVec[super.type]) maxRatioVec[super.type] = ratio;
     if (super.area < minAreaVec[super.type])
       minAreaVec[super.type] = super.area;
     if (super.area > maxAreaVec[super.type])
@@ -132,8 +121,7 @@ static void shapeIt(const std::vector<Superboid> &superboids,
   std::vector<real> msdAreaVec(p.TYPES_NO, -0.0f);
 
   for (const auto &super : superboids) {
-    if (super.isActivated() == false)
-      continue;
+    if (super.isActivated() == false) continue;
 
     msdPerimeter += square(super.perimeter - meanPerimeter);
     msdArea += square(super.area - meanArea);
@@ -205,21 +193,17 @@ void oneSystem(void) {
             break;
           }
 
-  if (InitialPositions::load())
-    loadPositions(superboids);
+  if (InitialPositions::load()) loadPositions(superboids);
 
   std::vector<Box> boxes(p.BOXES);
-  for (auto &box : boxes)
-    box.setNeighbors(boxes);
+  for (auto &box : boxes) box.setNeighbors(boxes);
 
   for (auto &super : superboids)
     if (super.isActivated() == true)
-      for (auto &mini : super.miniboids)
-        mini.checkLimits();
+      for (auto &mini : super.miniboids) mini.checkLimits();
 
   for (auto &super : superboids) {
-    if (super.isActivated() == false)
-      continue;
+    if (super.isActivated() == false) continue;
     for (auto &mini : super.miniboids)
       boxes[Box::getBoxID(mini.position)].append(mini);
   }
@@ -228,11 +212,9 @@ void oneSystem(void) {
     correctPositionAndRotation(superboids);
 
   for (auto &super : superboids) {
-    if (super.isActivated() == false)
-      continue;
+    if (super.isActivated() == false) continue;
 
-    for (auto &mini : super.miniboids)
-      mini.reset();
+    for (auto &mini : super.miniboids) mini.reset();
 
     super.setShape(0u);
   }
@@ -273,21 +255,20 @@ void oneSystem(void) {
 
   bool keepStepLoop = true;
   for (step_int step = InitialPositions::startStep(); step <= p.STEPS; ++step) {
-    if (keepStepLoop == false)
-      break;
+    if (keepStepLoop == false) break;
 
     bool gamma = false;
     bool shape = false;
     bool checkVirtuals = false;
-    checkVirtuals = true; ////
+    checkVirtuals = true;  ////
     bool exportVirtuals = false;
     if (Infinite::write())
       if (step + 1 == nextExitStep || step + 1 == p.STEPS)
         exportVirtuals = true;
     if (step == nextExitStep || step == p.STEPS || step == 0u) {
-      std::cerr << "Step: " << step << std::endl; ////
+      std::cerr << "Step: " << step << std::endl;  ////
       exportLastPositionsAndVelocities(superboids, step);
-      if (false) // count cell neighbors.
+      if (false)  // count cell neighbors.
       {
         super_int countNeighbors = 0u;
         for (auto &super : superboids)
@@ -298,26 +279,19 @@ void oneSystem(void) {
                   << std::endl;
       }
 
-      if (MSD::write())
-        exportMSD(superboids);
+      if (MSD::write()) exportMSD(superboids);
 
-      if (BinPrint::write())
-        binPrint(superboids);
+      if (BinPrint::write()) binPrint(superboids);
 
-      if (Infinite::write())
-        Infinite::write(superboids);
+      if (Infinite::write()) Infinite::write(superboids);
 
-      if (Phi::write())
-        exportPhi(phiFile, superboids);
+      if (Phi::write()) exportPhi(phiFile, superboids);
 
-      if (Shape::write())
-        shape = true;
+      if (Shape::write()) shape = true;
 
-      if (SCS::write())
-        SCS::write(step, superboids);
+      if (SCS::write()) SCS::write(step, superboids);
 
-      if (Gamma::write() && step != 0u)
-        gamma = true;
+      if (Gamma::write() && step != 0u) gamma = true;
 
       ++continuousStep;
 
@@ -358,20 +332,15 @@ void oneSystem(void) {
     }
 
     // Shape measures.
-    if (shape == true)
-      shapeIt(superboids, shapeFile, step);
+    if (shape == true) shapeIt(superboids, shapeFile, step);
   }
 
   gammaFile.close();
   shapeFile.close();
-  if (InitialPositions::load())
-    InitialPositions::file().close();
-  if (MSD::write())
-    MSD::file().close();
-  if (SCS::write())
-    SCS::file().close();
-  if (Infinite::write())
-    Infinite::close();
+  if (InitialPositions::load()) InitialPositions::file().close();
+  if (MSD::write()) MSD::file().close();
+  if (SCS::write()) SCS::file().close();
+  if (Infinite::write()) Infinite::close();
 
   return;
 }
@@ -399,8 +368,7 @@ int main(int argc, char **argv) {
 
   for (const auto &arg : Argument::args())
     if (arg.skipMandatory)
-      if (arg.isSet)
-        return arg.function(arg.valueSet);
+      if (arg.isSet) return arg.function(arg.valueSet);
 
   if (!Argument::areAllMandatorySet()) {
     std::cerr << "not all mandatory arguments set." << std::endl;
@@ -419,22 +387,19 @@ int main(int argc, char **argv) {
     if (!arg.skipMandatory)
       if (arg.mandatory)
         if (!arg.preventRunning)
-          if (arg.isSet)
-            arg.function(arg.valueSet);
+          if (arg.isSet) arg.function(arg.valueSet);
 
   for (const auto &arg : Argument::args())
     if (!arg.skipMandatory)
       if (!arg.mandatory)
         if (arg.preventRunning)
-          if (arg.isSet)
-            return arg.function(arg.valueSet);
+          if (arg.isSet) return arg.function(arg.valueSet);
 
   for (const auto &arg : Argument::args())
     if (!arg.skipMandatory)
       if (!arg.mandatory)
         if (!arg.preventRunning)
-          if (arg.isSet)
-            arg.function(arg.valueSet);
+          if (arg.isSet) arg.function(arg.valueSet);
 
   oneSystem();
 

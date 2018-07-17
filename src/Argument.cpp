@@ -3,16 +3,16 @@
 // License specified in LICENSE file.
 
 #include "Argument.hpp"
-#include "Date.hpp"
-#include "Parameter.hpp"
-#include "export.hpp"
-#include "load.hpp"
-#include "parameters.hpp"
 #include <cmath>
 #include <cstdlib>
 #include <fstream>
 #include <stdexcept>
 #include <string>
+#include "Date.hpp"
+#include "Parameter.hpp"
+#include "export.hpp"
+#include "load.hpp"
+#include "parameters.hpp"
 
 std::vector<Argument> getArguments(void);
 
@@ -21,15 +21,13 @@ std::vector<Argument> Argument::arguments = getArguments();
 
 bool Argument::has(const std::string &s) {
   for (const auto &arg : Argument::args())
-    if (arg.argument == s)
-      return true;
+    if (arg.argument == s) return true;
   return false;
 }
 
 Argument &Argument::get(const std::string &s) {
   for (auto &arg : Argument::args())
-    if (arg.argument == s)
-      return arg;
+    if (arg.argument == s) return arg;
 
   throw "Cacaca";
 }
@@ -37,8 +35,7 @@ Argument &Argument::get(const std::string &s) {
 bool Argument::areAllMandatorySet(void) {
   for (const auto &arg : Argument::args())
     if (arg.mandatory)
-      if (!arg.isSet)
-        return false;
+      if (!arg.isSet) return false;
 
   return true;
 }
@@ -47,8 +44,7 @@ std::ostream &operator<<(std::ostream &os, const Argument &arg) {
   size_t tabsNo = Argument::getBiggestSize() + 1u -
                   (arg.argument.size() + arg.secondArgument.size());
   std::string tab = "";
-  for (size_t tabCount = tabsNo; tabCount > 0u; --tabCount)
-    tab += " ";
+  for (size_t tabCount = tabsNo; tabCount > 0u; --tabCount) tab += " ";
   os << arg.argument << ' ' << arg.secondArgument << tab << arg.help;
 
   return os;
@@ -59,8 +55,7 @@ size_t Argument::getBiggestSize(void) {
     auto lambdaExp = [&](const std::vector<Argument> &argList) {
       for (const auto &arg : argList) {
         size_t size = arg.argument.size() + arg.secondArgument.size() + 1u;
-        if (size > Argument::_biggestSize)
-          Argument::_biggestSize = size;
+        if (size > Argument::_biggestSize) Argument::_biggestSize = size;
       }
       return;
     };
@@ -72,8 +67,7 @@ size_t Argument::getBiggestSize(void) {
 static int printHelp(const std::string &) {
   {
     const std::vector<Argument> &list(getArguments());
-    for (auto &arg : list)
-      std::cout << arg << std::endl;
+    for (auto &arg : list) std::cout << arg << std::endl;
   }
 
   std::cout.flush();
@@ -185,8 +179,7 @@ int setInfinite(const std::string &) {
   Infinite::_infFile.open(Date::compactRunTime + "_inf.dat", std::ios::out);
   Infinite::_inf2File.open(Date::compactRunTime + "_inf2.dat", std::ios::out);
   Infinite::_virtFile.open(Date::compactRunTime + "_virt.dat", std::ios::out);
-  if (!BinPrint::write())
-    return setBinPrint(std::string());
+  if (!BinPrint::write()) return setBinPrint(std::string());
   return 0;
 }
 

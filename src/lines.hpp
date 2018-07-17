@@ -2,8 +2,8 @@
 // Copyright (C) 2018 Leonardo Gregory Brunnet.
 // License specified in LICENSE file.
 
-#include "parameters.hpp"
 #include <valarray>
+#include "parameters.hpp"
 
 extern real getAngularCoefficient(const std::valarray<real> pointA,
                                   const std::valarray<real> pointB);

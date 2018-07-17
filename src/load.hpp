@@ -3,13 +3,13 @@
 // License specified in LICENSE file.
 
 #pragma once
-#include "Superboid.hpp"
-#include "parameters.hpp"
 #include <fstream>
 #include <vector>
+#include "Superboid.hpp"
+#include "parameters.hpp"
 
 class InitialPositions {
-public:
+ public:
   virtual void youCannotMakeAInstanceOfMe(void) = 0;
   static inline bool load(void) { return _load; }
   static inline std::ifstream &file(void) { return _file; }
@@ -17,7 +17,7 @@ public:
   friend int setInitialPositionsFile(const std::string &);
   virtual inline ~InitialPositions() { ; }
 
-private:
+ private:
   static bool _load;
   static std::ifstream _file;
   static step_int _startStep;

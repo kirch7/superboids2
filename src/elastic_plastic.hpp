@@ -4,9 +4,9 @@
 
 #pragma once
 
+#include <valarray>
 #include "Distance.hpp"
 #include "parameters.hpp"
-#include <valarray>
 
 std::valarray<real> getFiniteForce(const Distance &, const real beta,
                                    const real rEq);

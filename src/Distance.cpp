@@ -3,27 +3,28 @@
 // License specified in LICENSE file.
 
 #include "Distance.hpp"
+#include <cmath>
+#include <stdexcept>
 #include "Miniboid.hpp"
 #include "Superboid.hpp"
 #include "parameters.hpp"
-#include <cmath>
-#include <stdexcept>
 
 Distance::Distance(const std::valarray<real> &va)
     : miniboid1(nullptr), miniboid2(nullptr) {
-  if (va.size() != 2)
-    throw std::length_error("Only 2D supported.");
+  if (va.size() != 2) throw std::length_error("Only 2D supported.");
 
   this->module = -0.0;
-  for (auto &comp : va)
-    this->module += square(comp);
+  for (auto &comp : va) this->module += square(comp);
   this->module = std::sqrt(this->module);
   this->cosine = va[X] / this->module;
   this->sine = va[Y] / this->module;
 }
 
 Distance::Distance(const Miniboid &m1, const Miniboid &m2)
-    : miniboid1(&m1), miniboid2(&m2), module(-0.0f), sine(-0.0f),
+    : miniboid1(&m1),
+      miniboid2(&m2),
+      module(-0.0f),
+      sine(-0.0f),
       cosine(-0.0f) {
   const Distance d = Distance(m1.position, m2.position);
   this->module = d.module;
@@ -35,7 +36,10 @@ Distance::Distance(const Miniboid &m1, const Miniboid &m2)
 
 Distance::Distance(const std::valarray<real> &position1,
                    const std::valarray<real> &position2)
-    : miniboid1(nullptr), miniboid2(nullptr), module(-0.0f), sine(-0.0f),
+    : miniboid1(nullptr),
+      miniboid2(nullptr),
+      module(-0.0f),
+      sine(-0.0f),
       cosine(-0.0f) {
   std::valarray<real> delta(position2 - position1);
   // if (std::fabs(position1[X]) < 1.0e-6f || std::fabs(position2[X]) < 1.0e-6f
@@ -69,8 +73,7 @@ std::valarray<real> Distance::getDirectionArray(void) const {
 real Distance::getAngle(void) const {
   real angle = std::atan2(this->sine, this->cosine);
 
-  if (angle < -PI)
-    angle += TWO_PI;
+  if (angle < -PI) angle += TWO_PI;
 
   return angle;
 }
@@ -82,10 +85,8 @@ std::valarray<real> Distance::getTangentArray(void) const {
 }
 
 real assertAngle(real anglie) {
-  while (anglie < -PI)
-    anglie += TWO_PI;
-  while (anglie > PI)
-    anglie -= TWO_PI;
+  while (anglie < -PI) anglie += TWO_PI;
+  while (anglie > PI) anglie -= TWO_PI;
   return anglie;
 }
 

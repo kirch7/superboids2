@@ -19,14 +19,14 @@ std::valarray<real> getFiniteForce(Distance dist, const real beta,
     }
   } else
     for (std::size_t index = 1u; index < transitions.size(); ++index) {
-      if (index % 2 == 1) // odd index
+      if (index % 2 == 1)  // odd index
       {
         if (module <= transitions[index]) {
           module = transitions[index - 1];
           force = getFiniteForce(dist, beta, rEq, transitions);
           return force;
         }
-      } else // even index
+      } else  // even index
       {
         if (module <= transitions[index] + 1.0e-6f) {
           const real d = transitions[index - 1] - transitions[index];
@@ -52,7 +52,7 @@ std::valarray<real> getFiniteForce(const Distance &d, const real beta,
   std::valarray<real> force(0.0f, parameters().DIMENSIONS);
 
   if (module <= (parameters().INTER_ELASTIC_UP_LIMIT +
-                 1.0e-6)) // Elastic regime or called by recursion.
+                 1.0e-6))  // Elastic regime or called by recursion.
   {
     const real scalar = (1.0f - module / rEq) * beta;
     if (std::isfinite(scalar)) {
@@ -60,7 +60,7 @@ std::valarray<real> getFiniteForce(const Distance &d, const real beta,
       force *= scalar;
     }
     return force;
-  } else // Constant regime; call recursion.
+  } else  // Constant regime; call recursion.
   {
     dist.module = parameters().INTER_ELASTIC_UP_LIMIT;
     return getFiniteForce(dist, beta, rEq);

@@ -3,10 +3,10 @@
 // License specified in LICENSE file.
 
 #include "Box.hpp"
-#include "Miniboid.hpp"
-#include "Superboid.hpp"
 #include <valarray>
 #include <vector>
+#include "Miniboid.hpp"
+#include "Superboid.hpp"
 
 namespace boxID {
 static box_int south(const box_int centralBoxID) {
@@ -53,7 +53,7 @@ static box_int southeast(const box_int centralBoxID) {
 static box_int southwest(const box_int centralBoxID) {
   return (south(west(centralBoxID)));
 }
-} // namespace boxID
+}  // namespace boxID
 
 box_int Box::_totalBoxesCount(0u);
 
@@ -84,7 +84,7 @@ box_int Box::getBoxID(std::valarray<real> position) /* Parameter by copy. */
 {
   static const real BOX_SIZE_INVERSE =
       static_cast<real>(parameters().BOXES_IN_EDGE) /
-      parameters().RANGE; // 1/BOX_SIZE
+      parameters().RANGE;  // 1/BOX_SIZE
 
   position += 0.5f * parameters().RANGE; /* Translate */
   position *= BOX_SIZE_INVERSE;          /* Normalize */

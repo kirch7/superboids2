@@ -10,7 +10,7 @@
 typedef int (*ArgFunction)(const std::string &);
 
 class Argument {
-public:
+ public:
   inline static size_t getBiggestSize(void);
   static std::vector<Argument> &args(void) { return arguments; }
   static bool has(const std::string &);
@@ -27,14 +27,20 @@ public:
                   const bool mand, const bool prev, const bool skipMand,
                   const ArgFunction funcPointer = nullptr,
                   const char *const secArg = "")
-      : argument(arg), secondArgument(secArg), help(helppie),
-        function(funcPointer), mandatory(mand), preventRunning(prev),
-        skipMandatory(skipMand), isSet(false), valueSet("") {
+      : argument(arg),
+        secondArgument(secArg),
+        help(helppie),
+        function(funcPointer),
+        mandatory(mand),
+        preventRunning(prev),
+        skipMandatory(skipMand),
+        isSet(false),
+        valueSet("") {
     return;
   }
   friend int main(int, char **);
 
-protected:
+ protected:
   bool isSet;
   std::string valueSet;
   static std::size_t _biggestSize;

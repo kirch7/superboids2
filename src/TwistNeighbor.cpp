@@ -16,18 +16,18 @@ static std::vector<real> getAngles(const mini_int myID,
   if (parameters().MINIBOIDS_PER_SUPERBOID > 3u) {
     if (myID != 0u) {
       std::vector<mini_int> ms(
-          2u, myID); // vector of two components filled with myID value.
+          2u, myID);  // vector of two components filled with myID value.
       std::vector<std::vector<int>> orientationMatrix;
       {
         std::vector<int> line;
-        line.push_back(0);  // position
-        line.push_back(-1); // orientation
+        line.push_back(0);   // position
+        line.push_back(-1);  // orientation
         orientationMatrix.push_back(line);
       }
       {
         std::vector<int> line;
-        line.push_back(1); // position
-        line.push_back(1); // orientation
+        line.push_back(1);  // position
+        line.push_back(1);  // orientation
         orientationMatrix.push_back(line);
       }
 
@@ -37,7 +37,7 @@ static std::vector<real> getAngles(const mini_int myID,
           ms[line[0u]] = getTangentNeighborID(ms[line[0u]], line[1u]);
           if (neighborID == ms[line[0u]]) {
             ////angles.push_back(real(m * TWO_PI / (MINIBOIDS_PER_SUPERBOID -
-            ///1u)));
+            /// 1u)));
             angles.push_back(line[1] * m * parameters().TWIST_EQ_ANGLE);
             keep = false;
             break;
@@ -57,7 +57,8 @@ static std::vector<real> getAngles(const mini_int myID,
 }
 
 TwistNeighbor::TwistNeighbor(const mini_int myID, const mini_int neighborID)
-    : ID(neighborID), ANGLES(getAngles(myID, neighborID)),
+    : ID(neighborID),
+      ANGLES(getAngles(myID, neighborID)),
       _distance(Distance()) {
   ;
   return;

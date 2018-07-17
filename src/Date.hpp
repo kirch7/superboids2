@@ -6,14 +6,14 @@
 #include <string>
 
 class Date {
-public:
+ public:
   virtual void youCannotMakeAInstanceOfMe(void) = 0;
   static const std::string compiledTime;
   static const std::string prettyRunTime;
   static const std::string compactRunTime;
   virtual inline ~Date(void) { ; }
 
-private:
+ private:
   static const time_t rawTime;
   static const tm *const gimmeADecentName;
   static std::string getPrettyRunTime(void);

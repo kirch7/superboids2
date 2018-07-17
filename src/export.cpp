@@ -3,11 +3,6 @@
 // License specified in LICENSE file.
 
 #include "export.hpp"
-#include "Date.hpp"
-#include "Distance.hpp"
-#include "Superboid.hpp"
-#include "load.hpp"
-#include "parameters.hpp"
 #include <cstdio>
 #include <cstdlib>
 #include <fstream>
@@ -16,6 +11,11 @@
 #include <thread>
 #include <valarray>
 #include <vector>
+#include "Date.hpp"
+#include "Distance.hpp"
+#include "Superboid.hpp"
+#include "load.hpp"
+#include "parameters.hpp"
 
 static void writeMSDHead(std::ofstream &myFile) {
   for (const auto i : std::vector<unsigned long int>(
@@ -55,15 +55,13 @@ void exportMSD(std::ofstream &myFile, std::vector<Superboid> &superboids) {
 
   super_int activatedNo = 0u;
   for (auto &super : superboids)
-    if (super.isActivated() == true)
-      ++activatedNo;
+    if (super.isActivated() == true) ++activatedNo;
 
   uint16_t activated = static_cast<uint16_t>(activatedNo);
   myFile.write(reinterpret_cast<char *>(&activated), sizeof(activated));
 
   for (auto &super : superboids) {
-    if (super.isActivated() == false)
-      continue;
+    if (super.isActivated() == false) continue;
     const std::valarray<real> &position = super.miniboids[0u].position;
     for (dimension_int dim = 0u; dim < parameters().DIMENSIONS; ++dim) {
       float dComp = static_cast<float>(position[dim]);
@@ -94,16 +92,14 @@ void binPrint(std::ofstream &myFile, std::vector<Superboid> &superboids) {
 
   super_int activatedNo = 0u;
   for (auto &super : superboids)
-    if (super.isActivated() == true)
-      ++activatedNo;
+    if (super.isActivated() == true) ++activatedNo;
 
   uint16_t activated =
       static_cast<uint16_t>(activatedNo * parameters().MINIBOIDS_PER_SUPERBOID);
   myFile.write(reinterpret_cast<char *>(&activated), sizeof(activated));
 
   for (auto &super : superboids) {
-    if (super.isActivated() == false)
-      continue;
+    if (super.isActivated() == false) continue;
 
     for (const auto &mini : super.miniboids) {
       const std::valarray<real> &position = mini.position;
@@ -142,13 +138,11 @@ void exportLastPositionsAndVelocities(const std::vector<Superboid> &superboids,
   binaryOutFile << step << std::endl;
   super_int activatedCellsNo = 0;
   for (const auto &super : superboids)
-    if (super.isActivated() == true)
-      ++activatedCellsNo;
+    if (super.isActivated() == true) ++activatedCellsNo;
 
   binaryOutFile << activatedCellsNo << std::endl;
   for (auto &super : superboids) {
-    if (super.isActivated() == false)
-      continue;
+    if (super.isActivated() == false) continue;
 
     binaryOutFile << super.type << std::endl;
     for (auto &mini : super.miniboids) {
@@ -166,16 +160,14 @@ void exportLastPositionsAndVelocities(const std::vector<Superboid> &superboids,
 void exportPhi(std::ofstream &file, const std::vector<Superboid> &superboids) {
   std::valarray<real> meanArray(-0.0, parameters().DIMENSIONS);
   for (const auto &super : superboids) {
-    if (super.isActivated() == false)
-      continue;
+    if (super.isActivated() == false) continue;
 
     meanArray += super.miniboids[0u].velocity /
                  (parameters().SUPERBOIDS * parameters().SPEED[super.type]);
   }
 
   real arraySum = -0.0;
-  for (const auto &i : meanArray)
-    arraySum += square(i);
+  for (const auto &i : meanArray) arraySum += square(i);
 
   file << std::sqrt(arraySum) << std::endl;
 
@@ -184,14 +176,12 @@ void exportPhi(std::ofstream &file, const std::vector<Superboid> &superboids) {
 
 void SCS::write(const step_int step, const std::vector<Superboid> &superboids) {
   for (auto &super : superboids) {
-    if (super.isActivated() == false)
-      continue;
+    if (super.isActivated() == false) continue;
 
     std::valarray<real> peripheralsCM(-0.0, parameters().DIMENSIONS);
     const mini_int PERIPHERAL_NO = parameters().MINIBOIDS_PER_SUPERBOID - 1;
     for (auto &mini : super.miniboids) {
-      if (mini.ID == 0)
-        continue;
+      if (mini.ID == 0) continue;
       peripheralsCM += mini.position;
     }
     peripheralsCM /= static_cast<real>(PERIPHERAL_NO);
@@ -212,8 +202,7 @@ void Infinite::write(std::vector<Superboid> &superboids) {
   infinite2File << '#' << std::endl;
   virtFile << '#' << std::endl;
   for (auto &super : superboids) {
-    if (super.isActivated() == false)
-      continue;
+    if (super.isActivated() == false) continue;
 
     for (const auto &va : super.infiniteVectors)
       infiniteFile << va << std::endl;

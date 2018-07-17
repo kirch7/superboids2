@@ -3,6 +3,10 @@
 // License specified in LICENSE file.
 
 #include "Miniboid.hpp"
+#include <algorithm>
+#include <iostream>  // operator<<
+#include <list>
+#include <tuple>
 #include "Box.hpp"
 #include "Distance.hpp"
 #include "Stokes.hpp"
@@ -10,10 +14,6 @@
 #include "elastic_plastic.hpp"
 #include "export.hpp"
 #include "lines.hpp"
-#include <algorithm>
-#include <iostream> // operator<<
-#include <list>
-#include <tuple>
 
 std::ostream &operator<<(std::ostream &os, const Miniboid &mini) {
   const real diameter = (mini.ID == 0u) ? 4.0f * parameters().PRINT_CORE
@@ -27,8 +27,7 @@ std::valarray<real> Miniboid::getAngles(const mini_int id) {
   static const real DELTA_ANGLE =
       (TWO_PI / (parameters().MINIBOIDS_PER_SUPERBOID - 1u));
   std::valarray<real> angles(parameters().DIMENSIONS - 1u);
-  if (id != 0u)
-    angles[0u] = DELTA_ANGLE * (id - 1u);
+  if (id != 0u) angles[0u] = DELTA_ANGLE * (id - 1u);
   return angles;
 }
 
@@ -46,8 +45,7 @@ void Miniboid::checkLimits(void) {
 }
 
 void Miniboid::checkLimits(const step_int step) {
-  if (step != 0)
-    this->checkKillCondition(step);
+  if (step != 0) this->checkKillCondition(step);
 
   this->checkLimits();
 
@@ -58,10 +56,8 @@ static void checkPeriodicLimits(std::valarray<real> &position) {
   static const real HALF_RANGE(parameters().RANGE / 2.0f);
 
   for (auto &component : position) {
-    while (component <= -HALF_RANGE)
-      component += parameters().RANGE;
-    while (component > HALF_RANGE)
-      component -= parameters().RANGE;
+    while (component <= -HALF_RANGE) component += parameters().RANGE;
+    while (component > HALF_RANGE) component -= parameters().RANGE;
   }
 
   return;
@@ -107,10 +103,8 @@ void Miniboid::checkRectangularLimits() {
   static const real THREE_HALFS_RANGE(1.5f * parameters().RANGE);
 
   for (auto &component : this->position) {
-    while (component <= -THREE_HALFS_RANGE)
-      component += parameters().RANGE;
-    while (component > THREE_HALFS_RANGE)
-      component -= parameters().RANGE;
+    while (component <= -THREE_HALFS_RANGE) component += parameters().RANGE;
+    while (component > THREE_HALFS_RANGE) component -= parameters().RANGE;
   }
   for (dimension_int dim = 0u; dim < parameters().DIMENSIONS; ++dim) {
     const real HALF_RECTANGLE_SIZE = 0.5f * parameters().RECTANGLE_SIZE[dim];
@@ -150,8 +144,7 @@ void Miniboid::checkStokesLimits() {
         }
       }
 
-      if (skip)
-        continue;
+      if (skip) continue;
     }
 
     const real TOLERABLE =
@@ -176,8 +169,7 @@ void Miniboid::checkStokesLimits() {
 }
 
 void Miniboid::checkFatOut(void) {
-  if (this->ID != 0 || this->isVirtual)
-    return;
+  if (this->ID != 0 || this->isVirtual) return;
 
   bool isFatOut = true;
   for (mini_int miniID = 2; miniID < parameters().MINIBOIDS_PER_SUPERBOID - 1;
@@ -251,10 +243,8 @@ bool isPointInSomeNthTriangle(const mini_int nth,
   const Miniboid *auxMini = &super.miniboids.back();
 
   for (auto &realMini : super.miniboids) {
-    if (realMini.ID == 0)
-      continue;
-    if (inSomeTriangle)
-      break;
+    if (realMini.ID == 0) continue;
+    if (inSomeTriangle) break;
     mini_int nextID =
         realMini.ID % (parameters().MINIBOIDS_PER_SUPERBOID - 1) + nth;
     nextID %= parameters().MINIBOIDS_PER_SUPERBOID - 1;
@@ -272,10 +262,8 @@ bool Miniboid::isInSomeNthTriangle(const mini_int nth, const Superboid &super) {
   const Miniboid *auxMini = &super.miniboids.back();
 
   for (auto &realMini : super.miniboids) {
-    if (realMini.ID == 0)
-      continue;
-    if (inSomeTriangle)
-      break;
+    if (realMini.ID == 0) continue;
+    if (inSomeTriangle) break;
     mini_int nextID =
         realMini.ID % (parameters().MINIBOIDS_PER_SUPERBOID - 1) + nth;
     nextID %= parameters().MINIBOIDS_PER_SUPERBOID - 1;
@@ -292,8 +280,7 @@ bool Miniboid::fatInteractions(const step_int STEP,
                                const bool interact) {
   bool inSomeTriangle = false;
 
-  if (list.empty())
-    return inSomeTriangle;
+  if (list.empty()) return inSomeTriangle;
 
   const Superboid &super = list.front().miniNeighbor.superboid;
   const Miniboid &fatboid = super.miniboids[0u];
@@ -304,10 +291,8 @@ bool Miniboid::fatInteractions(const step_int STEP,
 
       const Miniboid *auxMini = nullptr;
       for (auto &realMini : super.miniboids) {
-        if (realMini.ID == 0)
-          continue;
-        if (inSomeTriangle)
-          break;
+        if (realMini.ID == 0) continue;
+        if (inSomeTriangle) break;
         mini_int nextID =
             realMini.ID % (parameters().MINIBOIDS_PER_SUPERBOID - 1) + nth;
         nextID %= parameters().MINIBOIDS_PER_SUPERBOID - 1;
@@ -337,14 +322,14 @@ bool Miniboid::fatInteractions(const step_int STEP,
       }
       auxMini = nullptr;
 
-      if (inSomeTriangle)
-        this->_lastInvasionStep = STEP;
+      if (inSomeTriangle) this->_lastInvasionStep = STEP;
 
       if (inSomeTriangle && interact) {
         //// const std::valarray<real> tangent = tangentSignal * Distance(r1,
-        ///r2).getTangentArray(); / const std::valarray<real> tangent =
-        ///Distance(fatboid.position, r0 - tangent).module >
-        ///Distance(fatboid.position, r0 + tangent).module ? -tangent : tangent;
+        /// r2).getTangentArray(); / const std::valarray<real> tangent =
+        /// Distance(fatboid.position, r0 - tangent).module >
+        /// Distance(fatboid.position, r0 + tangent).module ? -tangent :
+        /// tangent;
         const std::valarray<real> force1 =
             (0.9f * parameters().INFINITE_FORCE) * tangent;
         const std::valarray<real> radial =
@@ -445,13 +430,12 @@ void Miniboid::interInteractions(const step_int STEP) {
         this->interInteractions(miniN);
       }
     } else
-      for (const auto &particleNei : list)
-        this->interInteractions(particleNei);
+      for (const auto &particleNei : list) this->interInteractions(particleNei);
 
     // Check if interacts with fatboid:
     this->fatInteractions(STEP, list, true);
 
-  } // end of for pair in _neighbors.
+  }  // end of for pair in _neighbors.
 
   return;
 }
@@ -488,15 +472,13 @@ real Miniboid::getHarrisParameter(const std::vector<std::vector<real>> &matrix,
 }
 
 void Miniboid::setNextVelocity(const step_int STEP) {
-  if (this->isVirtual)
-    return;
+  if (this->isVirtual) return;
 
-  this->noise(); // Find a random noise (ETA).
+  this->noise();  // Find a random noise (ETA).
   const type_int MY_TYPE = this->superboid.type;
 
   // Interact with miniboids of another superboid:
-  if (this->ID != 0 && !this->isVirtual)
-    this->interInteractions(STEP);
+  if (this->ID != 0 && !this->isVirtual) this->interInteractions(STEP);
 
   // Same superboid:
   const auto &miniboidsInThisCell = this->superboid.miniboids;
@@ -560,7 +542,7 @@ void Miniboid::setNextVelocity(const step_int STEP) {
           -kapa * SUBTRACTION * parameters().RADIAL_REQ[MY_TYPE] * tangent;
       const std::vector<real> limits(
           {parameters().TANGENT_PLASTIC_BEGIN[MY_TYPE],
-           parameters().TANGENT_PLASTIC_END[MY_TYPE]}); ////
+           parameters().TANGENT_PLASTIC_END[MY_TYPE]});  ////
       const real req = this->superboid.getTangentReq(STEP);
       const std::valarray<real> f2 =
           -getFiniteForce(tn._distance, beta, req, limits);
@@ -597,7 +579,7 @@ void Miniboid::setNextPosition(const step_int step) {
   // else
   {
     this->position += parameters().DT *
-                      this->velocity; // Velocity is already normalized to V0.
+                      this->velocity;  // Velocity is already normalized to V0.
     // if (this->ID != 0 && !this->isVirtual)
     //   this->position += this->radialDistance.getDirectionArray() *
     //         ((this->superboid.area -
@@ -628,7 +610,7 @@ bool Miniboid::inEdge(void) const { return this->_box->inEdge; }
 
 void Miniboid::setNeighbors(const step_int step) {
   this->checkLimits(step);
-  this->_neighbors.clear(); // Removes all elements.
+  this->_neighbors.clear();  // Removes all elements.
 
   // Search for neighbors:
   for (auto box : this->_box->neighbors)
@@ -639,16 +621,15 @@ void Miniboid::setNeighbors(const step_int step) {
           Distance distance(*this, mini);
           if (distance.module <= parameters().NEIGHBOR_DISTANCE) {
             this->superboid.cellNeighbors.append(
-                mini.superboid.ID); // Potential data race!!!!!!!!
-            ++(this->_neighborsPerTypeNos[mini.superboid.type]); //// ERRADO?
+                mini.superboid.ID);  // Potential data race!!!!!!!!
+            ++(this->_neighborsPerTypeNos[mini.superboid.type]);  //// ERRADO?
             std::list<Neighbor> &c = this->_neighbors[mini.superboid.ID];
             c.emplace_back(mini, distance);
           }
         }
 
   // Sort each list in terms of distance:
-  for (auto &pair : this->_neighbors)
-    std::get<1>(pair).sort();
+  for (auto &pair : this->_neighbors) std::get<1>(pair).sort();
 
   return;
 }

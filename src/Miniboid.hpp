@@ -3,23 +3,23 @@
 // License specified in LICENSE file.
 
 #pragma once
-#include "CellNeighbors.hpp"
-#include "Distance.hpp"
-#include "Neighbor.hpp"
-#include "TwistNeighbor.hpp"
-#include "parameters.hpp"
 #include <iostream>
 #include <list>
 #include <map>
 #include <tuple>
 #include <valarray>
+#include "CellNeighbors.hpp"
+#include "Distance.hpp"
+#include "Neighbor.hpp"
+#include "TwistNeighbor.hpp"
+#include "parameters.hpp"
 
 class Superboid;
 bool operator==(const Superboid &s1, const Superboid &s2);
 class Box;
 
 class Miniboid {
-public:
+ public:
   const bool isVirtual;
   const mini_int ID;
   Superboid &superboid;
@@ -30,8 +30,8 @@ public:
   real radialAngle;
 
   //  real angleCM;
-  box_int boxID() const; // ID of box where *this is.
-  bool inEdge() const;   // True if box where *this is is in edge.
+  box_int boxID() const;  // ID of box where *this is.
+  bool inEdge() const;    // True if box where *this is is in edge.
 
   inline Miniboid(const mini_int _id, Superboid &super, const bool);
   void checkLimits(const step_int);
@@ -51,16 +51,16 @@ public:
   bool fatInteractions(const step_int, const std::list<Neighbor> &,
                        const bool interact);
   std::map<super_int, std::list<Neighbor>>
-      _neighbors; // From different superboid.
+      _neighbors;  // From different superboid.
   friend void exportPositions(const std::vector<Superboid> &, const step_int);
 
-protected:
+ protected:
   std::list<std::tuple<step_int, std::vector<const Miniboid *>>> history;
   std::valarray<real> _oldPosition;
   step_int _lastInvasionStep;
-  std::valarray<real> _noiseSum;    // Related to ETA.
-  std::valarray<real> _velocitySum; // Related to ALPHA;
-  std::valarray<real> _forceSum;    // Related to BETA.
+  std::valarray<real> _noiseSum;     // Related to ETA.
+  std::valarray<real> _velocitySum;  // Related to ALPHA;
+  std::valarray<real> _forceSum;     // Related to BETA.
   Box *_box;
   std::valarray<mini_int> _neighborsPerTypeNos;
   void noise(void);
@@ -80,12 +80,19 @@ protected:
 
 inline Miniboid::Miniboid(const mini_int _id, Superboid &super,
                           const bool isVirt = false)
-    : isVirtual(isVirt), ID(_id), superboid(super),
-      position(parameters().DIMENSIONS), velocity(parameters().DIMENSIONS),
-      newVelocity(parameters().DIMENSIONS), radialDistance(Distance()),
-      _oldPosition(parameters().DIMENSIONS), _lastInvasionStep(0),
-      _noiseSum(parameters().DIMENSIONS), _velocitySum(parameters().DIMENSIONS),
-      _forceSum(parameters().DIMENSIONS), _box(nullptr),
+    : isVirtual(isVirt),
+      ID(_id),
+      superboid(super),
+      position(parameters().DIMENSIONS),
+      velocity(parameters().DIMENSIONS),
+      newVelocity(parameters().DIMENSIONS),
+      radialDistance(Distance()),
+      _oldPosition(parameters().DIMENSIONS),
+      _lastInvasionStep(0),
+      _noiseSum(parameters().DIMENSIONS),
+      _velocitySum(parameters().DIMENSIONS),
+      _forceSum(parameters().DIMENSIONS),
+      _box(nullptr),
       _neighborsPerTypeNos(parameters().TYPES_NO) {
   if (!this->isVirtual) {
     this->setNewVelocity();

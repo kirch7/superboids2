@@ -14,8 +14,7 @@ void divide(std::vector<Box> &boxes, std::vector<Superboid> &superboids,
   std::set<super_int> eligibleCells;
 
   for (const auto &super : superboids) {
-    if (super.isActivated() == false)
-      continue;
+    if (super.isActivated() == false) continue;
     if (super.getLastDivisionStep() + parameters().NON_DIVISION_INTERVAL <=
         nonDivisionInterval) {
       if (super.miniboids[0].position[X] < parameters().DIVISION_REGION_X)
@@ -27,11 +26,9 @@ void divide(std::vector<Box> &boxes, std::vector<Superboid> &superboids,
   while (true) {
     ++atempts;
 
-    if (atempts > 16)
-      return;
+    if (atempts > 16) return;
 
-    if (eligibleCells.size() == 0)
-      return;
+    if (eligibleCells.size() == 0) return;
 
     static std::random_device deviceEngine;
     static std::default_random_engine generator(deviceEngine());

@@ -188,7 +188,7 @@ void oneSystem(void) {
       if (super.isActivated())
         for (const auto &mini : super.miniboids)
           if (hole.isInside(mini.position)) {
-            super.setDeactivation();
+            super.setDeactivation("Began inside hole");
             super.deactivate();
             break;
           }

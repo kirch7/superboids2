@@ -76,8 +76,7 @@ void Miniboid::checkKillCondition(const step_int step) {
   if (parameters().KILL_CONDITION == KillCondition::RIGHT_EDGE ||
       parameters().KILL_CONDITION == KillCondition::RIGHT_EDGE_OR_P0)
     if (this->position[X] > parameters().RECTANGLE_SIZE[X] / 2.0f) {
-      this->superboid.deathMessage = "right egde";
-      this->superboid.setDeactivation();
+      this->superboid.setDeactivation("right egde");
       std::cerr << "Death (rightEdge) at position "
                 << this->superboid.miniboids[0].position << std::endl;
       return;
@@ -88,8 +87,7 @@ void Miniboid::checkKillCondition(const step_int step) {
     this->superboid.setShape(step);
     const real P0 = this->superboid.perimeter / std::sqrt(this->superboid.area);
     if (P0 > parameters().P0_LIMIT) {
-      this->superboid.deathMessage = "P0";
-      this->superboid.setDeactivation();
+      this->superboid.setDeactivation("P0");
       std::cerr << "Death with p0\t" << P0 << "\tat position "
                 << this->superboid.miniboids[0].position << std::endl;
       return;
@@ -183,8 +181,7 @@ void Miniboid::checkFatOut(void) {
     }
 
   if (isFatOut) {
-    this->superboid.deathMessage = "umbrella";
-    this->superboid.setDeactivation();
+    this->superboid.setDeactivation("umbrella");
     // std::valarray<real> cm(-0.0f, parameters().DIMENSIONS);
     // for (const auto& mini : this->superboid.miniboids)
     //   if (mini.ID > 1)

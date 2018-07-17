@@ -429,10 +429,8 @@ bool Superboid::divide(const super_int divide_by, Superboid &newSuperboid,
     setOriginalPositions(this->miniboids, originalPositions);
 
     if (atempts > 6) {
-      nextBoxes(boxes, *this, step);
-      newSuperboid.deathMessage =
-          "newSuperboid could not be child cell (division)";
-      newSuperboid.setDeactivation();
+      nextBoxes(boxes, *this, step);;
+      newSuperboid.setDeactivation("newSuperboid could not be child cell (division)");
       return false;
     }
 
@@ -588,7 +586,7 @@ void Superboid::checkWrongNeighbors(const std::vector<Superboid> &superboids) {
 }
 
 void Superboid::deactivate(void) {
-  std::cerr << "death " << this->ID << ": " << this->deathMessage << std::endl;
+  std::cerr << "death " << this->ID << ": " << this->_deathMessage << std::endl;
 
   for (auto &mini : this->miniboids) {
     if (mini.getBoxPtr()) mini.getBoxPtr()->remove(mini);
@@ -602,8 +600,7 @@ void Superboid::deactivate(void) {
 
 void Superboid::activate(void) {
   this->_deathState = DeathState::Live;
-  this->deathMessage = "";
-  
+
   return;
 }
 
@@ -616,8 +613,9 @@ void Superboid::clearVirtualMiniboids(void) {
   return;
 }
 
-void Superboid::setDeactivation(void) {
+void Superboid::setDeactivation(const std::string& message) {
   this->_deathState = DeathState::WillDie;
+  this->_deathMessage = message;
 
   return;
 }

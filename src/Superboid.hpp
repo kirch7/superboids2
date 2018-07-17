@@ -39,7 +39,7 @@ class Superboid {
     this->cellNeighbors = CellNeighbors();
     this->infiniteVectors.clear();
     this->infinite2Vectors.clear();
-    this->deathMessage = "";
+    this->_deathMessage = "";
   }
   Superboid(void);
   real get0to2piRandom(void);
@@ -56,18 +56,18 @@ class Superboid {
   std::ostringstream virtualsInfo;
   step_int getLastDivisionStep(void) const { return this->_lastDivisionStep; }
 
-  void setDeactivation(void);
+  void setDeactivation(const std::string&);
   bool willDie(void) const;
   void deactivate(void);
   bool isActivated(void) const;
   void activate(void);  // Ignoring boxes.
-  std::string deathMessage;
   void checkBackInTime(const step_int);
   real getRadialReq(const step_int) const;
   real getTangentReq(const step_int) const;
 
  protected:
   static super_int _totalSuperboids;
+  std::string _deathMessage;
   DeathState _deathState;
   std::default_random_engine _randomEngine;
   step_int _shapeStep;

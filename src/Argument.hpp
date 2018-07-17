@@ -26,16 +26,16 @@ class Argument {
   inline Argument(const char *const arg, const char *const helppie,
                   const bool mand, const bool prev, const bool skipMand,
                   const ArgFunction funcPointer = nullptr,
-                  const char *const secArg = "")
-      : argument(arg),
-        secondArgument(secArg),
-        help(helppie),
-        function(funcPointer),
-        mandatory(mand),
-        preventRunning(prev),
-        skipMandatory(skipMand),
-        isSet(false),
-        valueSet("") {
+                  const char *const secArg      = "")
+      : argument(arg)
+      , secondArgument(secArg)
+      , help(helppie)
+      , function(funcPointer)
+      , mandatory(mand)
+      , preventRunning(prev)
+      , skipMandatory(skipMand)
+      , isSet(false)
+      , valueSet("") {
     return;
   }
   friend int main(int, char **);
@@ -47,4 +47,5 @@ class Argument {
   static std::vector<Argument> arguments;
 };
 
-extern std::ostream &operator<<(std::ostream &os, const Argument &arg);
+extern std::ostream &
+    operator<<(std::ostream &os, const Argument &arg);

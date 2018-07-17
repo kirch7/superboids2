@@ -3,56 +3,58 @@
 // License specified in LICENSE file.
 
 #include "Box.hpp"
+
 #include <valarray>
 #include <vector>
+
 #include "Miniboid.hpp"
 #include "Superboid.hpp"
 
 namespace boxID {
-static box_int south(const box_int centralBoxID) {
-  if (centralBoxID >= parameters().BOXES_IN_EDGE)
-    return (centralBoxID - parameters().BOXES_IN_EDGE);
-  else
-    return (parameters().BOXES - parameters().BOXES_IN_EDGE + centralBoxID);
-}
+  static box_int south(const box_int centralBoxID) {
+    if (centralBoxID >= parameters().BOXES_IN_EDGE)
+      return (centralBoxID - parameters().BOXES_IN_EDGE);
+    else
+      return (parameters().BOXES - parameters().BOXES_IN_EDGE + centralBoxID);
+  }
 
-static box_int north(const box_int centralBoxID) {
-  if (centralBoxID < parameters().BOXES - parameters().BOXES_IN_EDGE)
-    return (centralBoxID + parameters().BOXES_IN_EDGE);
-  else
-    return (centralBoxID + parameters().BOXES_IN_EDGE - parameters().BOXES);
-}
+  static box_int north(const box_int centralBoxID) {
+    if (centralBoxID < parameters().BOXES - parameters().BOXES_IN_EDGE)
+      return (centralBoxID + parameters().BOXES_IN_EDGE);
+    else
+      return (centralBoxID + parameters().BOXES_IN_EDGE - parameters().BOXES);
+  }
 
-static box_int west(const box_int centralBoxID) {
-  if (centralBoxID % parameters().BOXES_IN_EDGE != 0)
-    return (centralBoxID - 1);
-  else
-    return (centralBoxID + parameters().BOXES_IN_EDGE - 1);
-}
+  static box_int west(const box_int centralBoxID) {
+    if (centralBoxID % parameters().BOXES_IN_EDGE != 0)
+      return (centralBoxID - 1);
+    else
+      return (centralBoxID + parameters().BOXES_IN_EDGE - 1);
+  }
 
-static box_int east(const box_int centralBoxID) {
-  if (centralBoxID % parameters().BOXES_IN_EDGE !=
-      parameters().BOXES_IN_EDGE - 1u)
-    return (centralBoxID + 1);
-  else
-    return (centralBoxID - parameters().BOXES_IN_EDGE + 1u);
-}
+  static box_int east(const box_int centralBoxID) {
+    if (centralBoxID % parameters().BOXES_IN_EDGE
+        != parameters().BOXES_IN_EDGE - 1u)
+      return (centralBoxID + 1);
+    else
+      return (centralBoxID - parameters().BOXES_IN_EDGE + 1u);
+  }
 
-static box_int northeast(const box_int centralBoxID) {
-  return (north(east(centralBoxID)));
-}
+  static box_int northeast(const box_int centralBoxID) {
+    return (north(east(centralBoxID)));
+  }
 
-static box_int northwest(const box_int centralBoxID) {
-  return (north(west(centralBoxID)));
-}
+  static box_int northwest(const box_int centralBoxID) {
+    return (north(west(centralBoxID)));
+  }
 
-static box_int southeast(const box_int centralBoxID) {
-  return (south(east(centralBoxID)));
-}
+  static box_int southeast(const box_int centralBoxID) {
+    return (south(east(centralBoxID)));
+  }
 
-static box_int southwest(const box_int centralBoxID) {
-  return (south(west(centralBoxID)));
-}
+  static box_int southwest(const box_int centralBoxID) {
+    return (south(west(centralBoxID)));
+  }
 }  // namespace boxID
 
 box_int Box::_totalBoxesCount(0u);
@@ -63,11 +65,12 @@ box_int Box::_totalBoxesCount(0u);
 
 /* Box unique constructor: */
 Box::Box(void)
-    : ID(_totalBoxesCount++),
-      inEdge(Box::getIsInEdge(ID)), /* Construct boolean. */
-      neighbors(9u,
-                nullptr), /* Construct a vector with 9 null pointer elements. */
-      miniboids()         /* Construct superboids as a empty list. */
+    : ID(_totalBoxesCount++)
+    , inEdge(Box::getIsInEdge(ID))
+    , /* Construct boolean. */
+    neighbors(9u, nullptr)
+    ,           /* Construct a vector with 9 null pointer elements. */
+    miniboids() /* Construct superboids as a empty list. */
 {
 #ifdef DEBUG
   if (_totalBoxesCount > parameters().BOXES) {
@@ -80,11 +83,12 @@ Box::Box(void)
   return;
 }
 
-box_int Box::getBoxID(std::valarray<real> position) /* Parameter by copy. */
+box_int
+    Box::getBoxID(std::valarray<real> position) /* Parameter by copy. */
 {
-  static const real BOX_SIZE_INVERSE =
-      static_cast<real>(parameters().BOXES_IN_EDGE) /
-      parameters().RANGE;  // 1/BOX_SIZE
+  static const real BOX_SIZE_INVERSE
+      = static_cast<real>(parameters().BOXES_IN_EDGE)
+        / parameters().RANGE;  // 1/BOX_SIZE
 
   position += 0.5f * parameters().RANGE; /* Translate */
   position *= BOX_SIZE_INVERSE;          /* Normalize */
@@ -113,7 +117,8 @@ box_int Box::getBoxID(std::valarray<real> position) /* Parameter by copy. */
   return tmpBoxID;
 }
 
-bool Box::getIsInEdge(const box_int boxID) {
+bool
+    Box::getIsInEdge(const box_int boxID) {
   if (boxID < parameters().BOXES_IN_EDGE)
     return true;
 
@@ -130,29 +135,31 @@ bool Box::getIsInEdge(const box_int boxID) {
     return false;
 }
 
-void Box::setNeighbors(std::vector<Box> &boxes) {
+void
+    Box::setNeighbors(std::vector<Box> &boxes) {
   using namespace boxID;
 
   neighbors[static_cast<uint16_t>(CardinalPoint::ACTUAL)] = &boxes[ID];
 
   neighbors[static_cast<uint16_t>(CardinalPoint::NORTH)] = &boxes[north(ID)];
   neighbors[static_cast<uint16_t>(CardinalPoint::SOUTH)] = &boxes[south(ID)];
-  neighbors[static_cast<uint16_t>(CardinalPoint::EAST)] = &boxes[east(ID)];
-  neighbors[static_cast<uint16_t>(CardinalPoint::WEST)] = &boxes[west(ID)];
+  neighbors[static_cast<uint16_t>(CardinalPoint::EAST)]  = &boxes[east(ID)];
+  neighbors[static_cast<uint16_t>(CardinalPoint::WEST)]  = &boxes[west(ID)];
 
-  neighbors[static_cast<uint16_t>(CardinalPoint::NORTHWEST)] =
-      &boxes[northwest(ID)];
-  neighbors[static_cast<uint16_t>(CardinalPoint::NORTHEAST)] =
-      &boxes[northeast(ID)];
-  neighbors[static_cast<uint16_t>(CardinalPoint::SOUTHWEST)] =
-      &boxes[southwest(ID)];
-  neighbors[static_cast<uint16_t>(CardinalPoint::SOUTHEAST)] =
-      &boxes[southeast(ID)];
+  neighbors[static_cast<uint16_t>(CardinalPoint::NORTHWEST)]
+      = &boxes[northwest(ID)];
+  neighbors[static_cast<uint16_t>(CardinalPoint::NORTHEAST)]
+      = &boxes[northeast(ID)];
+  neighbors[static_cast<uint16_t>(CardinalPoint::SOUTHWEST)]
+      = &boxes[southwest(ID)];
+  neighbors[static_cast<uint16_t>(CardinalPoint::SOUTHEAST)]
+      = &boxes[southeast(ID)];
 
   return;
 }
 
-void Box::append(Miniboid &mini) {
+void
+    Box::append(Miniboid &mini) {
   if (mini.superboid.isActivated() == true) {
     this->miniboids.push_front(&mini);
     mini.setBox(this);

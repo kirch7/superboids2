@@ -7,6 +7,7 @@
 #include <list>
 #include <valarray>
 #include <vector>
+
 #include "parameters.hpp"
 
 class Miniboid;
@@ -52,7 +53,8 @@ class Box {
   static bool getIsInEdge(const box_int boxID);
   static box_int getBoxID(const std::valarray<real> position);
   static inline void setNeighborBoxes(std::vector<Box> &boxes) {
-    for (auto &box : boxes) box.setNeighbors(boxes);
+    for (auto &box : boxes)
+      box.setNeighbors(boxes);
   }
 
  private:

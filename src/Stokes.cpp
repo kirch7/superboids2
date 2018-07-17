@@ -3,20 +3,22 @@
 // License specified in LICENSE file.
 
 #include "Stokes.hpp"
+
 #include <algorithm>
+
 #include "Box.hpp"
 #include "Distance.hpp"
 
-static std::vector<box_int> getBoxIDs(const std::valarray<real> &center,
-                                      const real radius) {
+static std::vector<box_int>
+    getBoxIDs(const std::valarray<real> &center, const real radius) {
   std::vector<box_int> boxes;
 
-  real tmpRadius = radius;
+  real tmpRadius   = radius;
   const real delta = parameters().RANGE / parameters().BOXES_IN_EDGE;
   while (tmpRadius > 0.0f) {
     for (unsigned i = 0u; i < 3141u; ++i) {
       std::valarray<real> point = center;
-      const real angle = i * TWO_PI / 3141.0f;
+      const real angle          = i * TWO_PI / 3141.0f;
       point[X] += radius * std::cos(angle);
       point[Y] += radius * std::sin(angle);
       boxes.emplace_back(Box::getBoxID(point));
@@ -36,7 +38,8 @@ Stokes::Stokes(std::valarray<real> _center, real _radius)
   return;
 }
 
-bool Stokes::isInside(const std::valarray<real> &position) const {
+bool
+    Stokes::isInside(const std::valarray<real> &position) const {
   const real TOLERABLE = this->radius + parameters().REAL_TOLERANCE;
   const Distance d(this->center, position);
   return d.module < TOLERABLE;

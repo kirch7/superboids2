@@ -5,6 +5,7 @@
 #pragma once
 #include <fstream>
 #include <vector>
+
 #include "Superboid.hpp"
 #include "parameters.hpp"
 
@@ -23,4 +24,5 @@ class InitialPositions {
   static step_int _startStep;
 };
 
-extern void loadPositions(std::vector<Superboid> &);
+extern void
+    loadPositions(std::vector<Superboid> &);

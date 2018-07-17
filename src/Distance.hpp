@@ -6,6 +6,7 @@
 
 #include <iostream>
 #include <valarray>
+
 #include "parameters.hpp"
 
 class Miniboid;
@@ -24,11 +25,11 @@ class Distance {
     return;
   }
   inline Distance(const Distance &d)
-      : miniboid1(d.miniboid1),
-        miniboid2(d.miniboid2),
-        module(d.module),
-        sine(d.sine),
-        cosine(d.cosine) {
+      : miniboid1(d.miniboid1)
+      , miniboid2(d.miniboid2)
+      , module(d.module)
+      , sine(d.sine)
+      , cosine(d.cosine) {
     return;
   }
   Distance(const std::valarray<real> &);
@@ -39,30 +40,34 @@ class Distance {
   std::valarray<real> getTangentArray(void) const;
 };
 
-inline std::ostream &operator<<(std::ostream &os, const Distance &d) {
+inline std::ostream &
+    operator<<(std::ostream &os, const Distance &d) {
   os << d.module << '\t' << d.cosine << '\t' << d.sine;
   return os;
 }
 
-inline Distance operator-(const Distance &d) {
+inline Distance
+    operator-(const Distance &d) {
   Distance dist = d;
-  dist.sine = -dist.sine;
-  dist.cosine = -dist.cosine;
+  dist.sine     = -dist.sine;
+  dist.cosine   = -dist.cosine;
   return dist;
 }
 
-inline Distance operator+(const Distance &d1, const Distance &d2) {
+inline Distance
+    operator+(const Distance &d1, const Distance &d2) {
   Distance r;
   r.module = std::sqrt(
-      square(d1.module * d1.cosine) + square(d1.module * d1.sine) +
-      square(d2.module * d2.cosine) + square(d2.module * d2.sine) +
-      d1.module * d2.module * (d1.cosine * d2.cosine + d1.sine * d2.sine));
+      square(d1.module * d1.cosine) + square(d1.module * d1.sine)
+      + square(d2.module * d2.cosine) + square(d2.module * d2.sine)
+      + d1.module * d2.module * (d1.cosine * d2.cosine + d1.sine * d2.sine));
   r.cosine = (d1.module * d1.cosine + d2.module * d2.cosine) / r.module;
-  r.sine = (d1.module * d1.sine + d2.module * d2.sine) / r.module;
+  r.sine   = (d1.module * d1.sine + d2.module * d2.sine) / r.module;
   return r;
 }
 
-inline Distance operator-(const Distance &d1, const Distance &d2) {
+inline Distance
+    operator-(const Distance &d1, const Distance &d2) {
   return d1 + -d2;
 }
 
@@ -77,30 +82,39 @@ inline Distance operator*(const real r, const Distance &d) {
   return dist;
 }
 
-inline Distance operator*(const Distance &d, const real r) { return r * d; }
+inline Distance operator*(const Distance &d, const real r) {
+  return r * d;
+}
 
-inline bool operator<(const Distance &d1, const Distance &d2) {
+inline bool
+    operator<(const Distance &d1, const Distance &d2) {
   return d1.module < d2.module;
 }
 
-inline bool operator>(const Distance &d1, const Distance &d2) {
+inline bool
+    operator>(const Distance &d1, const Distance &d2) {
   return d1.module > d2.module;
 }
 
-inline bool operator<(const Distance &d1, const real &d2) {
+inline bool
+    operator<(const Distance &d1, const real &d2) {
   return d1.module < d2;
 }
 
-inline bool operator>(const Distance &d1, const real &d2) {
+inline bool
+    operator>(const Distance &d1, const real &d2) {
   return d1.module > d2;
 }
 
-extern real angleBetween(const real phi1, const real phi2);
-extern real assertAngle(real anglie);
+extern real
+    angleBetween(const real phi1, const real phi2);
+extern real
+    assertAngle(real anglie);
 
-template <typename Array>
-inline real getModule(const Array &va1, const Array &va2) {
-  real _module = -0.0;
+template<typename Array>
+inline real
+    getModule(const Array &va1, const Array &va2) {
+  real _module      = -0.0;
   const size_t size = va1.size() < va2.size() ? va1.size() : va2.size();
   for (uint16_t count = 0u; count < size; ++count)
     _module += square(va1[count] - va2[count]);

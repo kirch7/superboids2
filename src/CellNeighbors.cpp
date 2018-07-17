@@ -4,7 +4,8 @@
 
 #include "CellNeighbors.hpp"
 
-const std::list<super_int> &CellNeighbors::operator()(void) {
+const std::list<super_int>&
+    CellNeighbors::operator()(void) {
   if (this->_duplicates) {
     this->_list.unique();
     this->_list.sort();
@@ -14,7 +15,8 @@ const std::list<super_int> &CellNeighbors::operator()(void) {
   return this->_list;
 }
 
-void CellNeighbors::append(const super_int id) {
+void
+    CellNeighbors::append(const super_int id) {
   this->_list.push_back(id);
   this->_duplicates = true;
   return;

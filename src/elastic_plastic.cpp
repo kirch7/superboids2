@@ -4,9 +4,9 @@
 
 #include "elastic_plastic.hpp"
 
-std::valarray<real> getFiniteForce(Distance dist, const real beta,
-                                   const real rEq,
-                                   const std::vector<real> &transitions) {
+std::valarray<real>
+    getFiniteForce(Distance dist, const real beta, const real rEq,
+                   const std::vector<real> &transitions) {
   real &module = dist.module;
   std::valarray<real> force(0.0f, parameters().DIMENSIONS);
 
@@ -23,13 +23,13 @@ std::valarray<real> getFiniteForce(Distance dist, const real beta,
       {
         if (module <= transitions[index]) {
           module = transitions[index - 1];
-          force = getFiniteForce(dist, beta, rEq, transitions);
+          force  = getFiniteForce(dist, beta, rEq, transitions);
           return force;
         }
       } else  // even index
       {
         if (module <= transitions[index] + 1.0e-6f) {
-          const real d = transitions[index - 1] - transitions[index];
+          const real d   = transitions[index - 1] - transitions[index];
           const real dif = 1.0f - (module - d) / rEq;
           if (std::isfinite(dif)) {
             force = dist.getDirectionArray();
@@ -45,14 +45,14 @@ std::valarray<real> getFiniteForce(Distance dist, const real beta,
   return getFiniteForce(dist, beta, rEq, transitions);
 }
 
-std::valarray<real> getFiniteForce(const Distance &d, const real beta,
-                                   const real rEq) {
+std::valarray<real>
+    getFiniteForce(const Distance &d, const real beta, const real rEq) {
   Distance dist(d);
   const real &module = dist.module;
   std::valarray<real> force(0.0f, parameters().DIMENSIONS);
 
-  if (module <= (parameters().INTER_ELASTIC_UP_LIMIT +
-                 1.0e-6))  // Elastic regime or called by recursion.
+  if (module <= (parameters().INTER_ELASTIC_UP_LIMIT
+                 + 1.0e-6))  // Elastic regime or called by recursion.
   {
     const real scalar = (1.0f - module / rEq) * beta;
     if (std::isfinite(scalar)) {

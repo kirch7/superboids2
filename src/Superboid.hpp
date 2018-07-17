@@ -8,6 +8,7 @@
 #include <sstream>
 #include <valarray>
 #include <vector>
+
 #include "CellNeighbors.hpp"
 #include "Miniboid.hpp"
 
@@ -56,7 +57,7 @@ class Superboid {
   std::ostringstream virtualsInfo;
   step_int getLastDivisionStep(void) const { return this->_lastDivisionStep; }
 
-  void setDeactivation(const std::string&);
+  void setDeactivation(const std::string &);
   bool willDie(void) const;
   void deactivate(void);
   bool isActivated(void) const;
@@ -75,12 +76,15 @@ class Superboid {
   Superboid(Superboid &) = delete;
 };
 
-extern std::ostream &operator<<(std::ostream &os, const Superboid &super);
+extern std::ostream &
+    operator<<(std::ostream &os, const Superboid &super);
 
-inline bool operator!=(const Superboid &s1, const Superboid &s2) {
+inline bool
+    operator!=(const Superboid &s1, const Superboid &s2) {
   return (s1.ID != s2.ID);
 }
 
-inline bool operator==(const Superboid &s1, const Superboid &s2) {
+inline bool
+    operator==(const Superboid &s1, const Superboid &s2) {
   return (s1.ID == s2.ID);
 }

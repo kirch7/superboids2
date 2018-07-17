@@ -3,55 +3,66 @@
 // License specified in LICENSE file.
 
 #include "nextstep.hpp"
+
 #include <thread>
 #include <valarray>
+
 #include "Superboid.hpp"
 #include "divide.hpp"
 #include "export.hpp"
 #include "parameters.hpp"
 
-static void nextVelocity(const thread_int THREAD_ID,
-                         std::vector<Superboid> &superboids,
-                         const step_int STEP) {
+static void
+    nextVelocity(const thread_int THREAD_ID, std::vector<Superboid> &superboids,
+                 const step_int STEP) {
   for (auto &superboid : superboids) {
-    if (superboid.ID % parameters().THREADS != THREAD_ID) continue;
-    if (superboid.isActivated() == false) continue;
-    for (auto &mini : superboid.miniboids) mini.setNextVelocity(STEP);
+    if (superboid.ID % parameters().THREADS != THREAD_ID)
+      continue;
+    if (superboid.isActivated() == false)
+      continue;
+    for (auto &mini : superboid.miniboids)
+      mini.setNextVelocity(STEP);
   }
 
   return;
 }
 
-static void nextPosition(const thread_int THREAD_ID,
-                         std::vector<Superboid> &superboids,
-                         const step_int step) {
+static void
+    nextPosition(const thread_int THREAD_ID, std::vector<Superboid> &superboids,
+                 const step_int step) {
   for (auto &superboid : superboids) {
-    if (superboid.ID % parameters().THREADS != THREAD_ID) continue;
-    if (superboid.isActivated() == false) continue;
+    if (superboid.ID % parameters().THREADS != THREAD_ID)
+      continue;
+    if (superboid.isActivated() == false)
+      continue;
     superboid.setNextPosition(step);
   }
 
   return;
 }
 
-static void nextBackInTime(const thread_int THREAD_ID,
-                           std::vector<Superboid> &superboids,
-                           const step_int step) {
+static void
+    nextBackInTime(const thread_int THREAD_ID,
+                   std::vector<Superboid> &superboids, const step_int step) {
   for (auto &superboid : superboids) {
-    if (superboid.ID % parameters().THREADS != THREAD_ID) continue;
-    if (superboid.isActivated() == false) continue;
+    if (superboid.ID % parameters().THREADS != THREAD_ID)
+      continue;
+    if (superboid.isActivated() == false)
+      continue;
     superboid.checkBackInTime(step);
   }
 
   return;
 }
 
-static void nextNeighbors(const thread_int THREAD_ID,
-                          std::vector<Superboid> &superboids,
-                          const step_int step) {
+static void
+    nextNeighbors(const thread_int THREAD_ID,
+                  std::vector<Superboid> &superboids, const step_int step) {
   for (auto &superboid : superboids) {
-    if (superboid.ID % parameters().THREADS != THREAD_ID) continue;
-    if (superboid.isActivated() == false) continue;
+    if (superboid.ID % parameters().THREADS != THREAD_ID)
+      continue;
+    if (superboid.isActivated() == false)
+      continue;
     for (auto &mini : superboid.miniboids)
       mini.setNeighbors(step);  // Search for neighbors.
   }
@@ -59,44 +70,53 @@ static void nextNeighbors(const thread_int THREAD_ID,
   return;
 }
 
-static void nextCheckNeighbors(const thread_int THREAD_ID,
-                               std::vector<Superboid> &superboids) {
+static void
+    nextCheckNeighbors(const thread_int THREAD_ID,
+                       std::vector<Superboid> &superboids) {
   for (auto &superboid : superboids) {
-    if (superboid.ID % parameters().THREADS != THREAD_ID) continue;
-    if (superboid.isActivated() == false) continue;
+    if (superboid.ID % parameters().THREADS != THREAD_ID)
+      continue;
+    if (superboid.isActivated() == false)
+      continue;
     superboid.checkWrongNeighbors(superboids);
   }
 
   return;
 }
 
-static void nextVirtuals(const thread_int THREAD_ID,
-                         std::vector<Superboid> &superboids, const bool export_,
-                         const step_int step) {
+static void
+    nextVirtuals(const thread_int THREAD_ID, std::vector<Superboid> &superboids,
+                 const bool export_, const step_int step) {
   for (auto &superboid : superboids) {
-    if (superboid.ID % parameters().THREADS != THREAD_ID) continue;
-    if (superboid.isActivated() == false) continue;
+    if (superboid.ID % parameters().THREADS != THREAD_ID)
+      continue;
+    if (superboid.isActivated() == false)
+      continue;
     superboid.checkVirtual(export_, step);
   }
 
   return;
 }
 
-static void nextReset(const thread_int THREAD_ID,
-                      std::vector<Superboid> &superboids, const bool shape,
-                      const step_int STEP) {
+static void
+    nextReset(const thread_int THREAD_ID, std::vector<Superboid> &superboids,
+              const bool shape, const step_int STEP) {
   for (auto &superboid : superboids) {
-    if (superboid.ID % parameters().THREADS != THREAD_ID) continue;
-    if (superboid.isActivated() == false) continue;
+    if (superboid.ID % parameters().THREADS != THREAD_ID)
+      continue;
+    if (superboid.isActivated() == false)
+      continue;
     superboid.reset();
-    if (shape) superboid.setShape(STEP);
+    if (shape)
+      superboid.setShape(STEP);
   }
 
   return;
 }
 
-static void nextBoxes(std::vector<Box> &boxes,
-                      std::vector<Superboid> &superboids, const step_int step) {
+static void
+    nextBoxes(std::vector<Box> &boxes, std::vector<Superboid> &superboids,
+              const step_int step) {
   for (auto &super : superboids) {
     if (super.isActivated() == true) {
       for (auto &mini : super.miniboids) {
@@ -114,15 +134,18 @@ static void nextBoxes(std::vector<Box> &boxes,
   for (auto &box : boxes) {
     const std::list<const Miniboid *> miniboids = box.miniboids;
     for (const auto &mini : miniboids)
-      if (mini->isVirtual) box.remove(*mini);
+      if (mini->isVirtual)
+        box.remove(*mini);
   }
 
-  for (auto &super : superboids) super.virtualMiniboids.clear();
+  for (auto &super : superboids)
+    super.virtualMiniboids.clear();
 
   return;
 }
 
-void nextBoxes(std::vector<Box> &boxes, Superboid &super, const step_int step) {
+void
+    nextBoxes(std::vector<Box> &boxes, Superboid &super, const step_int step) {
   if (super.isActivated() == true)
     for (auto &mini : super.miniboids) {
       mini.checkLimits(step);
@@ -139,9 +162,10 @@ void nextBoxes(std::vector<Box> &boxes, Superboid &super, const step_int step) {
   return;
 }
 
-static void nextBoxes_putVirtuals(std::vector<Box> &boxes,
-                                  std::vector<Superboid> &superboids,
-                                  const step_int step) {
+static void
+    nextBoxes_putVirtuals(std::vector<Box> &boxes,
+                          std::vector<Superboid> &superboids,
+                          const step_int step) {
   for (auto &super : superboids) {
     for (auto &mini : super.virtualMiniboids) {
       mini.checkLimits(step);
@@ -153,19 +177,21 @@ static void nextBoxes_putVirtuals(std::vector<Box> &boxes,
   return;
 }
 
-static void nextGamma(const thread_int THREAD_ID,
-                      std::vector<Superboid> &superboids) {
+static void
+    nextGamma(const thread_int THREAD_ID, std::vector<Superboid> &superboids) {
   for (auto &superboid : superboids) {
-    if (superboid.ID % parameters().THREADS != THREAD_ID) continue;
-    if (superboid.isActivated() == false) continue;
+    if (superboid.ID % parameters().THREADS != THREAD_ID)
+      continue;
+    if (superboid.isActivated() == false)
+      continue;
     superboid.setGamma(superboids);
   }
 
   return;
 }
 
-static std::valarray<real> getMeanPosition(
-    const std::vector<Superboid> &superboids) {
+static std::valarray<real>
+    getMeanPosition(const std::vector<Superboid> &superboids) {
   std::valarray<real> mean(parameters().DIMENSIONS);
   super_int divideBy = 0u;
   for (const auto &super : superboids)
@@ -178,18 +204,19 @@ static std::valarray<real> getMeanPosition(
   return mean;
 }
 
-void correctPositionAndRotation(std::vector<Superboid> &superboids) {
+void
+    correctPositionAndRotation(std::vector<Superboid> &superboids) {
   const std::valarray<real> meanPosition = getMeanPosition(superboids);
   for (auto &super : superboids)
     if (super.isActivated() == true)
-      for (auto &mini : super.miniboids) mini.position -= meanPosition;
+      for (auto &mini : super.miniboids)
+        mini.position -= meanPosition;
 }
 
-error::NextStepError nextStep(std::vector<Box> &boxes,
-                              std::vector<Superboid> &superboids,
-                              const step_int step, const bool shape,
-                              const bool gamma, const bool checkVirt,
-                              const bool exportVirt) {
+error::NextStepError
+    nextStep(std::vector<Box> &boxes, std::vector<Superboid> &superboids,
+             const step_int step, const bool shape, const bool gamma,
+             const bool checkVirt, const bool exportVirt) {
 #if 1
   if (parameters().BC == BoundaryCondition::PERIODIC)
     correctPositionAndRotation(superboids);
@@ -199,16 +226,18 @@ error::NextStepError nextStep(std::vector<Box> &boxes,
 
   {
     for (auto &super : superboids)
-      if (super.willDie()) super.deactivate();
+      if (super.willDie())
+        super.deactivate();
   }
 
   if (gamma) {
     static std::vector<std::thread> gammaThreads(parameters().THREADS);
     for (thread_int threadCount = 0u; threadCount < parameters().THREADS;
          ++threadCount)
-      gammaThreads[threadCount] =
-          std::thread(nextGamma, threadCount, std::ref(superboids));
-    for (auto &thread : gammaThreads) thread.join();
+      gammaThreads[threadCount]
+          = std::thread(nextGamma, threadCount, std::ref(superboids));
+    for (auto &thread : gammaThreads)
+      thread.join();
   }
 
   {
@@ -217,7 +246,8 @@ error::NextStepError nextStep(std::vector<Box> &boxes,
          ++threadCount)
       resetThreads[threadCount] = std::thread(
           nextReset, threadCount, std::ref(superboids), shape, step);
-    for (auto &thread : resetThreads) thread.join();
+    for (auto &thread : resetThreads)
+      thread.join();
   }
 
   {
@@ -226,7 +256,8 @@ error::NextStepError nextStep(std::vector<Box> &boxes,
          ++threadCount)
       virtualThreads[threadCount] = std::thread(
           nextVirtuals, threadCount, std::ref(superboids), exportVirt, step);
-    for (auto &thread : virtualThreads) thread.join();
+    for (auto &thread : virtualThreads)
+      thread.join();
   }
 
   nextBoxes_putVirtuals(boxes, superboids, step);
@@ -235,32 +266,36 @@ error::NextStepError nextStep(std::vector<Box> &boxes,
     static std::vector<std::thread> neighborsThreads(parameters().THREADS);
     for (thread_int threadCount = 0u; threadCount < parameters().THREADS;
          ++threadCount)
-      neighborsThreads[threadCount] =
-          std::thread(nextNeighbors, threadCount, std::ref(superboids), step);
-    for (auto &thread : neighborsThreads) thread.join();
+      neighborsThreads[threadCount]
+          = std::thread(nextNeighbors, threadCount, std::ref(superboids), step);
+    for (auto &thread : neighborsThreads)
+      thread.join();
   }
 
   {
     static std::vector<std::thread> checkNeighborsThreads(parameters().THREADS);
     for (thread_int threadCount = 0u; threadCount < parameters().THREADS;
          ++threadCount)
-      checkNeighborsThreads[threadCount] =
-          std::thread(nextCheckNeighbors, threadCount, std::ref(superboids));
-    for (auto &thread : checkNeighborsThreads) thread.join();
+      checkNeighborsThreads[threadCount]
+          = std::thread(nextCheckNeighbors, threadCount, std::ref(superboids));
+    for (auto &thread : checkNeighborsThreads)
+      thread.join();
   }
 
   {
     static std::vector<std::thread> velocityThreads(parameters().THREADS);
     for (thread_int threadCount = 0u; threadCount < parameters().THREADS;
          ++threadCount)
-      velocityThreads[threadCount] =
-          std::thread(nextVelocity, threadCount, std::ref(superboids), step);
-    for (auto &thread : velocityThreads) thread.join();
+      velocityThreads[threadCount]
+          = std::thread(nextVelocity, threadCount, std::ref(superboids), step);
+    for (auto &thread : velocityThreads)
+      thread.join();
   }
 
   if (checkVirt)
     for (const auto &super : superboids) {
-      if (super.isActivated() == false) continue;
+      if (super.isActivated() == false)
+        continue;
       const size_t s = super.virtualMiniboids.size();
       if (s > 4 * parameters().MINIBOIDS_PER_SUPERBOID)
         return error::NextStepError::TOO_MANY_VIRTUALS_SINGLE_CELL;
@@ -270,23 +305,25 @@ error::NextStepError nextStep(std::vector<Box> &boxes,
     static std::vector<std::thread> positionThreads(parameters().THREADS);
     for (thread_int threadCount = 0u; threadCount < parameters().THREADS;
          ++threadCount)
-      positionThreads[threadCount] =
-          std::thread(nextPosition, threadCount, std::ref(superboids), step);
-    for (auto &thread : positionThreads) thread.join();
+      positionThreads[threadCount]
+          = std::thread(nextPosition, threadCount, std::ref(superboids), step);
+    for (auto &thread : positionThreads)
+      thread.join();
   }
 
   {
     static std::vector<std::thread> backThreads(parameters().THREADS);
     for (thread_int threadCount = 0u; threadCount < parameters().THREADS;
          ++threadCount)
-      backThreads[threadCount] =
-          std::thread(nextBackInTime, threadCount, std::ref(superboids), step);
-    for (auto &thread : backThreads) thread.join();
+      backThreads[threadCount] = std::thread(nextBackInTime, threadCount,
+                                             std::ref(superboids), step);
+    for (auto &thread : backThreads)
+      thread.join();
   }
 
   if (parameters().DIVISION_INTERVAL != 0u)
-    if (step % parameters().DIVISION_INTERVAL ==
-        parameters().DIVISION_INTERVAL - 1)
+    if (step % parameters().DIVISION_INTERVAL
+        == parameters().DIVISION_INTERVAL - 1)
       divide(boxes, superboids, step);
 
   nextBoxes(boxes, superboids, step);

@@ -3,29 +3,35 @@
 // License specified in LICENSE file.
 
 #include "parameters.hpp"
+
 #include <sstream>
+
 #include "Date.hpp"
 #include "Parameter.hpp"
 #include "Stokes.hpp"
 
 Parameters _p;
 
-const Parameters &parameters() { return _p; }
+const Parameters &
+    parameters() {
+  return _p;
+}
 
 const dimension_int X = 0u;
 const dimension_int Y = 1u;
 const dimension_int Z = 2u;
-const real HALF_PI = 1.57079633f;
-const real PI = 3.14159265359f;
-const real TWO_PI = 6.283185307179586f;
+const real HALF_PI    = 1.57079633f;
+const real PI         = 3.14159265359f;
+const real TWO_PI     = 6.283185307179586f;
 
-static std::size_t getSignificantNo(const real num) {
+static std::size_t
+    getSignificantNo(const real num) {
   std::ostringstream oss;
   oss.precision(7);
   oss << std::fixed;
   oss << num;
 
-  auto str = oss.str();
+  auto str               = oss.str();
   const size_t dot_index = str.find('.');
 
   if (dot_index == std::string::npos)
@@ -42,14 +48,16 @@ static std::size_t getSignificantNo(const real num) {
   }
 }
 
-template <typename T>
-static void printMatrix(std::ostringstream &st,
-                        const std::vector<std::vector<T>> &matrix) {
+template<typename T>
+static void
+    printMatrix(std::ostringstream &st,
+                const std::vector<std::vector<T>> &matrix) {
   std::size_t signifMax = 0;
   for (const auto &line : matrix)
     for (const auto &elem : line) {
       const auto signif = getSignificantNo(elem);
-      if (signif > signifMax) signifMax = signif;
+      if (signif > signifMax)
+        signifMax = signif;
     }
 
   const auto precision = st.precision();
@@ -65,51 +73,62 @@ static void printMatrix(std::ostringstream &st,
   return;
 }
 
-template <typename S, typename T>
-static void printVector(S &st, const std::vector<T> &vec) {
+template<typename S, typename T>
+static void
+    printVector(S &st, const std::vector<T> &vec) {
   std::size_t signifMax = 0;
   for (const auto &elem : vec) {
     const auto signif = getSignificantNo(elem);
-    if (signif > signifMax) signifMax = signif;
+    if (signif > signifMax)
+      signifMax = signif;
   }
 
   const auto precision = st.precision();
   st.precision(signifMax);
   st << '#';
   const std::size_t SIZE = vec.size();
-  for (type_int column = 0u; column < SIZE; ++column) st << '\t' << vec[column];
+  for (type_int column = 0u; column < SIZE; ++column)
+    st << '\t' << vec[column];
   st << std::endl;
   st.precision(precision);
 
   return;
 }
 
-static std::vector<real> getTargetAreas(const std::vector<real> &reqs) {
+static std::vector<real>
+    getTargetAreas(const std::vector<real> &reqs) {
   std::vector<real> v(reqs.size());
-  for (type_int t = 0; t < v.size(); ++t) v[t] = square(reqs[t]) * PI;
+  for (type_int t = 0; t < v.size(); ++t)
+    v[t] = square(reqs[t]) * PI;
   return v;
 }
 
-static std::vector<real> normalize(const std::vector<real> &v) {
+static std::vector<real>
+    normalize(const std::vector<real> &v) {
   std::vector<real> vec = v;
-  real sum = -0.0f;
-  for (const auto &i : vec) sum += i;
-  for (auto &i : vec) i /= sum;
+  real sum              = -0.0f;
+  for (const auto &i : vec)
+    sum += i;
+  for (auto &i : vec)
+    i /= sum;
 
   sum = -0.0f;
-  for (const auto &i : vec) sum += i;
+  for (const auto &i : vec)
+    sum += i;
 
-  if (sum < 1.0f) vec[0] += (1.0f - sum);
+  if (sum < 1.0f)
+    vec[0] += (1.0f - sum);
 
   return vec;
 }
 
-std::string &getParameters(void) {
+std::string &
+    getParameters(void) {
   static bool firstTime = true;
   static std::string s;
   if (firstTime) {
     const Parameters &p = parameters();
-    firstTime = false;
+    firstTime           = false;
     std::ostringstream stream;
     stream << "# Compiled at" << '\t' << Date::compiledTime << std::endl;
     stream << "# Runned at" << '\t' << Date::prettyRunTime << std::endl;
@@ -277,32 +296,37 @@ std::string &getParameters(void) {
   return s;
 }
 
-static box_int getBoxesInEdge() {
-  const box_int b =
-      getParameter<real>("domain") / getParameter<real>("neighbor_distance");
+static box_int
+    getBoxesInEdge() {
+  const box_int b
+      = getParameter<real>("domain") / getParameter<real>("neighbor_distance");
   if (b < 3)
     return 3;
   else
     return b;
 }
 
-static void panic(const std::string &m) __attribute__((noreturn));
+static void
+    panic(const std::string &m) __attribute__((noreturn));
 
-static void panic(const std::string &m) {
+static void
+    panic(const std::string &m) {
   std::cerr << m << std::endl;
   std::exit(2);
 }
 
-static void panic(const std::string &m, const real value)
-    __attribute__((noreturn));
+static void
+    panic(const std::string &m, const real value) __attribute__((noreturn));
 
-static void panic(const std::string &m, const real value) {
+static void
+    panic(const std::string &m, const real value) {
   std::cerr << m << std::endl;
   std::cerr << value << " was found" << std::endl;
   std::exit(2);
 }
 
-void Parameters::set1(void) {
+void
+    Parameters::set1(void) {
   this->REAL_TOLERANCE = getParameter<real>("real_tolerance");
   if (this->REAL_TOLERANCE <= 0.0)
     panic("real_tolerance is supposed to be positive.", this->REAL_TOLERANCE);
@@ -311,14 +335,15 @@ void Parameters::set1(void) {
 
   this->DIMENSIONS = getParameter<unsigned long int>("dimensions");
   ;
-  if (this->DIMENSIONS != 2) panic("only 2D for now");
+  if (this->DIMENSIONS != 2)
+    panic("only 2D for now");
 
   // Last step number:
   this->STEPS = getParameter<unsigned long int>("steps");
   // Initial interval between outputs to files. In case EXIT_FACTOR=0, this
   // interval is homogeneous:
   this->EXIT_INTERVAL = getParameter<unsigned long int>("exit_interval");
-  this->EXIT_FACTOR = getParameter<real>("exit_factor");
+  this->EXIT_FACTOR   = getParameter<real>("exit_factor");
   ;
   if (this->EXIT_FACTOR < 0.0f)
     panic("exit_factor must be positive or nule.", this->EXIT_FACTOR);
@@ -354,12 +379,14 @@ void Parameters::set1(void) {
   this->ETA = getParameter<real>("eta");
   // Delta time. Time step jump value:
   this->DT = getParameter<real>("dt");
-  if (this->DT <= 0.0) panic("dt must be positive", this->CORE_DIAMETER);
+  if (this->DT <= 0.0)
+    panic("dt must be positive", this->CORE_DIAMETER);
 
   return;
 }
 
-void Parameters::setCells(void) {
+void
+    Parameters::setCells(void) {
   // Cells number:
   this->SUPERBOIDS = getParameter<unsigned long>("cells");
   if (this->SUPERBOIDS < 1)
@@ -375,8 +402,8 @@ void Parameters::setCells(void) {
     panic("it is supposed to some cell type to exist", this->TYPES_NO);
 
   // Particles in a single cell. All cells have the same particles number:
-  this->MINIBOIDS_PER_SUPERBOID =
-      getParameter<unsigned long>("particles_per_cell");
+  this->MINIBOIDS_PER_SUPERBOID
+      = getParameter<unsigned long>("particles_per_cell");
   if (this->MINIBOIDS_PER_SUPERBOID < 4)
     panic("it is supposed to a cell to have at least 4 particles",
           MINIBOIDS_PER_SUPERBOID);
@@ -384,7 +411,8 @@ void Parameters::setCells(void) {
   return;
 }
 
-static BoundaryCondition getBC(const std::string &b) {
+static BoundaryCondition
+    getBC(const std::string &b) {
   if (b == "stokes")
     return BoundaryCondition::STOKES;
   else if (b == "rectangle")
@@ -395,7 +423,8 @@ static BoundaryCondition getBC(const std::string &b) {
     panic("boundary must be either stokes, rectangle or periodic");
 }
 
-static InitialCondition getIC(const std::string &ic) {
+static InitialCondition
+    getIC(const std::string &ic) {
   if (ic == "left")
     return InitialCondition::LEFT_EDGE;
   else if (ic == "hex_center")
@@ -404,7 +433,8 @@ static InitialCondition getIC(const std::string &ic) {
     panic("initial must be either left or hex_center");
 }
 
-static KillCondition getKC(const std::string &kc) {
+static KillCondition
+    getKC(const std::string &kc) {
   if (kc == "right")
     return KillCondition::RIGHT_EDGE;
   else if (kc == "none")
@@ -417,7 +447,8 @@ static KillCondition getKC(const std::string &kc) {
     panic("kill must be either right, none, right_edge_or_p0, or p0");
 }
 
-void Parameters::setDomain(void) {
+void
+    Parameters::setDomain(void) {
   // Domain length:
   this->RANGE = getParameter<real>("domain");
   if (this->RANGE <= 0.0f)
@@ -443,21 +474,23 @@ void Parameters::setDomain(void) {
   // Total boxes quantity:
   this->BOXES = square(this->BOXES_IN_EDGE);
 
-  this->BC = getBC(getParameter<std::string>("boundary"));
+  this->BC                = getBC(getParameter<std::string>("boundary"));
   this->INITIAL_CONDITION = getIC(getParameter<std::string>("initial"));
-  this->KILL_CONDITION = getKC(getParameter<std::string>("kill"));
-  this->P0_LIMIT = getParameter<real>("p0_limit");
-  if (this->P0_LIMIT < 3.545) panic("p0_limit should be greater than 3.545");
+  this->KILL_CONDITION    = getKC(getParameter<std::string>("kill"));
+  this->P0_LIMIT          = getParameter<real>("p0_limit");
+  if (this->P0_LIMIT < 3.545)
+    panic("p0_limit should be greater than 3.545");
   return;
 }
 
-void Parameters::setDivision(void) {
+void
+    Parameters::setDivision(void) {
   // Every DIVISION_INTERVAL a division will occur:
   this->DIVISION_INTERVAL = getParameter<unsigned long int>("division");
   // A cell can not divide if it is product of a division in the last
   // NON_DIVISION_INTERVAL:
   this->NON_DIVISION_INTERVAL = getParameter<unsigned long int>("non_division");
-  this->DIVISION_REGION_X = getParameter<real>("division_region_x");
+  this->DIVISION_REGION_X     = getParameter<real>("division_region_x");
   // A cell can not divide if its P0 is greater than TOLERABLE_P0:
   this->TOLERABLE_P0 = getParameter<real>("tolerable_p0");
   if (this->TOLERABLE_P0 < 1.0f)
@@ -468,7 +501,8 @@ void Parameters::setDivision(void) {
   return;
 }
 
-void Parameters::setInter(void) {
+void
+    Parameters::setInter(void) {
   this->INTER_ELASTIC_UP_LIMIT = getParameter<real>("domain");
 
   this->INTER_REQ = getParameter<std::vector<std::vector<real>>>("inter_eq");
@@ -480,39 +514,42 @@ void Parameters::setInter(void) {
   this->INTER_BETA = getParameter<std::vector<std::vector<real>>>("inter_beta");
   for (const auto &vec : this->INTER_BETA)
     for (const auto &comp : vec)
-      if (comp < 0.0f) panic("inter_eq must be bigger positive or nule", comp);
+      if (comp < 0.0f)
+        panic("inter_eq must be bigger positive or nule", comp);
 
   return;
 }
 
-void Parameters::setRadial(void) {
-  this->RADIAL_PLASTIC_BEGIN =
-      getParameter<std::vector<real>>("radial_plastic_begin");
+void
+    Parameters::setRadial(void) {
+  this->RADIAL_PLASTIC_BEGIN
+      = getParameter<std::vector<real>>("radial_plastic_begin");
   for (const auto comp : this->RADIAL_PLASTIC_BEGIN)
     if (comp < this->REAL_TOLERANCE)
       panic("radial_plastic_begin must be bigger than real_tolerance", comp);
-  this->RADIAL_PLASTIC_END =
-      getParameter<std::vector<real>>("radial_plastic_end");
+  this->RADIAL_PLASTIC_END
+      = getParameter<std::vector<real>>("radial_plastic_end");
   for (const auto comp : this->RADIAL_PLASTIC_END)
     if (comp < this->REAL_TOLERANCE)
       panic("radial_plastic_begin must be bigger than real_tolerance", comp);
 
-  this->RADIAL_SPRING_EXP =
-      1.0f;  //// Deixa-me harmônico. O código tá "otimizado" (não genérico
-             ///(embora haja código genérico comentado)) para molas lineares.
+  this->RADIAL_SPRING_EXP
+      = 1.0f;  //// Deixa-me harmônico. O código tá "otimizado" (não genérico
+               ///(embora haja código genérico comentado)) para molas lineares.
   this->RADIAL_REQ = getParameter<std::vector<real>>("radial_eq");
   for (const auto &comp : this->RADIAL_REQ)
     if (comp < this->REAL_TOLERANCE)
       panic("radial_eq must be bigger than real_tolerance", comp);
 
-  this->RADIAL_BETA =
-      getParameter<std::vector<std::vector<real>>>("radial_beta");
+  this->RADIAL_BETA
+      = getParameter<std::vector<std::vector<real>>>("radial_beta");
   for (const auto &vec : this->RADIAL_BETA)
     for (const auto &comp : vec)
-      if (comp < 0.0f) panic("radial_eq must be bigger positive or nule", comp);
+      if (comp < 0.0f)
+        panic("radial_eq must be bigger positive or nule", comp);
 
-  this->RADIAL_BETA_MEDIUM =
-      getParameter<std::vector<real>>("radial_beta_medium");
+  this->RADIAL_BETA_MEDIUM
+      = getParameter<std::vector<real>>("radial_beta_medium");
   for (const auto &comp : this->RADIAL_BETA_MEDIUM)
     if (comp < this->REAL_TOLERANCE)
       panic("radial_beta_medium must be bigger than real_tolerance", comp);
@@ -520,10 +557,12 @@ void Parameters::setRadial(void) {
   return;
 }
 
-void Parameters::setStokes(void) {
+void
+    Parameters::setStokes(void) {
   this->STOKES_HOLES = std::vector<Stokes>();
-  const auto &vec = getParameter<std::vector<real>>("stokes");
-  if (vec.size() % (this->DIMENSIONS + 1) != 0) panic("algorithm problem");
+  const auto &vec    = getParameter<std::vector<real>>("stokes");
+  if (vec.size() % (this->DIMENSIONS + 1) != 0)
+    panic("algorithm problem");
   const std::size_t stokesNo = vec.size() / (this->DIMENSIONS + 1);
   for (std::size_t stokesID = 0; stokesID < stokesNo; ++stokesID) {
     std::valarray<real> position(this->DIMENSIONS);
@@ -536,7 +575,8 @@ void Parameters::setStokes(void) {
   return;
 }
 
-void Parameters::set(void) {
+void
+    Parameters::set(void) {
   setParameters();
 
   this->setDomain();
@@ -555,22 +595,22 @@ void Parameters::set(void) {
       panic("proportion component must be positive or nule", comp);
   this->PROPORTIONS = normalize(this->PROPORTIONS);
 
-  this->KAPA = getParameter<std::vector<std::vector<real>>>("kapa");
+  this->KAPA        = getParameter<std::vector<std::vector<real>>>("kapa");
   this->KAPA_MEDIUM = getParameter<std::vector<real>>("kapa_medium");
 
-  this->TANGENT_BETA =
-      getParameter<std::vector<std::vector<real>>>("tangent_beta");
-  this->TANGENT_BETA_MEDIUM =
-      getParameter<std::vector<real>>("tangent_beta_medium");
+  this->TANGENT_BETA
+      = getParameter<std::vector<std::vector<real>>>("tangent_beta");
+  this->TANGENT_BETA_MEDIUM
+      = getParameter<std::vector<real>>("tangent_beta_medium");
 
-  this->INTER_ALPHA =
-      getParameter<std::vector<std::vector<real>>>("inter_alpha");
+  this->INTER_ALPHA
+      = getParameter<std::vector<std::vector<real>>>("inter_alpha");
   this->AUTO_ALPHA = getParameter<std::vector<real>>("auto_alpha");
 
   this->SPEED = getParameter<std::vector<real>>("speed");
 
-  this->THREADS =
-      getParameter<unsigned long int>("threads");  // Threads quantity.
+  this->THREADS
+      = getParameter<unsigned long int>("threads");  // Threads quantity.
 
   this->TARGET_AREA = getTargetAreas(this->RADIAL_REQ);
 
@@ -584,7 +624,7 @@ void Parameters::set(void) {
 
   for (type_int t = 0u; t < this->TYPES_NO; ++t) {
     real angle = this->NEIGHBOR_DISTANCE / (this->RADIAL_REQ[t] + interReqAvg);
-    angle = 4.0f * asin(angle);
+    angle      = 4.0f * asin(angle);
     this->HARRIS_AMOUNT[t] = (this->MINIBOIDS_PER_SUPERBOID * angle) / TWO_PI;
   }
 
@@ -603,8 +643,8 @@ void Parameters::set(void) {
 
   std::vector<real> arcs(this->TYPES_NO);
   for (type_int t = 0u; t < this->TYPES_NO; ++t)
-    arcs[t] =
-        TWO_PI * this->RADIAL_REQ[t] / (this->MINIBOIDS_PER_SUPERBOID - 1);
+    arcs[t]
+        = TWO_PI * this->RADIAL_REQ[t] / (this->MINIBOIDS_PER_SUPERBOID - 1);
 
   this->TANGENT_REQ = getParameter<std::vector<real>>("tangent_eq_factor");
   for (const auto r : this->TANGENT_REQ)
@@ -613,16 +653,16 @@ void Parameters::set(void) {
   for (type_int t = 0u; t < this->TYPES_NO; ++t)
     this->TANGENT_REQ[t] *= arcs[t];
 
-  this->TANGENT_PLASTIC_BEGIN =
-      getParameter<std::vector<real>>("tangent_plastic_begin_factor");
+  this->TANGENT_PLASTIC_BEGIN
+      = getParameter<std::vector<real>>("tangent_plastic_begin_factor");
   for (const auto comp : this->TANGENT_PLASTIC_BEGIN)
     if (comp < this->REAL_TOLERANCE)
       panic("tangent_plastic_begin must be bigger than real_tolerance", comp);
   for (type_int t = 0u; t < this->TYPES_NO; ++t)
     this->TANGENT_PLASTIC_BEGIN[t] *= arcs[t];
 
-  this->TANGENT_PLASTIC_END =
-      getParameter<std::vector<real>>("tangent_plastic_end_factor");
+  this->TANGENT_PLASTIC_END
+      = getParameter<std::vector<real>>("tangent_plastic_end_factor");
   for (const auto comp : this->TANGENT_PLASTIC_END)
     if (comp < this->REAL_TOLERANCE)
       panic("tangent_plastic_begin must be bigger than real_tolerance", comp);
@@ -633,7 +673,8 @@ void Parameters::set(void) {
 }
 
 //// Distância entre núcleo velho e núcleo novo.
-real Parameters::getDivisionDistance(void) const {
-  return (this->MINIBOIDS_PER_SUPERBOID - 1) * this->CORE_DIAMETER / 6.0 +
-         this->CORE_DIAMETER * 2.0f;
+real
+    Parameters::getDivisionDistance(void) const {
+  return (this->MINIBOIDS_PER_SUPERBOID - 1) * this->CORE_DIAMETER / 6.0
+         + this->CORE_DIAMETER * 2.0f;
 }

@@ -3,6 +3,7 @@
 // License specified in LICENSE file.
 
 #include "Neighbor.hpp"
+
 #include "Miniboid.hpp"
 
 Neighbor::Neighbor(const Miniboid &m, const Distance &d)
@@ -15,6 +16,7 @@ Neighbor::Neighbor(const Distance &d, const Miniboid &m)
   return;
 }
 
-bool operator<(const Neighbor &n1, const Neighbor &n2) {
+bool
+    operator<(const Neighbor &n1, const Neighbor &n2) {
   return n1.distance.module < n2.distance.module;
 }

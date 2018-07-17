@@ -8,6 +8,7 @@
 #include <map>
 #include <tuple>
 #include <valarray>
+
 #include "CellNeighbors.hpp"
 #include "Distance.hpp"
 #include "Neighbor.hpp"
@@ -15,7 +16,8 @@
 #include "parameters.hpp"
 
 class Superboid;
-bool operator==(const Superboid &s1, const Superboid &s2);
+bool
+    operator==(const Superboid &s1, const Superboid &s2);
 class Box;
 
 class Miniboid {
@@ -80,25 +82,25 @@ class Miniboid {
 
 inline Miniboid::Miniboid(const mini_int _id, Superboid &super,
                           const bool isVirt = false)
-    : isVirtual(isVirt),
-      ID(_id),
-      superboid(super),
-      position(parameters().DIMENSIONS),
-      velocity(parameters().DIMENSIONS),
-      newVelocity(parameters().DIMENSIONS),
-      radialDistance(Distance()),
-      _oldPosition(parameters().DIMENSIONS),
-      _lastInvasionStep(0),
-      _noiseSum(parameters().DIMENSIONS),
-      _velocitySum(parameters().DIMENSIONS),
-      _forceSum(parameters().DIMENSIONS),
-      _box(nullptr),
-      _neighborsPerTypeNos(parameters().TYPES_NO) {
+    : isVirtual(isVirt)
+    , ID(_id)
+    , superboid(super)
+    , position(parameters().DIMENSIONS)
+    , velocity(parameters().DIMENSIONS)
+    , newVelocity(parameters().DIMENSIONS)
+    , radialDistance(Distance())
+    , _oldPosition(parameters().DIMENSIONS)
+    , _lastInvasionStep(0)
+    , _noiseSum(parameters().DIMENSIONS)
+    , _velocitySum(parameters().DIMENSIONS)
+    , _forceSum(parameters().DIMENSIONS)
+    , _box(nullptr)
+    , _neighborsPerTypeNos(parameters().TYPES_NO) {
   if (!this->isVirtual) {
     this->setNewVelocity();
     if (_id != 0u) {
-      if (parameters().MINIBOIDS_PER_SUPERBOID > 3u ||
-          _id != parameters().MINIBOIDS_PER_SUPERBOID - 1u)
+      if (parameters().MINIBOIDS_PER_SUPERBOID > 3u
+          || _id != parameters().MINIBOIDS_PER_SUPERBOID - 1u)
         this->_twistNeighbors.push_front(
             TwistNeighbor(_id, getTangentNeighborID(_id, 1)));
       if (parameters().MINIBOIDS_PER_SUPERBOID > 3u || _id != 1u)
@@ -110,21 +112,26 @@ inline Miniboid::Miniboid(const mini_int _id, Superboid &super,
   return;
 }
 
-extern std::ostream &operator<<(std::ostream &os, const Miniboid &mini);
+extern std::ostream &
+    operator<<(std::ostream &os, const Miniboid &mini);
 
-inline bool operator==(const Miniboid &m1, const Miniboid &m2) {
-  return (m1.ID == m2.ID && m1.isVirtual == m2.isVirtual &&
-          m1.superboid == m2.superboid);
+inline bool
+    operator==(const Miniboid &m1, const Miniboid &m2) {
+  return (m1.ID == m2.ID && m1.isVirtual == m2.isVirtual
+          && m1.superboid == m2.superboid);
 }
 
-inline bool operator!=(const Miniboid &m1, const Miniboid &m2) {
+inline bool
+    operator!=(const Miniboid &m1, const Miniboid &m2) {
   return !(m1 == m2);
 }
 
-bool isPointInTriangle(const std::valarray<real> &p_test,
-                       const std::valarray<real> &p0,
-                       const std::valarray<real> &p1,
-                       const std::valarray<real> &p2);
-bool isPointInSomeNthTriangle(const mini_int nth,
-                              const std::valarray<real> &point,
-                              const Superboid &super);
+bool
+    isPointInTriangle(const std::valarray<real> &p_test,
+                      const std::valarray<real> &p0,
+                      const std::valarray<real> &p1,
+                      const std::valarray<real> &p2);
+bool
+    isPointInSomeNthTriangle(const mini_int nth,
+                             const std::valarray<real> &point,
+                             const Superboid &super);

@@ -3,10 +3,12 @@
 // License specified in LICENSE file.
 
 #include "lines.hpp"
+
 #include <cmath>
 
-real getAngularCoefficient(const std::valarray<real> pointA,
-                           const std::valarray<real> pointB) {
+real
+    getAngularCoefficient(const std::valarray<real> pointA,
+                          const std::valarray<real> pointB) {
   const real deltaX = pointB[X] - pointA[X];
   const real deltaY = pointB[Y] - pointA[Y];
 
@@ -16,9 +18,9 @@ real getAngularCoefficient(const std::valarray<real> pointA,
     return deltaY / deltaX;
 }
 
-std::valarray<real> getClosestPoint(const real m,
-                                    const std::valarray<real> pointA,
-                                    const std::valarray<real> pointC) {
+std::valarray<real>
+    getClosestPoint(const real m, const std::valarray<real> pointA,
+                    const std::valarray<real> pointC) {
   const real x1 = pointA[X];
   const real x3 = pointC[X];
   const real y1 = pointA[Y];
@@ -29,7 +31,7 @@ std::valarray<real> getClosestPoint(const real m,
   else if (!std::isnormal(m))
     return std::valarray<real>({x1, y3});
   else {
-    const real div = m + 1.0f / m;
+    const real div     = m + 1.0f / m;
     const real commonX = ((x3 / m) + y3 + (m * x1) - y1) / div;
     const real commonY = m * (commonX - x1) + y1;
     return std::valarray<real>({commonX, commonY});

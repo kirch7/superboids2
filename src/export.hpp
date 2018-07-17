@@ -4,6 +4,7 @@
 
 #pragma once
 #include <vector>
+
 #include "parameters.hpp"
 
 class Superboid;
@@ -96,10 +97,16 @@ class Phi {
   static bool _export;
 };
 
-extern void exportMSD(std::ofstream &, std::vector<Superboid> &);
-extern void exportMSD(std::vector<Superboid> &);
-extern void binPrint(std::vector<Superboid> &);
-extern void binPrint(std::ofstream &, std::vector<Superboid> &);
-extern void exportPhi(std::ofstream &, const std::vector<Superboid> &);
-extern void exportLastPositionsAndVelocities(const std::vector<Superboid> &,
-                                             const step_int);
+extern void
+    exportMSD(std::ofstream &, std::vector<Superboid> &);
+extern void
+    exportMSD(std::vector<Superboid> &);
+extern void
+    binPrint(std::vector<Superboid> &);
+extern void
+    binPrint(std::ofstream &, std::vector<Superboid> &);
+extern void
+    exportPhi(std::ofstream &, const std::vector<Superboid> &);
+extern void
+    exportLastPositionsAndVelocities(const std::vector<Superboid> &,
+                                     const step_int);

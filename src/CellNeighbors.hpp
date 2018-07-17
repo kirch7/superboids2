@@ -4,6 +4,7 @@
 
 #pragma once
 #include <list>
+
 #include "Miniboid.hpp"
 #include "parameters.hpp"
 

@@ -5,10 +5,12 @@
 #pragma once
 
 #include <valarray>
+
 #include "Distance.hpp"
 #include "parameters.hpp"
 
-std::valarray<real> getFiniteForce(const Distance &, const real beta,
-                                   const real rEq);
-std::valarray<real> getFiniteForce(Distance, const real beta, const real rEq,
-                                   const std::vector<real> &transitions);
+std::valarray<real>
+    getFiniteForce(const Distance &, const real beta, const real rEq);
+std::valarray<real>
+    getFiniteForce(Distance, const real beta, const real rEq,
+                   const std::vector<real> &transitions);

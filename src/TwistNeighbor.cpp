@@ -3,11 +3,12 @@
 // License specified in LICENSE file.
 
 #include "TwistNeighbor.hpp"
+
 #include <cmath>
 #include <vector>
 
-static std::vector<real> getAngles(const mini_int myID,
-                                   const mini_int neighborID) {
+static std::vector<real>
+    getAngles(const mini_int myID, const mini_int neighborID) {
   std::vector<real> angles;
 
   static const mini_int M = static_cast<mini_int>(
@@ -57,14 +58,15 @@ static std::vector<real> getAngles(const mini_int myID,
 }
 
 TwistNeighbor::TwistNeighbor(const mini_int myID, const mini_int neighborID)
-    : ID(neighborID),
-      ANGLES(getAngles(myID, neighborID)),
-      _distance(Distance()) {
+    : ID(neighborID)
+    , ANGLES(getAngles(myID, neighborID))
+    , _distance(Distance()) {
   ;
   return;
 }
 
-mini_int getTangentNeighborID(const mini_int MY_ID, const int SIDE) {
+mini_int
+    getTangentNeighborID(const mini_int MY_ID, const int SIDE) {
   if (SIDE == 0u)
     return 0u;
   else if (SIDE > 0) {

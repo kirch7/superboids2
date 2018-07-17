@@ -3,59 +3,72 @@
 // License specified in LICENSE file.
 
 #include "Argument.hpp"
+
 #include <cmath>
 #include <cstdlib>
 #include <fstream>
 #include <stdexcept>
 #include <string>
+
 #include "Date.hpp"
 #include "Parameter.hpp"
 #include "export.hpp"
 #include "load.hpp"
 #include "parameters.hpp"
 
-std::vector<Argument> getArguments(void);
+std::vector<Argument>
+    getArguments(void);
 
 std::size_t Argument::_biggestSize(0u);
 std::vector<Argument> Argument::arguments = getArguments();
 
-bool Argument::has(const std::string &s) {
+bool
+    Argument::has(const std::string &s) {
   for (const auto &arg : Argument::args())
-    if (arg.argument == s) return true;
+    if (arg.argument == s)
+      return true;
   return false;
 }
 
-Argument &Argument::get(const std::string &s) {
+Argument &
+    Argument::get(const std::string &s) {
   for (auto &arg : Argument::args())
-    if (arg.argument == s) return arg;
+    if (arg.argument == s)
+      return arg;
 
   throw "Cacaca";
 }
 
-bool Argument::areAllMandatorySet(void) {
+bool
+    Argument::areAllMandatorySet(void) {
   for (const auto &arg : Argument::args())
     if (arg.mandatory)
-      if (!arg.isSet) return false;
+      if (!arg.isSet)
+        return false;
 
   return true;
 }
 
-std::ostream &operator<<(std::ostream &os, const Argument &arg) {
-  size_t tabsNo = Argument::getBiggestSize() + 1u -
-                  (arg.argument.size() + arg.secondArgument.size());
+std::ostream &
+    operator<<(std::ostream &os, const Argument &arg) {
+  size_t tabsNo = Argument::getBiggestSize() + 1u
+                  - (arg.argument.size() + arg.secondArgument.size());
   std::string tab = "";
-  for (size_t tabCount = tabsNo; tabCount > 0u; --tabCount) tab += " ";
+  for (size_t tabCount = tabsNo; tabCount > 0u; --tabCount)
+    tab += " ";
   os << arg.argument << ' ' << arg.secondArgument << tab << arg.help;
 
   return os;
 }
 
-size_t Argument::getBiggestSize(void) {
+size_t
+    Argument::getBiggestSize(void) {
   if (Argument::_biggestSize == 0u) {
     auto lambdaExp = [&](const std::vector<Argument> &argList) {
       for (const auto &arg : argList) {
         size_t size = arg.argument.size() + arg.secondArgument.size() + 1u;
-        if (size > Argument::_biggestSize) Argument::_biggestSize = size;
+        if (size > Argument::_biggestSize)
+          Argument::_biggestSize = size;
       }
       return;
     };
@@ -64,34 +77,41 @@ size_t Argument::getBiggestSize(void) {
   return Argument::_biggestSize;
 }
 
-static int printHelp(const std::string &) {
+static int
+    printHelp(const std::string &) {
   {
     const std::vector<Argument> &list(getArguments());
-    for (auto &arg : list) std::cout << arg << std::endl;
+    for (auto &arg : list)
+      std::cout << arg << std::endl;
   }
 
   std::cout.flush();
   return 0;
 }
 
-int setMSD(const std::string &) {
+int
+    setMSD(const std::string &) {
   MSD::_export = true;
   MSD::_file.open((Date::compactRunTime + "_msd_v4.bin").c_str());
   return 0;
 }
 
-int setBinPrint(const std::string &) {
+int
+    setBinPrint(const std::string &) {
   BinPrint::_export = true;
   BinPrint::_file.open((Date::compactRunTime + "_binprint_v4.bin").c_str());
   return 0;
 }
 
-static int printRadius(const std::string &) {
+static int
+    printRadius(const std::string &) {
   auto getTangentRadius = [](real rEq) {
     return static_cast<real>(
-        rEq * std::sqrt(2.0 * (1.0 - cos(2.0 * PI /
-                                         (parameters().MINIBOIDS_PER_SUPERBOID -
-                                          1u)))));
+        rEq
+        * std::sqrt(2.0
+                    * (1.0
+                       - cos(2.0 * PI
+                             / (parameters().MINIBOIDS_PER_SUPERBOID - 1u)))));
   };
 
   for (type_int type = 0u; type < parameters().TYPES_NO; ++type)
@@ -100,55 +120,64 @@ static int printRadius(const std::string &) {
   return 0;
 }
 
-static int printParameters(const std::string &) {
+static int
+    printParameters(const std::string &) {
   std::cout << getParameters() << std::endl;
   std::cout.flush();
   return 0;
 }
 
-static int printParametersSample(const std::string &) {
+static int
+    printParametersSample(const std::string &) {
   std::cout << getParametersSample() << std::endl;
   std::cout.flush();
   return 0;
 }
 
-static int printExitSteps(const std::string &) {
+static int
+    printExitSteps(const std::string &) {
   std::cout << static_cast<unsigned>(
-                   static_cast<real>(parameters().STEPS) /
-                   static_cast<real>(parameters().EXIT_INTERVAL))
+                   static_cast<real>(parameters().STEPS)
+                   / static_cast<real>(parameters().EXIT_INTERVAL))
             << std::endl;
   std::cout.flush();
   return 0;
 }
 
-static int printThreadsNo(const std::string &) {
+static int
+    printThreadsNo(const std::string &) {
   std::cout << parameters().THREADS << std::endl;
   std::cout.flush();
   return 0;
 }
 
-static int printHalfRange(const std::string &) {
+static int
+    printHalfRange(const std::string &) {
   std::cout << parameters().RANGE / 2.0f << std::endl;
   std::cout.flush();
   return 0;
 }
 
-int setShapeExportation(const std::string &) {
+int
+    setShapeExportation(const std::string &) {
   Shape::_export = true;
   return 0;
 }
 
-int setGammaExportation(const std::string &) {
+int
+    setGammaExportation(const std::string &) {
   Gamma::_export = true;
   return 0;
 }
 
-int setPhi(const std::string &) {
+int
+    setPhi(const std::string &) {
   Phi::_export = true;
   return 0;
 }
 
-int setInitialPositionsFile(const std::string &filename) {
+int
+    setInitialPositionsFile(const std::string &filename) {
   InitialPositions::_load = true;
   InitialPositions::_file.open(filename,
                                std::ifstream::in | std::ifstream::binary);
@@ -156,11 +185,11 @@ int setInitialPositionsFile(const std::string &filename) {
   std::getline(InitialPositions::file(), line);
   std::string cellsNo;
   std::getline(InitialPositions::file(), cellsNo);
-  InitialPositions::_startStep = std::stoul(line);
+  InitialPositions::_startStep                            = std::stoul(line);
   *const_cast<super_int *const>(&parameters().SUPERBOIDS) = std::stoul(cellsNo);
   if (parameters().MAX_SUPERBOIDS < parameters().SUPERBOIDS)
-    *const_cast<super_int *const>(&parameters().MAX_SUPERBOIDS) =
-        std::stoul(cellsNo);
+    *const_cast<super_int *const>(&parameters().MAX_SUPERBOIDS)
+        = std::stoul(cellsNo);
   if (InitialPositions::_startStep >= parameters().STEPS)
     throw(std::range_error(
         "Invalid step in binary file or invalid STEPS parameter."));
@@ -168,28 +197,33 @@ int setInitialPositionsFile(const std::string &filename) {
   return 0;
 }
 
-int setSCS(const std::string &) {
+int
+    setSCS(const std::string &) {
   SCS::_export = true;
   SCS::_file.open((Date::compactRunTime + "_scs.dat").c_str(), std::ios::out);
   return 0;
 }
 
-int setInfinite(const std::string &) {
+int
+    setInfinite(const std::string &) {
   Infinite::_export = true;
   Infinite::_infFile.open(Date::compactRunTime + "_inf.dat", std::ios::out);
   Infinite::_inf2File.open(Date::compactRunTime + "_inf2.dat", std::ios::out);
   Infinite::_virtFile.open(Date::compactRunTime + "_virt.dat", std::ios::out);
-  if (!BinPrint::write()) return setBinPrint(std::string());
+  if (!BinPrint::write())
+    return setBinPrint(std::string());
   return 0;
 }
 
-int setLastStep(const std::string &stepString) {
+int
+    setLastStep(const std::string &stepString) {
   *const_cast<step_int *>(&parameters().STEPS) = std::stol(stepString);
 
   return 0;
 }
 
-int setParameters(const std::string &filename) {
+int
+    setParameters(const std::string &filename) {
   std::ifstream file(filename);
   if (!file.is_open()) {
     std::cerr << "could not open " << filename << std::endl;
@@ -205,7 +239,8 @@ int setParameters(const std::string &filename) {
   return 0;
 }
 
-std::vector<Argument> &getMandatoryList(void) {
+std::vector<Argument> &
+    getMandatoryList(void) {
   static std::vector<Argument> list;
   static bool firstTime = true;
   if (firstTime) {
@@ -215,7 +250,8 @@ std::vector<Argument> &getMandatoryList(void) {
   return list;
 }
 
-std::vector<Argument> getArguments(void) {
+std::vector<Argument>
+    getArguments(void) {
   std::vector<Argument> list;
   list.push_back(
       Argument("-h", "Show this help message.", false, true, true, printHelp));

@@ -3,13 +3,15 @@
 // License specified in LICENSE file.
 
 #include "load.hpp"
+
 #include "parameters.hpp"
 
 bool InitialPositions::_load(false);
 std::ifstream InitialPositions::_file;
 step_int InitialPositions::_startStep(0u);
 
-void loadPositions(std::vector<Superboid> &superboids) {
+void
+    loadPositions(std::vector<Superboid> &superboids) {
   std::ifstream &file = InitialPositions::file();
 
   for (super_int superID = 0; superID < parameters().SUPERBOIDS; ++superID) {

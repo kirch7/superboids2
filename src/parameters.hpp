@@ -123,37 +123,45 @@ class Parameters {
   real getDivisionDistance(void) const;
 };
 
-template <typename T>
-inline T square(T t) {
+template<typename T>
+inline T
+    square(T t) {
   return t * t;
 }
 
-template <typename T>
-inline T cube(T t) {
+template<typename T>
+inline T
+    cube(T t) {
   return t * t * t;
 }
 
-template <typename T>
-inline int sign(T &v) {
+template<typename T>
+inline int
+    sign(T &v) {
   if (v < static_cast<T>(0))
     return -1;
   else
     return +1;
 }
 
-template <typename Array>
-real getModule(const Array &array) {
+template<typename Array>
+real
+    getModule(const Array &array) {
   real squareSum = 0.0f;
-  for (auto component : array) squareSum += square(component);
+  for (auto component : array)
+    squareSum += square(component);
   return std::sqrt(squareSum);
 };
 
-inline std::ostream &operator<<(std::ostream &os,
-                                const std::valarray<real> &va) {
-  for (auto &component : va) os << std::fixed << component << '\t';
+inline std::ostream &
+    operator<<(std::ostream &os, const std::valarray<real> &va) {
+  for (auto &component : va)
+    os << std::fixed << component << '\t';
 
   return os;
 }
 
-extern const Parameters &parameters();
-extern std::string &getParameters(void);
+extern const Parameters &
+    parameters();
+extern std::string &
+    getParameters(void);

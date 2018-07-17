@@ -3,6 +3,7 @@
 // License specified in LICENSE file.
 
 #include "Parameter.hpp"
+
 #include <exception>
 #include <iostream>
 #include <sstream>
@@ -25,7 +26,7 @@ class SuperParameter {
   std::vector<std::string> _dependencies;
 };
 
-template <typename P>
+template<typename P>
 class Parameter : public SuperParameter {
  public:
   static std::vector<Parameter<P>> map;
@@ -41,47 +42,52 @@ class Parameter : public SuperParameter {
   P _parameter;
 };
 
-template <>
-std::vector<Parameter<std::string>> Parameter<std::string>::map =
-    std::vector<Parameter<std::string>>();
-template <>
-std::vector<Parameter<unsigned long int>> Parameter<unsigned long int>::map =
-    std::vector<Parameter<unsigned long int>>();
-template <>
-std::vector<Parameter<real>> Parameter<real>::map =
-    std::vector<Parameter<real>>();
-template <>
-std::vector<Parameter<std::vector<real>>> Parameter<std::vector<real>>::map =
-    std::vector<Parameter<std::vector<real>>>();
-template <>
+template<>
+std::vector<Parameter<std::string>> Parameter<std::string>::map
+    = std::vector<Parameter<std::string>>();
+template<>
+std::vector<Parameter<unsigned long int>> Parameter<unsigned long int>::map
+    = std::vector<Parameter<unsigned long int>>();
+template<>
+std::vector<Parameter<real>> Parameter<real>::map
+    = std::vector<Parameter<real>>();
+template<>
+std::vector<Parameter<std::vector<real>>> Parameter<std::vector<real>>::map
+    = std::vector<Parameter<std::vector<real>>>();
+template<>
 std::vector<Parameter<std::vector<std::vector<real>>>>
-    Parameter<std::vector<std::vector<real>>>::map =
-        std::vector<Parameter<std::vector<std::vector<real>>>>();
+    Parameter<std::vector<std::vector<real>>>::map
+    = std::vector<Parameter<std::vector<std::vector<real>>>>();
 
-template <typename P>
-bool Parameter<P>::has(const std::string &n) {
+template<typename P>
+bool
+    Parameter<P>::has(const std::string &n) {
   for (const auto &elem : map)
-    if (elem.name == n) return true;
+    if (elem.name == n)
+      return true;
 
   return false;
 }
 
-template <typename P>
-Parameter<P> Parameter<P>::get(const std::string &n) {
+template<typename P>
+Parameter<P>
+    Parameter<P>::get(const std::string &n) {
   for (const auto &elem : map)
-    if (elem.name == n) return elem;
+    if (elem.name == n)
+      return elem;
 
   std::cerr << "BLAME IT TO THE PROGRAMMER" << std::endl;
   std::exit(3);
 }
 
-void setParameters(void) {
-  if (Parameter<std::string>::map.size() +
-          Parameter<unsigned long int>::map.size() +
-          Parameter<real>::map.size() +
-          Parameter<std::vector<real>>::map.size() +
-          Parameter<std::vector<std::vector<real>>>::map.size() !=
-      0)
+void
+    setParameters(void) {
+  if (Parameter<std::string>::map.size()
+          + Parameter<unsigned long int>::map.size()
+          + Parameter<real>::map.size()
+          + Parameter<std::vector<real>>::map.size()
+          + Parameter<std::vector<std::vector<real>>>::map.size()
+      != 0)
     return;
 
   auto &string_set = Parameter<std::string>::map;
@@ -164,32 +170,39 @@ void setParameters(void) {
 
 SuperParameter::SuperParameter(const std::string &n, const bool a,
                                const std::string &def)
-    : name(n), defaultValue(def), _modifiedCount(0), _canChange(a) {}
+    : name(n), defaultValue(def), _modifiedCount(0), _canChange(a) {
+}
 
-template <typename P>
+template<typename P>
 Parameter<P>::Parameter(const std::string &n, const bool a,
                         const std::string &def)
-    : SuperParameter(n, a, def) {}
+    : SuperParameter(n, a, def) {
+}
 
-template <typename P>
-const P &Parameter<P>::operator()(void) const {
+template<typename P>
+const P &
+    Parameter<P>::operator()(void) const {
   return this->_parameter;
 }
 
-std::size_t SuperParameter::getElementsNo(void) {
-  if (this->_dependencies.size() == 0) throw "Eita, giovana!";
+std::size_t
+    SuperParameter::getElementsNo(void) {
+  if (this->_dependencies.size() == 0)
+    throw "Eita, giovana!";
 
   std::size_t elemNo = 0;
   for (const auto &depName : this->_dependencies) {
     for (const auto &dep : Parameter<unsigned long int>::map)
-      if (dep.name == depName) elemNo = dep();
+      if (dep.name == depName)
+        elemNo = dep();
   }
 
   return elemNo;
 }
 
-template <typename P>
-void Parameter<P>::operator=(const P &p) {
+template<typename P>
+void
+    Parameter<P>::operator=(const P &p) {
   if (!this->_canChange && this->_modifiedCount != 0)
     throw "redefinition of final parameter";
 
@@ -197,8 +210,10 @@ void Parameter<P>::operator=(const P &p) {
   ++this->_modifiedCount;
 }
 
-bool SuperParameter::areDependenciesSet(void) {
-  if (this->_dependencies.empty()) return true;
+bool
+    SuperParameter::areDependenciesSet(void) {
+  if (this->_dependencies.empty())
+    return true;
 
   std::vector<std::size_t> counter(this->_dependencies.size(), 0);
   for (std::size_t depIndex = 0; depIndex < this->_dependencies.size();
@@ -230,74 +245,89 @@ bool SuperParameter::areDependenciesSet(void) {
   }
 
   for (const auto &count : counter)
-    if (count != 0) return false;
+    if (count != 0)
+      return false;
 
   return true;
 }
 
-void SuperParameter::pushDependency(const std::string &dep) {
+void
+    SuperParameter::pushDependency(const std::string &dep) {
   this->_dependencies.push_back(dep);
 }
 
-template <>
-std::string getParameter(const std::string &name) {
+template<>
+std::string
+    getParameter(const std::string &name) {
   for (const auto &comp : Parameter<std::string>::map)
-    if (comp.name == name) return comp();
+    if (comp.name == name)
+      return comp();
 
   std::cerr << "parameter " << name << " not found" << std::endl;
   std::exit(2);
 }
 
-template <>
-unsigned long int getParameter(const std::string &name) {
+template<>
+unsigned long int
+    getParameter(const std::string &name) {
   for (const auto &comp : Parameter<unsigned long int>::map)
-    if (comp.name == name) return comp();
+    if (comp.name == name)
+      return comp();
 
   std::cerr << "parameter " << name << " not found" << std::endl;
   std::exit(2);
 }
 
-template <>
-real getParameter(const std::string &name) {
+template<>
+real
+    getParameter(const std::string &name) {
   for (const auto &comp : Parameter<real>::map)
-    if (comp.name == name) return comp();
+    if (comp.name == name)
+      return comp();
 
   std::cerr << "parameter " << name << " not found" << std::endl;
   std::exit(2);
 }
 
-template <>
-std::vector<real> getParameter(const std::string &name) {
+template<>
+std::vector<real>
+    getParameter(const std::string &name) {
   for (const auto &comp : Parameter<std::vector<real>>::map)
-    if (comp.name == name) return comp();
+    if (comp.name == name)
+      return comp();
 
   std::cerr << "parameter " << name << " not found" << std::endl;
   std::exit(2);
 }
 
-template <>
-std::vector<std::vector<real>> getParameter(const std::string &name) {
+template<>
+std::vector<std::vector<real>>
+    getParameter(const std::string &name) {
   for (const auto &comp : Parameter<std::vector<std::vector<real>>>::map)
-    if (comp.name == name) return comp();
+    if (comp.name == name)
+      return comp();
 
   std::cerr << "parameter " << name << " not found" << std::endl;
   std::exit(2);
 }
 
-static void panic(const std::string &m, std::size_t lineNo) {
+static void
+    panic(const std::string &m, std::size_t lineNo) {
   std::cerr << "Error (line " << lineNo << "): " << m << std::endl;
   std::exit(1);
 }
 
-static void panic(const std::string &m,
-                  const std::tuple<std::string, std::size_t> &t) {
+static void
+    panic(const std::string &m, const std::tuple<std::string, std::size_t> &t) {
   std::cerr << "Error (line " << std::get<1>(t) << "): " << m << std::endl;
   std::cerr << std::get<0>(t) << std::endl;
   std::exit(1);
 }
 
-static std::string stripFront(const std::string s) {
-  if (s.size() == 0) return std::string();
+static std::string
+    stripFront(const std::string s) {
+  if (s.size() == 0)
+    return std::string();
 
   const char c = s.front();
   if (c == '\n' || c == ' ' || c == '\t' || c == '\r')
@@ -305,8 +335,10 @@ static std::string stripFront(const std::string s) {
   return s;
 }
 
-static std::string stripBack(const std::string s) {
-  if (s.size() == 0) return std::string();
+static std::string
+    stripBack(const std::string s) {
+  if (s.size() == 0)
+    return std::string();
 
   const char c = s.back();
   if (c == '\n' || c == ' ' || c == '\t' || c == '\r')
@@ -315,37 +347,40 @@ static std::string stripBack(const std::string s) {
     return s;
 }
 
-static std::string strip(const std::string s) {
+static std::string
+    strip(const std::string s) {
   return stripFront(stripBack(s));
 }
 
-static std::vector<std::tuple<std::string, std::size_t>> splitLines(
-    const std::string &s) {
+static std::vector<std::tuple<std::string, std::size_t>>
+    splitLines(const std::string &s) {
   std::vector<std::tuple<std::string, std::size_t>> vec;
-  std::size_t p0 = 0;
+  std::size_t p0     = 0;
   std::size_t lineNo = 1;
 
   for (std::size_t index = 0; index < s.size(); ++index) {
     if (index != p0)
       if (s[index] == '\n' || index == s.size() - 1) {
         std::string subs = s.substr(p0, index - p0);
-        subs = strip(subs);
+        subs             = strip(subs);
         if (subs.size() > 0)
           vec.push_back(std::tuple<std::string, std::size_t>(subs, lineNo));
         p0 = index;
       }
-    if (s[index] == '\n') ++lineNo;
+    if (s[index] == '\n')
+      ++lineNo;
   }
 
   return vec;
 }
 
-static std::tuple<std::string, std::string> splitTwo(std::string s,
-                                                     std::size_t lineNo) {
+static std::tuple<std::string, std::string>
+    splitTwo(std::string s, std::size_t lineNo) {
   s = strip(s);
 
   // Check if s starts with equals.
-  if (s.front() == '=') panic("starts with equals", lineNo);
+  if (s.front() == '=')
+    panic("starts with equals", lineNo);
 
   std::size_t end = s.size();
 
@@ -358,37 +393,40 @@ static std::tuple<std::string, std::string> splitTwo(std::string s,
     } else if (s[index] == '=')
       ++occurrencesOfEquals;
 
-  if (occurrencesOfEquals != 1) panic("amount of equals", lineNo);
+  if (occurrencesOfEquals != 1)
+    panic("amount of equals", lineNo);
 
   std::string key("");
   std::string value("");
 
   for (std::size_t index = 0; index < end; ++index)
     if (s[index] == '=') {
-      key = s.substr(0, index - 1);
+      key   = s.substr(0, index - 1);
       value = s.substr(index + 1, end);
       break;
     }
 
-  key = strip(key);
+  key   = strip(key);
   value = strip(value);
 
   return std::tuple<std::string, std::string>(key, value);
 }
 
-static std::vector<std::string> splitWords(const std::string &s) {
+static std::vector<std::string>
+    splitWords(const std::string &s) {
   std::vector<std::string> vec;
   std::size_t p0 = 0;
 
   for (std::size_t index = 0; index < s.size(); ++index) {
-    if (((s[index] < 'a' || s[index] > 'z') &&
-         (s[index] < 'A' || s[index] > 'Z') &&
-         (s[index] < '0' || s[index] > '9') && s[index] != '.' &&
-         s[index] != '-' && s[index] != '_') ||
-        index + 1 == s.size()) {
+    if (((s[index] < 'a' || s[index] > 'z')
+         && (s[index] < 'A' || s[index] > 'Z')
+         && (s[index] < '0' || s[index] > '9') && s[index] != '.'
+         && s[index] != '-' && s[index] != '_')
+        || index + 1 == s.size()) {
       std::string subs = s.substr(p0, index - p0 + 1);
-      subs = strip(subs);
-      if (subs.size() > 0) vec.push_back(subs);
+      subs             = strip(subs);
+      if (subs.size() > 0)
+        vec.push_back(subs);
       p0 = index;
     }
   }
@@ -396,14 +434,17 @@ static std::vector<std::string> splitWords(const std::string &s) {
   return vec;
 }
 
-static bool isNumeric(const std::string &s) {
+static bool
+    isNumeric(const std::string &s) {
   for (const char c : s)
-    if (!std::isdigit(c) && c != '.' && c != '-') return false;
+    if (!std::isdigit(c) && c != '.' && c != '-')
+      return false;
 
   return true;
 }
 
-static void checkAllSet(void) {
+static void
+    checkAllSet(void) {
   for (const auto &parameter : Parameter<std::string>::map)
     if (!parameter.isSet()) {
       std::cerr << "please, set " << parameter.name << std::endl;
@@ -435,20 +476,22 @@ static void checkAllSet(void) {
     }
 }
 
-void loadParametersFromString(const std::string &raw) {
+void
+    loadParametersFromString(const std::string &raw) {
   setParameters();
 
   auto vec = splitLines(raw);
 
   for (const auto &t : vec) {
-    const std::string &s = std::get<0>(t);
+    const std::string &s     = std::get<0>(t);
     const std::size_t lineNo = std::get<1>(t);
-    if (strip(s).front() == '#') continue;
-    const auto tuple2 = splitTwo(s, lineNo);
-    const std::string _key = strip(std::get<0>(tuple2));
+    if (strip(s).front() == '#')
+      continue;
+    const auto tuple2        = splitTwo(s, lineNo);
+    const std::string _key   = strip(std::get<0>(tuple2));
     const std::string _value = strip(std::get<1>(tuple2));
 
-    const auto keys = splitWords(_key);
+    const auto keys   = splitWords(_key);
     const auto values = splitWords(_value);
 
     std::size_t matchesNo = 0;
@@ -456,16 +499,19 @@ void loadParametersFromString(const std::string &raw) {
     // Non numeric parameters:
     for (auto &parameter : Parameter<std::string>::map)
       if (parameter.name == keys[0]) {
-        if (!parameter.areDependenciesSet()) panic("dependencies unset", t);
+        if (!parameter.areDependenciesSet())
+          panic("dependencies unset", t);
         ++matchesNo;
-        if (values.size() != 1) panic("invalid value", t);
+        if (values.size() != 1)
+          panic("invalid value", t);
         parameter = values[0];
       }
 
     // Integer number parameters:
     for (auto &parameter : Parameter<unsigned long int>::map)
       if (parameter.name == keys[0]) {
-        if (!parameter.areDependenciesSet()) panic("dependencies unset", t);
+        if (!parameter.areDependenciesSet())
+          panic("dependencies unset", t);
         ++matchesNo;
         if (values.size() != 1)
           panic("invalid value", t);
@@ -489,19 +535,22 @@ void loadParametersFromString(const std::string &raw) {
     // Real number parameters:
     for (auto &parameter : Parameter<real>::map)
       if (parameter.name == keys[0]) {
-        if (!parameter.areDependenciesSet()) panic("dependencies unset", t);
+        if (!parameter.areDependenciesSet())
+          panic("dependencies unset", t);
         ++matchesNo;
         bool ok = false;
-        if (values.size() != 1) panic("invalid values", t);
+        if (values.size() != 1)
+          panic("invalid values", t);
         for (const auto r : Parameter<real>::map)
           if (values[0] == r.name) {
             if (r.isSet()) {
               parameter = r();
-              ok = true;
+              ok        = true;
             } else
               panic("dependency unset", t);
           }
-        if (ok) continue;
+        if (ok)
+          continue;
         if (isNumeric(values[0]))
           parameter = std::stof(values[0]);
         else
@@ -512,15 +561,16 @@ void loadParametersFromString(const std::string &raw) {
     if (keys[0] == "stokes") {
       if (values.size() == 1 && keys.size() == 1 && values[0] == "none") {
         for (auto &parameter : Parameter<std::vector<real>>::map) {
-          if (parameter.name != "stokes") continue;
+          if (parameter.name != "stokes")
+            continue;
           parameter = std::vector<real>();
         }
       } else if (!Parameter<unsigned long int>::get("dimensions").isSet())
         panic("dependencies unset", t);
       else if (keys.size() != 1)
         panic("invalid key", t);
-      else if (values.size() !=
-               Parameter<unsigned long int>::get("dimensions")() + 1)
+      else if (values.size()
+               != Parameter<unsigned long int>::get("dimensions")() + 1)
         panic("invalid number of values", t);
       else
         for (const auto &str : values)
@@ -528,7 +578,8 @@ void loadParametersFromString(const std::string &raw) {
             panic("non numeric", t);
           else {
             for (auto &parameter : Parameter<std::vector<real>>::map) {
-              if (parameter.name != "stokes") continue;
+              if (parameter.name != "stokes")
+                continue;
               auto oldVec = parameter();
               oldVec.emplace_back(std::stof(str));
               parameter = oldVec;
@@ -537,7 +588,8 @@ void loadParametersFromString(const std::string &raw) {
     } else
       for (auto &parameter : Parameter<std::vector<real>>::map)
         if (parameter.name == keys[0]) {
-          if (!parameter.areDependenciesSet()) panic("dependencies unset", t);
+          if (!parameter.areDependenciesSet())
+            panic("dependencies unset", t);
           ++matchesNo;
           const std::size_t elementsNo = parameter.getElementsNo();
 
@@ -546,8 +598,8 @@ void loadParametersFromString(const std::string &raw) {
               if (isNumeric(values[0]))
                 parameter = std::vector<real>(elementsNo, std::stof(values[0]));
               else {
-                if (Parameter<real>::has(values[0]) &&
-                    Parameter<real>::get(values[0]).isSet())
+                if (Parameter<real>::has(values[0])
+                    && Parameter<real>::get(values[0]).isSet())
                   parameter = std::vector<real>(
                       elementsNo, Parameter<real>::get(values[0])());
                 else
@@ -556,7 +608,8 @@ void loadParametersFromString(const std::string &raw) {
             } else if (values.size() == elementsNo) {
               auto newVec = std::vector<real>();
               for (const auto &valueStr : values) {
-                if (!isNumeric(valueStr)) panic("non numeric", t);
+                if (!isNumeric(valueStr))
+                  panic("non numeric", t);
                 newVec.push_back(std::stof(valueStr));
                 parameter = newVec;
               }
@@ -569,12 +622,12 @@ void loadParametersFromString(const std::string &raw) {
               if (values.size() != 1)
                 panic("invalid value", t);
               else if (isNumeric(values[0])) {
-                auto oldVec = parameter();
+                auto oldVec                 = parameter();
                 oldVec[std::stoul(keys[1])] = std::stof(values[0]);
-                parameter = oldVec;
+                parameter                   = oldVec;
               } else {
-                if (Parameter<real>::has(values[0]) &&
-                    Parameter<real>::get(values[0]).isSet())
+                if (Parameter<real>::has(values[0])
+                    && Parameter<real>::get(values[0]).isSet())
                   parameter = std::vector<real>(
                       elementsNo, Parameter<real>::get(values[0])());
                 else
@@ -588,7 +641,8 @@ void loadParametersFromString(const std::string &raw) {
     // Matrix parameters:
     for (auto &parameter : Parameter<std::vector<std::vector<real>>>::map)
       if (parameter.name == keys[0]) {
-        if (!parameter.areDependenciesSet()) panic("dependencies unset", t);
+        if (!parameter.areDependenciesSet())
+          panic("dependencies unset", t);
         ++matchesNo;
         const std::size_t elementsNo = parameter.getElementsNo();
         if (keys.size() == 1) {
@@ -610,9 +664,10 @@ void loadParametersFromString(const std::string &raw) {
             }
           } else if (values.size() == square(elementsNo)) {
             auto newMatrix = std::vector<std::vector<real>>();
-            auto newVec = std::vector<real>();
+            auto newVec    = std::vector<real>();
             for (const auto &valueStr : values) {
-              if (!isNumeric(valueStr)) panic("non numeric", t);
+              if (!isNumeric(valueStr))
+                panic("non numeric", t);
               newVec.push_back(std::stof(valueStr));
               if (newVec.size() == elementsNo) {
                 newMatrix.push_back(newVec);
@@ -626,11 +681,13 @@ void loadParametersFromString(const std::string &raw) {
           panic("unimplemented", t);
         else if (keys.size() == 3) {
           if (isNumeric(keys[1]) && isNumeric(keys[2])) {
-            if (values.size() != 1) panic("invalid value", t);
-            if (!isNumeric(values[0])) panic("non numeric", t);
+            if (values.size() != 1)
+              panic("invalid value", t);
+            if (!isNumeric(values[0]))
+              panic("non numeric", t);
             auto oldMatrix = parameter();
-            oldMatrix[std::stoul(keys[1])][std::stoul(keys[2])] =
-                std::stof(values[0]);
+            oldMatrix[std::stoul(keys[1])][std::stoul(keys[2])]
+                = std::stof(values[0]);
             parameter = oldMatrix;
           } else
             panic("invalid key", t);
@@ -650,14 +707,17 @@ void loadParametersFromString(const std::string &raw) {
   checkAllSet();
 }
 
-static std::string getSpaces(const std::size_t n) {
+static std::string
+    getSpaces(const std::size_t n) {
   std::string s = "";
-  for (std::size_t i = 0; i < n; ++i) s += " ";
+  for (std::size_t i = 0; i < n; ++i)
+    s += " ";
 
   return s;
 }
 
-std::string getParametersSample() {
+std::string
+    getParametersSample() {
   const std::size_t charsNo = 36;
   std::stringstream stream;
 

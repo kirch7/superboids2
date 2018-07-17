@@ -14,4 +14,5 @@ class Neighbor {
   Neighbor(const Distance &, const Miniboid &);
 };
 
-bool operator<(const Neighbor &, const Neighbor &);
+bool
+    operator<(const Neighbor &, const Neighbor &);

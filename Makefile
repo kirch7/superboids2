@@ -19,12 +19,6 @@ WARNINGS = -W -Wall -Wextra -Wshadow -Wstrict-overflow -Wmissing-braces -Wextra-
 GCCWARNINGS = -Wall -Wextra -Wshadow -Wstrict-overflow -Wmissing-braces
 CXXFLAGS = -stdlib=libstdc++ -std=c++14 -fno-strict-aliasing -fPIC -flto
 
-ifneq ("$(wildcard /usr/bin/ld.lld)", "")
-LDFLAGS += -fuse-ld=lld
-else
-LDFLAGS += -fuse-ld=gold
-endif
-
 CXXSOURCES := $(wildcard $(SRCDIR)/*.cpp)
 OBJECTS    := $(CXXSOURCES:$(SRCDIR)/%.cpp=$(BUILDDIR)/%.o)
 DEPS       := $(CXXSOURCES:$(SRCDIR)/%.cpp=$(BUILDDIR)/%.d)
@@ -32,6 +26,7 @@ DEPS       := $(CXXSOURCES:$(SRCDIR)/%.cpp=$(BUILDDIR)/%.d)
 all: $(START)
 
 clang: CXXFLAGS+=-O3 $(WARNINGS)
+clang: LDFLAGS += -fuse-ld=lld
 clang: $(TARGET)
 
 ada: CXX=g++
@@ -39,7 +34,7 @@ ada: CXXFLAGS=-std=c++14 -fno-strict-aliasing -flto -fPIC -O3 $(GCCWARNINGS)
 ada: $(TARGET)
 
 $(TARGET): $(OBJECTS)
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $(CXXLIBS) $(OBJECTS) -o $(TARGET)
+	$(CXX) $(LDFLAGS) $(CPPFLAGS) $(CXXFLAGS) $(CXXLIBS) $(OBJECTS) -o $(TARGET)
 
 at_once: 
 	$(CXX) $(CXXFLAGS) $(CXXLIBS) $(CXXSOURCES) -o $(TARGET)

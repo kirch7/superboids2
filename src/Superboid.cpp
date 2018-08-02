@@ -12,6 +12,7 @@
 #include "Miniboid.hpp"
 #include "Stokes.hpp"
 #include "export.hpp"
+#include "initial.hpp"
 #include "nextstep.hpp"
 #include "parameters.hpp"
 
@@ -79,57 +80,6 @@ static type_int
   return types[id];
 }
 
-static std::valarray<real>
-    initialNoise(const real radius) {
-  static std::default_random_engine defaultEngine(std::time(NULL));
-  static std::mt19937 mtEngine(defaultEngine());
-  std::uniform_real_distribution<real> uniDistribution2pi(0.0, TWO_PI);
-  std::uniform_real_distribution<real> uniDistributionRadius(0.0, radius);
-  std::valarray<real> _noise(parameters().DIMENSIONS);
-  if (parameters().DIMENSIONS == 2) {
-    const real r = std::sqrt(uniDistributionRadius(mtEngine));
-    const real a = uniDistribution2pi(mtEngine);
-    _noise[X]    = r * std::cos(a);
-    _noise[Y]    = r * std::sin(a);
-  } else {
-    std::cerr << "Not yet implemented." << std::endl << std::endl;
-  }
-  return _noise;
-}
-
-static std::valarray<real>
-    getCentralMiniboidPosition(void) {
-  static super_int superboidCount    = 0u;
-  static super_int superboidsOnLayer = 1u;
-  static uint16_t layerCount         = 0u;
-  static std::valarray<real> nextPosition(0.0f, parameters().DIMENSIONS);
-  static real angle             = 0.0f;
-  static const real DISTANCE    = parameters().INITIAL_DISTANCE;
-  static const real DELTA_ANGLE = PI / 3.0f;
-
-  const std::valarray<real> position(
-      nextPosition + initialNoise(parameters().CORE_DIAMETER / 2.0f));
-
-  if (superboidCount == (superboidsOnLayer - 1u)) {
-    angle          = 0.0;
-    superboidCount = 0u;
-    ++layerCount;
-    superboidsOnLayer = layerCount * 6u;
-    nextPosition[Y]   = DISTANCE * (layerCount - 1);
-    nextPosition[X]   = 0.0;
-  } else {
-    if (superboidCount == 0u)
-      angle = 2.0 * DELTA_ANGLE;
-    else if (superboidCount % layerCount == 0)
-      angle += DELTA_ANGLE;
-    ++superboidCount;
-  }
-
-  nextPosition[Y] += DISTANCE * std::cos(angle);
-  nextPosition[X] += DISTANCE * std::sin(angle);
-  return position;
-}
-
 // Get a peripheral miniboid position considering the central miniboid
 // position is its origin.
 static std::valarray<real>
@@ -179,30 +129,8 @@ Superboid::Superboid(void)
         if (miniCount == 0u) {
           bool ready = false;
           while (!ready) {
-            this->miniboids[0u].position = getCentralMiniboidPosition();
-            ready                        = true;
-            for (dimension_int dim = 0u; ready && dim < parameters().DIMENSIONS;
-                 ++dim) {
-              const real comp       = this->miniboids[0u].position[dim];
-              const real HALF_RANGE = parameters().RANGE / 2.0f;
-              if (HALF_RANGE - std::fabs(comp)
-                  < parameters().INITIAL_DISTANCE / 2.0f
-                        - parameters().REAL_TOLERANCE)
-                ready = false;
-              if (parameters().BC == BoundaryCondition::RECTANGLE
-                  || parameters().BC == BoundaryCondition::STOKES)
-                if (parameters().RECTANGLE_SIZE[dim] / 2.0f - std::fabs(comp)
-                    < parameters().INITIAL_DISTANCE / 2.0f - 0.1f)
-                  ready = false;
-            }
-
-            if (parameters().BC == BoundaryCondition::STOKES)
-              for (const auto &hole : parameters().STOKES_HOLES) {
-                const Distance d(hole.center, this->miniboids[0u].position);
-                if (d.module
-                    < hole.radius + parameters().RADIAL_REQ[this->type] - 0.1f)
-                  ready = false;
-              }
+            this->miniboids[0].position = getCentralMiniboidPosition();
+            ready = tryArrangeCell(this->miniboids[0]);
           }
         } else
           this->miniboids[miniCount].position
@@ -214,17 +142,24 @@ Superboid::Superboid(void)
     } else if (parameters().INITIAL_CONDITION == InitialCondition::LEFT_EDGE) {
       static const super_int AMOUNT_IN_A_COLUMN
           = parameters().RECTANGLE_SIZE[Y] / parameters().INITIAL_DISTANCE;
+      static super_int positionCount = 0;
+      bool ready = false;
 
-      this->miniboids.emplace_back(0u, *this);
-      std::valarray<real> &centralPosition = this->miniboids[0u].position;
-      const super_int COLUMN
-          = static_cast<super_int>(this->ID / AMOUNT_IN_A_COLUMN);
-      const super_int ROW
-          = static_cast<super_int>(this->ID % AMOUNT_IN_A_COLUMN);
-      centralPosition[X] = (COLUMN + 0.5f) * parameters().INITIAL_DISTANCE
-                           - parameters().RECTANGLE_SIZE[X] / 2.0f;
-      centralPosition[Y] = (ROW + 0.5f) * parameters().INITIAL_DISTANCE
-                           - parameters().RECTANGLE_SIZE[Y] / 2.0f;
+      while (!ready) {
+        this->miniboids.emplace_back(0u, *this);
+        std::valarray<real> &centralPosition = this->miniboids[0u].position;
+        const super_int COLUMN
+            = static_cast<super_int>(positionCount / AMOUNT_IN_A_COLUMN);
+        const super_int ROW
+            = static_cast<super_int>(positionCount % AMOUNT_IN_A_COLUMN);
+        centralPosition[X] = (COLUMN + 0.5f) * parameters().INITIAL_DISTANCE
+                            - parameters().RECTANGLE_SIZE[X] / 2.0f;
+        centralPosition[Y] = (ROW + 0.5f) * parameters().INITIAL_DISTANCE
+                            - parameters().RECTANGLE_SIZE[Y] / 2.0f;
+        ready = tryArrangeCell(this->miniboids[0]);
+        ++positionCount;
+      }
+
       if (parameters().DIMENSIONS != 2u)
         std::cerr << "Unimplemented!" << std::endl;
 

@@ -87,8 +87,44 @@ void
 }
 
 void
+    plainPrint(std::vector<Superboid> &superboids) {
+  plainPrint(PlainPrint::file(), superboids);
+  return;
+}
+
+void
     binPrint(std::vector<Superboid> &superboids) {
   binPrint(BinPrint::file(), superboids);
+  return;
+}
+
+void
+    plainPrint(std::ofstream &myFile, std::vector<Superboid> &superboids) {
+  const char TAB        = '\t';
+  super_int activatedNo = 0u;
+  for (auto &super : superboids)
+    if (super.isActivated() == true)
+      ++activatedNo;
+
+  for (auto &super : superboids) {
+    if (super.isActivated() == false)
+      continue;
+
+    for (const auto &mini : super.miniboids) {
+      float coreSize
+          = static_cast<float>(mini.ID == 0 ? (3.0f * parameters().PRINT_CORE)
+                                            : parameters().PRINT_CORE);
+      myFile.precision(8);
+      myFile << std::fixed << mini.position << mini.velocity << super.type
+             << TAB << super.cellNeighbors().size() << TAB << coreSize
+             << std::endl;
+    }
+  }
+
+  myFile << std::endl << std::endl;
+
+  myFile.flush();
+
   return;
 }
 
@@ -252,6 +288,9 @@ std::ofstream MSD::_file;
 
 bool BinPrint::_export(false);
 std::ofstream BinPrint::_file;
+
+bool PlainPrint::_export(false);
+std::ofstream PlainPrint::_file;
 
 bool Infinite::_export(false);
 std::ofstream Infinite::_infFile;

@@ -307,6 +307,9 @@ void
       if (BinPrint::write())
         binPrint(superboids);
 
+      if (PlainPrint::write())
+        plainPrint(superboids);
+
       if (Infinite::write())
         Infinite::write(superboids);
 

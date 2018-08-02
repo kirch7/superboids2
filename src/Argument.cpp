@@ -103,6 +103,13 @@ int
   return 0;
 }
 
+int
+    setPlainPrint(const std::string &) {
+  PlainPrint::_export = true;
+  PlainPrint::_file.open((Date::compactRunTime + "_plainprint.dat").c_str());
+  return 0;
+}
+
 static int
     printRadius(const std::string &) {
   auto getTangentRadius = [](real rEq) {
@@ -275,6 +282,8 @@ std::vector<Argument>
                           false, false, setMSD));
   list.push_back(Argument("-binprint", "Export position of particles.", false,
                           false, false, setBinPrint));
+  list.push_back(Argument("-plainprint", "Export position of particles.", false,
+                          false, false, setPlainPrint));
   list.push_back(Argument(
       "-virtual", "Export position of virtual particles and infinite forces.",
       false, false, false, setInfinite));

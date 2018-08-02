@@ -61,7 +61,7 @@ std::valarray<real>
 
 bool
     tryArrangeCell(Miniboid& mini) {
-  bool ready    = true;
+  bool ready = true;
   for (dimension_int dim = 0u; ready && dim < parameters().DIMENSIONS; ++dim) {
     const real comp       = mini.position[dim];
     const real HALF_RANGE = parameters().RANGE / 2.0f;

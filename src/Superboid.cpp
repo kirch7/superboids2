@@ -130,7 +130,7 @@ Superboid::Superboid(void)
           bool ready = false;
           while (!ready) {
             this->miniboids[0].position = getCentralMiniboidPosition();
-            ready = tryArrangeCell(this->miniboids[0]);
+            ready                       = tryArrangeCell(this->miniboids[0]);
           }
         } else
           this->miniboids[miniCount].position
@@ -143,7 +143,7 @@ Superboid::Superboid(void)
       static const super_int AMOUNT_IN_A_COLUMN
           = parameters().RECTANGLE_SIZE[Y] / parameters().INITIAL_DISTANCE;
       static super_int positionCount = 0;
-      bool ready = false;
+      bool ready                     = false;
 
       while (!ready) {
         this->miniboids.emplace_back(0u, *this);
@@ -153,9 +153,9 @@ Superboid::Superboid(void)
         const super_int ROW
             = static_cast<super_int>(positionCount % AMOUNT_IN_A_COLUMN);
         centralPosition[X] = (COLUMN + 0.5f) * parameters().INITIAL_DISTANCE
-                            - parameters().RECTANGLE_SIZE[X] / 2.0f;
+                             - parameters().RECTANGLE_SIZE[X] / 2.0f;
         centralPosition[Y] = (ROW + 0.5f) * parameters().INITIAL_DISTANCE
-                            - parameters().RECTANGLE_SIZE[Y] / 2.0f;
+                             - parameters().RECTANGLE_SIZE[Y] / 2.0f;
         ready = tryArrangeCell(this->miniboids[0]);
         ++positionCount;
       }

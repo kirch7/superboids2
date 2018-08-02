@@ -35,6 +35,19 @@ class BinPrint {
   static bool _export;
 };
 
+class PlainPrint {
+ public:
+  virtual void youCannotMakeAInstanceOfMe(void) = 0;
+  static inline bool write(void) { return _export; }
+  static inline std::ofstream &file(void) { return _file; }
+  virtual inline ~PlainPrint() { ; }
+  friend int setPlainPrint(const std::string &);
+
+ private:
+  static std::ofstream _file;
+  static bool _export;
+};
+
 class Shape {
  public:
   virtual void youCannotMakeAInstanceOfMe(void) = 0;
@@ -105,6 +118,10 @@ extern void
     binPrint(std::vector<Superboid> &);
 extern void
     binPrint(std::ofstream &, std::vector<Superboid> &);
+extern void
+    plainPrint(std::vector<Superboid> &);
+extern void
+    plainPrint(std::ofstream &, std::vector<Superboid> &);
 extern void
     exportPhi(std::ofstream &, const std::vector<Superboid> &);
 extern void

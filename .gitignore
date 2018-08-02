@@ -2,8 +2,9 @@
 *.png
 *.dat
 *.bin
-*.d
-*.o
+build/*.d
+build/*.o
+*.sh
 superboids
 .pijul
 .ignore

@@ -37,7 +37,10 @@ std::valarray<real>
 }
 
 void
-    Miniboid::checkLimits(void) {
+    Miniboid::checkLimits(const step_int step) {
+  if (step != 0)
+    this->checkKillCondition(step);
+
   if (parameters().BC == BoundaryCondition::PERIODIC)
     this->checkPeriodicLimits();
   else if (parameters().BC == BoundaryCondition::RECTANGLE
@@ -46,16 +49,6 @@ void
 
   if (parameters().BC == BoundaryCondition::STOKES && this->isVirtual == false)
     this->checkStokesLimits();
-
-  return;
-}
-
-void
-    Miniboid::checkLimits(const step_int step) {
-  if (step != 0)
-    this->checkKillCondition(step);
-
-  this->checkLimits();
 
   return;
 }

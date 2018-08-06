@@ -36,8 +36,7 @@ class Miniboid {
   bool inEdge() const;    // True if box where *this is is in edge.
 
   inline Miniboid(const mini_int _id, Superboid &super, const bool);
-  void checkLimits(const step_int);
-  void checkLimits(void);
+  void checkLimits(const step_int step = 0);
   void setNextVelocity(const step_int);
   void setNextPosition(const step_int);
   void checkFatOut(void);

@@ -92,21 +92,21 @@ static int
 int
     setMSD(const std::string &) {
   MSD::_export = true;
-  MSD::_file.open((Date::compactRunTime + "_msd_v4.bin").c_str());
+  MSD::_file.open(Date::compactRunTime + "_msd_v4.bin");
   return 0;
 }
 
 int
     setBinPrint(const std::string &) {
   BinPrint::_export = true;
-  BinPrint::_file.open((Date::compactRunTime + "_binprint_v4.bin").c_str());
+  BinPrint::_file.open(Date::compactRunTime + "_binprint_v4.bin");
   return 0;
 }
 
 int
     setPlainPrint(const std::string &) {
   PlainPrint::_export = true;
-  PlainPrint::_file.open((Date::compactRunTime + "_plainprint.dat").c_str());
+  PlainPrint::_file.open(Date::compactRunTime + "_plainprint.dat");
   return 0;
 }
 

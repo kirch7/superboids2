@@ -141,8 +141,8 @@ void
     if (this->_box) {
       bool skip             = true;
       const box_int myBoxID = Box::getBoxID(this->position);
-      for (const auto boxID : hole.boxIDs) {
-        if (boxID == myBoxID) {
+      for (const auto boxID_2 : hole.boxIDs) {
+        if (boxID_2 == myBoxID) {
           skip = false;
           break;
         }

@@ -10,10 +10,9 @@
 #include <valarray>
 #include <vector>
 
-#define SEED (time(NULL))
 typedef uint16_t type_int;
 typedef uint16_t mini_int;
-typedef uint16_t super_int;
+typedef uint32_t super_int;
 typedef uint32_t box_int;
 typedef uint64_t step_int;
 typedef uint16_t dimension_int;

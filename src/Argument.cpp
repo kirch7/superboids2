@@ -110,6 +110,13 @@ int
   return 0;
 }
 
+int
+    setNeighborPrint(const std::string &) {
+  NeighborPrint::_export = true;
+  NeighborPrint::_file.open(Date::compactRunTime + "_neighbors.dat");
+  return 0;
+}
+
 static int
     printRadius(const std::string &) {
   auto getTangentRadius = [](real rEq) {
@@ -284,6 +291,8 @@ std::vector<Argument>
                           false, false, setBinPrint));
   list.push_back(Argument("-plainprint", "Export position of particles.", false,
                           false, false, setPlainPrint));
+  list.push_back(Argument("-nei", "Export list of cell neighbors.", false,
+                          false, false, setNeighborPrint));
   list.push_back(Argument(
       "-virtual", "Export position of virtual particles and infinite forces.",
       false, false, false, setInfinite));

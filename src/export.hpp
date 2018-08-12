@@ -48,6 +48,19 @@ class PlainPrint {
   static bool _export;
 };
 
+class NeighborPrint {
+ public:
+  virtual void youCannotMakeAInstanceOfMe(void) = 0;
+  static inline bool write(void) { return _export; }
+  static inline std::ofstream &file(void) { return _file; }
+  virtual inline ~NeighborPrint() { ; }
+  friend int setNeighborPrint(const std::string &);
+
+ private:
+  static std::ofstream _file;
+  static bool _export;
+};
+
 class Shape {
  public:
   virtual void youCannotMakeAInstanceOfMe(void) = 0;
@@ -122,6 +135,8 @@ extern void
     plainPrint(std::vector<Superboid> &);
 extern void
     plainPrint(std::ofstream &, std::vector<Superboid> &);
+extern void
+    neighborsPrint(std::vector<Superboid> &);
 extern void
     exportPhi(std::ofstream &, const std::vector<Superboid> &);
 extern void

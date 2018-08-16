@@ -608,6 +608,15 @@ void
   this->AUTO_ALPHA = getParameter<std::vector<real>>("auto_alpha");
 
   this->SPEED = getParameter<std::vector<real>>("speed");
+  const auto &_initialVelocityAngle
+      = getParameter<std::string>("initial_velocity_angle");
+  if (isNumeric(_initialVelocityAngle)) {
+    this->INITIAL_VELOCITY_ANGLE = std::stof(_initialVelocityAngle);
+  } else if (_initialVelocityAngle == "random") {
+    this->INITIAL_VELOCITY_ANGLE = NAN;
+  } else {
+    panic("intial_velocity_angle must be real or \"random\".");
+  }
 
   this->THREADS
       = getParameter<unsigned long int>("threads");  // Threads quantity.
@@ -677,4 +686,13 @@ real
     Parameters::getDivisionDistance(void) const {
   return (this->MINIBOIDS_PER_SUPERBOID - 1) * this->CORE_DIAMETER / 6.0
          + this->CORE_DIAMETER * 2.0f;
+}
+
+bool
+    isNumeric(const std::string &s) {
+  for (const char c : s)
+    if (!std::isdigit(c) && c != '.' && c != '-')
+      return false;
+
+  return true;
 }

@@ -149,7 +149,8 @@ Superboid::Superboid(void)
 
       while (!ready) {
         if (positionCount >= AMOUNT_IN_A_COLUMN * AMOUNT_IN_A_LINE) {
-          std::cerr << "Could not fill (position " << positionCount << ", cell " << this->ID << ")." << std::endl;
+          std::cerr << "Could not fill (position " << positionCount << ", cell "
+                    << this->ID << ")." << std::endl;
           std::exit(41);
         }
         this->miniboids.emplace_back(0u, *this);
@@ -158,7 +159,7 @@ Superboid::Superboid(void)
             = static_cast<super_int>(positionCount / AMOUNT_IN_A_COLUMN);
         const super_int ROW
             = static_cast<super_int>(positionCount % AMOUNT_IN_A_COLUMN);
-        
+
         centralPosition[X] = (COLUMN + 0.5f) * parameters().INITIAL_DISTANCE
                              - parameters().RECTANGLE_SIZE[X] / 2.0f;
         centralPosition[Y] = (ROW + 0.5f) * parameters().INITIAL_DISTANCE
@@ -398,7 +399,7 @@ bool
 
     if (atempts > 6) {
       nextBoxes(boxes, *this, step);
-      
+
       newSuperboid.setDeactivation(
           "newSuperboid could not be child cell (division)");
       newSuperboid.deactivate();
@@ -569,7 +570,8 @@ void
 void
     Superboid::deactivate(void) {
   if (this->_deathMessage.size() > 0)
-    std::cerr << "death " << this->ID << ": " << this->_deathMessage << std::endl;
+    std::cerr << "death " << this->ID << ": " << this->_deathMessage
+              << std::endl;
 
   for (auto &mini : this->miniboids) {
     if (mini.getBoxPtr())

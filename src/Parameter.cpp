@@ -2,6 +2,7 @@
 // Copyright (C) 2018 Leonardo Gregory Brunnet.
 // License specified in LICENSE file.
 
+#include "parameters.hpp"
 #include "Parameter.hpp"
 
 #include <exception>
@@ -94,6 +95,7 @@ void
   string_set.emplace_back("boundary", false, "periodic");
   string_set.emplace_back("initial", false, "hex_center");
   string_set.emplace_back("kill", false, "none");
+  string_set.emplace_back("initial_velocity_angle", false, "random");
 
   auto &uint_set = Parameter<unsigned long int>::map;
   uint_set.emplace_back("dimensions", false, "2");
@@ -353,7 +355,9 @@ static std::string
 }
 
 static std::vector<std::tuple<std::string, std::size_t>>
-    splitLines(const std::string &s) {
+    splitLines(std::string s) {
+  s += '\n';
+
   std::vector<std::tuple<std::string, std::size_t>> vec;
   std::size_t p0     = 0;
   std::size_t lineNo = 1;
@@ -432,15 +436,6 @@ static std::vector<std::string>
   }
 
   return vec;
-}
-
-static bool
-    isNumeric(const std::string &s) {
-  for (const char c : s)
-    if (!std::isdigit(c) && c != '.' && c != '-')
-      return false;
-
-  return true;
 }
 
 static void

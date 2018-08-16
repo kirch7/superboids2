@@ -675,9 +675,15 @@ box_int
 
 void
     Miniboid::setNewVelocity(void) {
-  const real angle     = this->superboid.get0to2piRandom();
+  real angle;
+  if (!std::isfinite(parameters().INITIAL_VELOCITY_ANGLE))
+    angle = this->superboid.get0to2piRandom();
+  else
+    angle = parameters().INITIAL_VELOCITY_ANGLE;
+
   this->newVelocity[X] = std::cos(angle);
   this->newVelocity[Y] = std::sin(angle);
+
   return;
 }
 

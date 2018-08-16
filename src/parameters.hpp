@@ -98,6 +98,7 @@ class Parameters {
   std::vector<real> AUTO_ALPHA;
 
   std::vector<real> SPEED;
+  real INITIAL_VELOCITY_ANGLE;
 
   real ETA;
   real DT;
@@ -164,3 +165,5 @@ extern const Parameters &
     parameters();
 extern std::string &
     getParameters(void);
+extern bool
+    isNumeric(const std::string &s);

@@ -310,6 +310,9 @@ void
       if (PlainPrint::write())
         plainPrint(superboids);
 
+      if (NeighborPrint::write())
+        neighborsPrint(superboids);
+
       if (Infinite::write())
         Infinite::write(superboids);
 

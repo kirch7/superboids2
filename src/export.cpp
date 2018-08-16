@@ -19,6 +19,27 @@
 #include "load.hpp"
 #include "parameters.hpp"
 
+void
+    neighborsPrint(std::vector<Superboid> &superboids) {
+  std::ofstream &neiFile = NeighborPrint::file();
+  const char TAB         = '\t';
+
+  for (auto &super : superboids) {
+    if (super.isActivated() == false)
+      continue;
+    
+    neiFile << super.ID << TAB << super.type;
+    for (const auto &nei : super.cellNeighbors())
+      neiFile << TAB << nei;
+    neiFile << std::endl;
+  }
+
+  neiFile << std::endl << std::endl;
+  neiFile.flush();
+
+  return;
+}
+
 static void
     writeMSDHead(std::ofstream &myFile) {
   for (const auto i : std::vector<unsigned long int>(
@@ -291,6 +312,9 @@ std::ofstream BinPrint::_file;
 
 bool PlainPrint::_export(false);
 std::ofstream PlainPrint::_file;
+
+bool NeighborPrint::_export(false);
+std::ofstream NeighborPrint::_file;
 
 bool Infinite::_export(false);
 std::ofstream Infinite::_infFile;

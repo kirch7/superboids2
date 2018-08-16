@@ -92,21 +92,28 @@ static int
 int
     setMSD(const std::string &) {
   MSD::_export = true;
-  MSD::_file.open((Date::compactRunTime + "_msd_v4.bin").c_str());
+  MSD::_file.open(Date::compactRunTime + "_msd_v4.bin");
   return 0;
 }
 
 int
     setBinPrint(const std::string &) {
   BinPrint::_export = true;
-  BinPrint::_file.open((Date::compactRunTime + "_binprint_v4.bin").c_str());
+  BinPrint::_file.open(Date::compactRunTime + "_binprint_v4.bin");
   return 0;
 }
 
 int
     setPlainPrint(const std::string &) {
   PlainPrint::_export = true;
-  PlainPrint::_file.open((Date::compactRunTime + "_plainprint.dat").c_str());
+  PlainPrint::_file.open(Date::compactRunTime + "_plainprint.dat");
+  return 0;
+}
+
+int
+    setNeighborPrint(const std::string &) {
+  NeighborPrint::_export = true;
+  NeighborPrint::_file.open(Date::compactRunTime + "_neighbors.dat");
   return 0;
 }
 
@@ -284,6 +291,8 @@ std::vector<Argument>
                           false, false, setBinPrint));
   list.push_back(Argument("-plainprint", "Export position of particles.", false,
                           false, false, setPlainPrint));
+  list.push_back(Argument("-nei", "Export list of cell neighbors.", false,
+                          false, false, setNeighborPrint));
   list.push_back(Argument(
       "-virtual", "Export position of virtual particles and infinite forces.",
       false, false, false, setInfinite));

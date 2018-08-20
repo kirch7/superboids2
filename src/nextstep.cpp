@@ -65,6 +65,8 @@ static void
       continue;
     for (auto &mini : superboid.miniboids)
       mini.setNeighbors(step);  // Search for neighbors.
+
+    superboid.miniboids[0].killBlackHoles();
   }
 
   return;

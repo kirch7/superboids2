@@ -54,6 +54,7 @@ class Miniboid {
   std::map<super_int, std::list<Neighbor>>
       _neighbors;  // From different superboid.
   friend void exportPositions(const std::vector<Superboid> &, const step_int);
+  void killBlackHoles(void);
 
  protected:
   std::list<std::tuple<step_int, std::vector<const Miniboid *>>> history;

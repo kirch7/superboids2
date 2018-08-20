@@ -378,6 +378,8 @@ bool
 void
     Miniboid::interInteractions(const Neighbor &neighbor) {
   const Miniboid &miniNeighbor = neighbor.miniNeighbor;
+  if (this->ID == 0 || miniNeighbor.ID == 0)
+    return;
   if (this->superboid.ID != miniNeighbor.superboid.ID) {
     const type_int MY_TYPE       = this->superboid.type;
     const type_int NEIGHBOR_TYPE = miniNeighbor.superboid.type;
@@ -641,6 +643,20 @@ bool
 }
 
 void
+    Miniboid::killBlackHoles(void) {
+  if (this->ID != 0)
+    return;
+  
+  for (const auto &pair : this->_neighbors)
+    for (const auto &nei : std::get<1>(pair))
+      if (nei.miniNeighbor.ID == 0)
+        if (nei.distance.module < 3.0 * parameters().CORE_DIAMETER)
+          this->superboid.setDeactivation("Black hole prevention");
+  
+  return;
+}
+
+void
     Miniboid::setNeighbors(const step_int step) {
   this->checkLimits(step);
   this->_neighbors.clear();  // Removes all elements.
@@ -648,18 +664,18 @@ void
   // Search for neighbors:
   for (auto box : this->_box->neighbors)
     for (auto miniPointer : box->miniboids)
-      if (miniPointer->superboid.ID != this->superboid.ID)
-        if (miniPointer->ID != 0u) {
-          const Miniboid &mini = *miniPointer;
-          Distance distance(*this, mini);
-          if (distance.module <= parameters().NEIGHBOR_DISTANCE) {
-            this->superboid.cellNeighbors.append(
-                mini.superboid.ID);  // Potential data race!!!!!!!!
-            ++(this->_neighborsPerTypeNos[mini.superboid.type]);  //// ERRADO?
-            std::list<Neighbor> &c = this->_neighbors[mini.superboid.ID];
-            c.emplace_back(mini, distance);
-          }
+      if (miniPointer->superboid.ID != this->superboid.ID && miniPointer->superboid.isActivated() == true) {
+        //if (miniPointer->ID != 0u) {
+        const Miniboid &mini = *miniPointer;
+        Distance distance(*this, mini);
+        if (distance.module <= parameters().NEIGHBOR_DISTANCE) {
+          this->superboid.cellNeighbors.append(
+              mini.superboid.ID);  // Potential data race!!!!!!!!
+          ++(this->_neighborsPerTypeNos[mini.superboid.type]);  //// ERRADO?
+          std::list<Neighbor> &c = this->_neighbors[mini.superboid.ID];
+          c.emplace_back(mini, distance);
         }
+      }
 
   // Sort each list in terms of distance:
   for (auto &pair : this->_neighbors)

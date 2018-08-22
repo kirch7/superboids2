@@ -11,6 +11,16 @@ else
 START := ada
 endif
 
+ifeq ($(CXX), clang++)
+ifeq ("$(shell ld.lld --version > /dev/null 2>&1 ; echo $$?)", "0")
+LINKERFLAGS := -fuse-ld=lld
+else
+LINKERFLAGS := -fuse-ld=gold
+endif
+else
+LINKERFLAGS := ""
+endif
+
 CPP = $(CXX)
 TARGET = superboids
 CPPFLAGS = -MP -MD
@@ -26,7 +36,7 @@ DEPS       := $(CXXSOURCES:$(SRCDIR)/%.cpp=$(BUILDDIR)/%.d)
 all: $(START)
 
 clang: CXXFLAGS+=-O3 $(WARNINGS)
-clang: LDFLAGS += -fuse-ld=lld
+clang: LDFLAGS += $(LINKERFLAGS)
 clang: $(TARGET)
 
 ada: CXX=g++

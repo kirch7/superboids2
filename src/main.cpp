@@ -202,7 +202,7 @@ void
     for (auto &super : superboids)
       if (super.isActivated())
         for (const auto &mini : super.miniboids)
-          if (hole.isInside(mini.position)) {
+          if (hole.contains(mini.position)) {
             super.setDeactivation("Began inside hole");
             super.deactivate();
             break;

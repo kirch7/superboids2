@@ -13,5 +13,5 @@ class Stokes {
   const std::valarray<real> center;
   const real radius;
   const std::vector<box_int> boxIDs;
-  bool isInside(const std::valarray<real> &position) const;
+  bool contains(const std::valarray<real> &position) const;
 };

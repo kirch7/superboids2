@@ -39,7 +39,7 @@ Stokes::Stokes(std::valarray<real> _center, real _radius)
 }
 
 bool
-    Stokes::isInside(const std::valarray<real> &position) const {
+    Stokes::contains(const std::valarray<real> &position) const {
   const real TOLERABLE = this->radius + parameters().REAL_TOLERANCE;
   const Distance d(this->center, position);
   return d.module < TOLERABLE;

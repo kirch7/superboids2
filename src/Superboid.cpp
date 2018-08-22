@@ -456,7 +456,7 @@ bool
       for (auto &mini : super->miniboids) {
         if (!someInvasion)
           for (const auto &hole : parameters().STOKES_HOLES)
-            if (hole.isInside(mini.position)) {
+            if (hole.contains(mini.position)) {
               someInvasion = true;
               break;
             }

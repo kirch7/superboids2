@@ -5,6 +5,7 @@
 #include "parameters.hpp"
 
 #include <sstream>
+#include <iomanip>
 
 #include "Date.hpp"
 #include "Parameter.hpp"
@@ -84,13 +85,14 @@ static void
   }
 
   const auto precision = st.precision();
-  st.precision(signifMax);
+  st << std::setprecision(signifMax);
+  st << std::fixed;
   st << '#';
   const std::size_t SIZE = vec.size();
   for (type_int column = 0u; column < SIZE; ++column)
     st << '\t' << vec[column];
   st << std::endl;
-  st.precision(precision);
+  st << std::setprecision(precision);
 
   return;
 }

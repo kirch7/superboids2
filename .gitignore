@@ -3,11 +3,17 @@
 *.bin
 *.dat
 *.png
+*.mp4
+*.bash
+*.sh
+*.gp
 *~
 build/
 helpers/
 simu/
 superboids
+nohup.out
 
-!*.bash
-!*.sh
+!helpers/*.bash
+!helpers/*.sh
+!helpers/*.gp

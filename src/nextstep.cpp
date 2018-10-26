@@ -226,6 +226,9 @@ error::NextStepError
 #warning "You should enable correctPositionAndRotation."
 #endif
 
+  if (NeighborPrint::write())
+    neighborsPrint(superboids);
+
   {
     for (auto &super : superboids)
       if (super.willDie())
